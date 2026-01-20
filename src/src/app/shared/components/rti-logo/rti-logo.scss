@@ -1,0 +1,85 @@
+$tile-size: 38px;
+$tile-radius: 8px;
+$icon-color: #ffffff;
+$title-color: #111827;
+$subtitle-color: #6b7280;
+$gap-x: 12px;
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: $gap-x;
+  line-height: 1;
+
+  &__tile {
+    width: $tile-size;
+    height: $tile-size;
+    background-color: var(--brand-primary);
+    border-radius: $tile-radius;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    color: $icon-color; // mat-icon will inherit this
+  }
+
+  &__icon {
+    font-size: 16px;   // Material Icon font size
+    width: 22px;       // keep consistent box
+    height: 22px;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title {
+    color: $title-color;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    color: $subtitle-color;
+    font-weight: 400;
+    font-size: 11px;
+  }
+}
+
+.brand-lockup__icon{
+  display: flex;
+  justify-content: center;  /* horizontal center */
+  align-items: center;      /* vertical center */
+  height: 100%;             /* or a fixed height */
+}
+
+// Optional interaction when clickable
+a.brand-lockup,
+button.brand-lockup {
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  .brand-lockup__tile {
+    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  }
+
+  &:hover .brand-lockup__tile,
+  &:focus-visible .brand-lockup__tile {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.05);
+  }
+}
+
+// Dark theme preference
+@media (prefers-color-scheme: dark) {
+  .brand-lockup {
+    &__title { color: #e5e7eb; }
+    &__subtitle { color: #9ca3af; }
+    &__tile { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+  }
+}

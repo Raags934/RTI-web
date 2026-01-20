@@ -1,0 +1,70 @@
+.header-filters {
+  border-bottom: 1px solid rgb(218, 214, 214);
+  padding-bottom: 10px;
+
+  .row {
+    display: flex;
+    flex-wrap: nowrap;      // force single row
+    align-items: center;
+    gap: 1rem;              // spacing between each field
+  }
+
+  .form-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;               // space between label and dropdown
+    width: auto;
+  }
+
+  label {
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--neutral-300);
+  }
+
+  app-form-input {
+    width: 100px;           // dropdown width
+    height: 20px;           // dropdown height
+    display: block;
+  }
+
+  /* ------------------------------
+     Angular Material Fixes
+     Ensures select fits perfectly
+     ------------------------------ */
+
+  /* Outer wrapper */
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 20px !important;
+    padding: 0 8px !important;
+    display: flex;
+    align-items: center;
+    background-color: var(--neutral-100);
+  }
+
+  /* Infix area (content box) */
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 0 !important;
+    height: 20px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Select trigger (text inside select) */
+  ::ng-deep .mat-mdc-select-trigger {
+    height: 20px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Arrow wrapper */
+  ::ng-deep .mat-mdc-select-arrow-wrapper {
+    height: 32px !important;
+    display: flex !important;
+    align-items: center;
+  }
+  ::ng-deep .mat-mdc-select-value-text{
+    font-size: 9px;
+    font-weight: var(--font-weight-regular);
+  }
+}

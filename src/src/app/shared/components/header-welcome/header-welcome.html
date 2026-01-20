@@ -1,0 +1,53 @@
+<div class="header">
+  <!-- Title -->
+  <h2 class="title">
+    <!-- Back Icon (only visible when backIconVisible = true) -->
+    <app-buttons
+      variant="type2"
+      icon="arrow_back"
+      color="var(--primary-400)"
+      size="xsmall"
+      *ngIf="pageHeader.backIconVisible"
+      actionType="closePopUp"
+      (click)="goBack()"
+    >
+    </app-buttons>
+
+    {{ pageHeader.title }}
+    @if (prevNextBtnsVisible) {
+    <div class="action-btn">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-400)"
+        size="medium"
+        icon="chevron_left"
+        [actionType]="'prevIdea'"
+      >
+        Previous
+      </app-buttons>
+
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        icon="chevron_right"
+        iconPosition="right"
+        [actionType]="'nextIdea'"
+      >
+        Next
+      </app-buttons>
+    </div>
+    }
+  </h2>
+
+  <!-- Breadcrumbs -->
+  <div class="sub">
+    <ng-container *ngFor="let part of pageHeader.breadcrumbParts; let i = index">
+      <span class="crumb" [class.active]="i === pageHeader.breadcrumbParts.length - 1">
+        {{ part }}
+      </span>
+
+      <span *ngIf="i < pageHeader.breadcrumbParts.length - 1" class="divider"> > </span>
+    </ng-container>
+  </div>
+</div>

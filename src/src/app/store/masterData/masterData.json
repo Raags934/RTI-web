@@ -1,0 +1,411 @@
+{
+  "user": {
+    "name": "Karthik Perisetti",
+    "email": "karthik@example.com",
+    "roles": [
+      {
+        "role_id": 1,
+        "role_name": "Admin",
+        "description": "System administrator with full access"
+      },
+      { "role_id": 2, "role_name": "Creator", "description": "Creates and edits ideas" }
+    ],
+    "user_id": 1,
+    "functions": [
+      {
+        "description": "Marketing business function",
+        "function_id": 1,
+        "function_name": "Marketing",
+        "function_type": "Business Function"
+      },
+      {
+        "description": "Health economics and outcomes research",
+        "function_id": 5,
+        "function_name": "HEOR",
+        "function_type": "Evidence Function"
+      }
+    ],
+    "research_pathways": [
+      {
+        "pathway_id": 1,
+        "description": "Investigator Initiated Trials",
+        "function_id": 4,
+        "pathway_name": "IIT",
+        "flag_soft_lock": false
+      },
+      {
+        "pathway_id": 2,
+        "description": "Advanced Innovative Trials",
+        "function_id": 3,
+        "pathway_name": "AIT",
+        "flag_soft_lock": false
+      },
+      {
+        "pathway_id": 3,
+        "description": "Health Economics and Outcomes Research Pathway",
+        "function_id": 5,
+        "pathway_name": "HEOR",
+        "flag_soft_lock": false
+      },
+      {
+        "pathway_id": 4,
+        "description": "Simulated clinical research activities",
+        "function_id": 3,
+        "pathway_name": "Simulated Clinical",
+        "flag_soft_lock": false
+      },
+      {
+        "pathway_id": 5,
+        "description": "Bench-level experimental research",
+        "function_id": 6,
+        "pathway_name": "Bench",
+        "flag_soft_lock": false
+      },
+      {
+        "pathway_id": 6,
+        "description": "Market research and survey-based insights",
+        "function_id": 7,
+        "pathway_name": "Market Research / Survey",
+        "flag_soft_lock": false
+      }
+    ],
+    "therapeutic_areas": [
+      { "ta_id": 1, "ta_name": "Pharma - Glaucoma", "franchise_id": 3 },
+      { "ta_id": 2, "ta_name": "CRCX", "franchise_id": 4 },
+      { "ta_id": 3, "ta_name": "PCIOL", "franchise_id": 4 }
+    ]
+  },
+  "dropdowns": {
+    "Monad": [
+      { "value_id": 24, "value_code": "YES", "value_label": "Yes" },
+      { "value_id": 25, "value_code": "NO", "value_label": "No" }
+    ],
+    "Origin": [
+      {
+        "value_id": 5,
+        "value_code": "COUNTRY_SPECIFIC",
+        "value_label": "Country specific (add a comments)"
+      },
+      { "value_id": 6, "value_code": "FRANCHISE", "value_label": "Franchise" },
+      { "value_id": 7, "value_code": "HEOR", "value_label": "HEOR" },
+      { "value_id": 8, "value_code": "IMG", "value_label": "IMG" },
+      { "value_id": 9, "value_code": "MEDICAL_DIRECTORS", "value_label": "Medical Directors" },
+      { "value_id": 10, "value_code": "US_MARKETING", "value_label": "US Marketing" }
+    ],
+    "Product Type": [
+      { "value_id": 1, "value_code": "ATP_RND", "value_label": "ATP - R&D" },
+      { "value_id": 2, "value_code": "TIER_2_3_RND", "value_label": "Tier 2 / 3 R&D" },
+      {
+        "value_id": 3,
+        "value_code": "STRATEGIC_EXISTING",
+        "value_label": "Strategic Existing Product"
+      },
+      { "value_id": 4, "value_code": "OTHER_EXISTING", "value_label": "Other Existing Product" }
+    ],
+    "Type of Claim": [
+      { "value_id": 22, "value_code": "PROMOTIONAL", "value_label": "Promotional" },
+      { "value_id": 23, "value_code": "SHARE_OF_VOICE", "value_label": "Share of Voice" }
+    ],
+    "Type of Study": [
+      { "value_id": 13, "value_code": "BENCH", "value_label": "Bench" },
+      { "value_id": 14, "value_code": "CLINICAL", "value_label": "Clinical" },
+      { "value_id": 15, "value_code": "SIMULATED_CLINICAL", "value_label": "Simulated Clinical" },
+      { "value_id": 16, "value_code": "HEOR", "value_label": "HEOR" },
+      { "value_id": 17, "value_code": "IIT", "value_label": "IIT" },
+      {
+        "value_id": 18,
+        "value_code": "MARKET_RESEARCH_SURVEY",
+        "value_label": "Market Research / Survey"
+      },
+      { "value_id": 19, "value_code": "REGISTRATION", "value_label": "Registration" }
+    ],
+    "Funding Source": [
+      { "value_id": 35, "value_code": "DATA_GEN_BUDGET", "value_label": "Data Generation Budget" },
+      { "value_id": 36, "value_code": "RND_BUDGET", "value_label": "R&D Budget" }
+    ],
+    "Type of claims": [
+      { "value_id": 20, "value_code": "NEW", "value_label": "New" },
+      { "value_id": 21, "value_code": "SUPPLEMENTAL", "value_label": "Supplemental" }
+    ],
+    "Risk Assessment": [
+      { "value_id": 26, "value_code": "LOW", "value_label": "Low" },
+      { "value_id": 27, "value_code": "MEDIUM", "value_label": "Medium" },
+      { "value_id": 28, "value_code": "HIGH", "value_label": "High" }
+    ],
+    "Monadic or Comparative": [
+      { "value_id": 11, "value_code": "MONADIC", "value_label": "Monadic" },
+      { "value_id": 12, "value_code": "COMPARATIVE", "value_label": "Comparative" }
+    ],
+    "Regions Accepting Submissions": [
+      { "value_id": 29, "value_code": "APAC", "value_label": "APAC" },
+      { "value_id": 30, "value_code": "CHINA", "value_label": "China" },
+      { "value_id": 31, "value_code": "EUROPE", "value_label": "Europe" },
+      { "value_id": 32, "value_code": "LATAM", "value_label": "LATAM" },
+      { "value_id": 33, "value_code": "JAPAN", "value_label": "Japan" },
+      { "value_id": 34, "value_code": "NORTH_AMERICA", "value_label": "North America" }
+    ]
+  },
+  "franchises": [
+    {
+      "franchise_id": 4,
+      "franchise_code": "SU",
+      "franchise_name": "Surgical",
+      "therapeutic_areas": [
+        {
+          "ta_id": 3,
+          "brands": [
+            {
+              "brand_id": 63,
+              "products": [
+                {
+                  "product_id": 12,
+                  "product_name": "DAILIES All Day Comfort Toric",
+                  "product_type": null
+                },
+                { "product_id": 35, "product_name": "Centurion Silver", "product_type": null },
+                { "product_id": 46, "product_name": "CyPass", "product_type": null },
+                {
+                  "product_id": 56,
+                  "product_name": "DAILIES All Day Comfort",
+                  "product_type": null
+                },
+                {
+                  "product_id": 65,
+                  "product_name": "DAILIES AquaComfort Plus Sphere",
+                  "product_type": null
+                },
+                { "product_id": 175, "product_name": "Centurion", "product_type": null },
+                {
+                  "product_id": 194,
+                  "product_name": "Custom-Pak, Vitreoretinal",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Clareon"
+            },
+            {
+              "brand_id": 73,
+              "products": [
+                { "product_id": 29, "product_name": "DAILIES Colors", "product_type": null },
+                {
+                  "product_id": 168,
+                  "product_name": "DAILIES AquaComfort Plus Toric",
+                  "product_type": null
+                },
+                {
+                  "product_id": 173,
+                  "product_name": "DAILIES AquaComfort Plus Multifocal",
+                  "product_type": null
+                },
+                {
+                  "product_id": 188,
+                  "product_name": "DAILIES TOTAL1 for Astigmatism",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "PanOptix"
+            }
+          ],
+          "ta_name": "PCIOL"
+        },
+        {
+          "ta_id": 2,
+          "brands": [
+            {
+              "brand_id": 1,
+              "products": [
+                { "product_id": 120, "product_name": "AcrySof IQ Vivity", "product_type": null }
+              ],
+              "brand_name": "Laureate"
+            },
+            {
+              "brand_id": 5,
+              "products": [
+                { "product_id": 44, "product_name": "AcrySof IQ monofocal", "product_type": null }
+              ],
+              "brand_name": "Balance Tip"
+            },
+            {
+              "brand_id": 22,
+              "products": [{ "product_id": 79, "product_name": "AIR OPTIX", "product_type": null }],
+              "brand_name": "LuxOR Revalia"
+            },
+            {
+              "brand_id": 26,
+              "products": [
+                {
+                  "product_id": 8,
+                  "product_name": "AcrySof IQ PanOptix Toric",
+                  "product_type": null
+                },
+                { "product_id": 121, "product_name": "AcrySof IQ ReSTOR", "product_type": null },
+                { "product_id": 128, "product_name": "AcrySof IQ PanOptix", "product_type": null },
+                {
+                  "product_id": 195,
+                  "product_name": "AcrySof IQ ReSTOR Toric",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Centurion"
+            },
+            {
+              "brand_id": 29,
+              "products": [
+                {
+                  "product_id": 6,
+                  "product_name": "AcrySof IQ Toric UV only",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Infiniti"
+            },
+            {
+              "brand_id": 32,
+              "products": [
+                { "product_id": 40, "product_name": "AcrySof Multi-Piece", "product_type": null }
+              ],
+              "brand_name": "LenSx"
+            },
+            {
+              "brand_id": 39,
+              "products": [
+                {
+                  "product_id": 2,
+                  "product_name": "AcrySof IQ monofocal Toric",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "BSS Plus"
+            },
+            {
+              "brand_id": 42,
+              "products": [
+                { "product_id": 64, "product_name": "AcrySof IQ UV only", "product_type": null }
+              ],
+              "brand_name": "INTREPID Hybrid Tip"
+            },
+            {
+              "brand_id": 48,
+              "products": [
+                {
+                  "product_id": 162,
+                  "product_name": "AIR OPTIX Aqua Multifocal",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "SMARTCataract"
+            },
+            {
+              "brand_id": 56,
+              "products": [
+                {
+                  "product_id": 53,
+                  "product_name": "Acrysof IQ Vivity Toric",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Legion"
+            },
+            {
+              "brand_id": 61,
+              "products": [
+                { "product_id": 49, "product_name": "AIR OPTIX Aqua Sphere", "product_type": null },
+                {
+                  "product_id": 156,
+                  "product_name": "AIR OPTIX Night & Day Aqua",
+                  "product_type": null
+                },
+                { "product_id": 196, "product_name": "AIR OPTIX Colors", "product_type": null }
+              ],
+              "brand_name": "Unity"
+            },
+            {
+              "brand_id": 62,
+              "products": [
+                {
+                  "product_id": 88,
+                  "product_name": "AIR OPTIX Aqua for Astigmatism",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "OVDs"
+            },
+            {
+              "brand_id": 89,
+              "products": [
+                {
+                  "product_id": 183,
+                  "product_name": "AIR OPTIX Plus HydraGlyde for Astigmatism",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Revalia"
+            }
+          ],
+          "ta_name": "CRCX"
+        }
+      ]
+    },
+    {
+      "franchise_id": 3,
+      "franchise_code": "PH",
+      "franchise_name": "Pharma",
+      "therapeutic_areas": [
+        {
+          "ta_id": 1,
+          "brands": [
+            {
+              "brand_id": 20,
+              "products": [
+                {
+                  "product_id": 186,
+                  "product_name": "Grieshaber Reflex Long ",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Simbrinza"
+            },
+            {
+              "brand_id": 44,
+              "products": [
+                { "product_id": 1, "product_name": "Grieshaber Sharkskin", "product_type": null }
+              ],
+              "brand_name": "Travatan"
+            },
+            {
+              "brand_id": 54,
+              "products": [
+                { "product_id": 58, "product_name": "Grieshaber Flex Loop", "product_type": null }
+              ],
+              "brand_name": "Azopt"
+            },
+            {
+              "brand_id": 74,
+              "products": [{ "product_id": 101, "product_name": "Glaucoma", "product_type": null }],
+              "brand_name": "Azarga"
+            },
+            {
+              "brand_id": 75,
+              "products": [
+                {
+                  "product_id": 147,
+                  "product_name": "Grieshaber Reflex Handle",
+                  "product_type": null
+                }
+              ],
+              "brand_name": "Rocklatan"
+            },
+            {
+              "brand_id": 80,
+              "products": [
+                { "product_id": 57, "product_name": "Grieshaber others", "product_type": null }
+              ],
+              "brand_name": "Rhopressa"
+            }
+          ],
+          "ta_name": "Pharma - Glaucoma"
+        }
+      ]
+    }
+  ]
+}

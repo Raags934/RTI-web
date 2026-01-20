@@ -1,0 +1,106 @@
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+
+  /* Global cell styling */
+  th,
+  td {
+    border: 1px solid var(--neutral-200);
+    text-align: left;
+    padding: 4px 6px;
+    font-size: var(--font-size-b4);
+    height: 40px; /* uniform row height */
+    width: 150px; /* 🔥 equal column width */
+    span {
+      display: -webkit-box;
+      -webkit-line-clamp: 2; /* show only 2 lines */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal; /* allow wrapping */
+    }
+  }
+  td {
+    mat-icon {
+      font-size: var(--font-size-b2);
+      font-weight: var(--font-weight-regular);
+    }
+  }
+
+  /* Header styling */
+  th {
+    font-family: var(--font-weight-semibold) !important;
+    background-color: var(--neutral-100);
+  }
+  .xsmall {
+    width: 2%;
+  }
+  .small {
+    width: 8%;
+  }
+  .medium {
+    width: 12%;
+  }
+  .large {
+    width: 28%;
+  }
+
+  // /* Header cell layout */
+  // .header-cell {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   cursor: pointer;
+  //   padding-right: 8px;
+  // }
+
+  // .header-content {
+  //   display: flex;
+  //   align-items: center;
+  //   gap: 4px;
+  //   white-space: nowrap;
+  // }
+
+  // .header-text {
+  //   margin-right: 4px;
+  // }
+  .header-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .header-cell {
+    cursor: pointer;
+  }
+  .header-text {
+    margin-right: 2px;
+  }
+
+  /* Sorting icons */
+  .sort-icon {
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* Hover effect */
+  tr:hover {
+    background-color: var(--secondary-100);
+  }
+
+  /* Prevent header wrapping */
+  th.mat-header-cell {
+    white-space: normal; /* allow wrapping */
+    word-break: break-word;
+  }
+}
+
+/* Highlight pipe styling */
+:host ::ng-deep mark {
+  background-color: var(--secondary-200);
+  padding: 0 2px;
+  border-radius: 2px;
+}

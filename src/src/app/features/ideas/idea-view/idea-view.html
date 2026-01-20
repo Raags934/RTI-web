@@ -1,0 +1,175 @@
+
+<div class="status-row">
+  <p class="status-label">Status:</p>
+
+  <app-buttons
+    variant="type2"
+    [color]="getStatusColor(viewIdea?.status?.status_id)"
+    size="small"
+    [isStatus]="true"
+  >
+    {{ viewIdea?.status?.status_name || '.....' }}
+  </app-buttons>
+</div>
+<div class="card-heading">
+  <p>Ideation</p>
+</div>
+<form class="material-form">
+    <!-- Product -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[0].text"
+        type="text"
+        [isDisabled]="true"
+        [required]="true"
+        [control]="form.get('product_id')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- TA (auto-filled) -->
+    <div class="form-field">
+      <app-form-input
+      [label]="labels[1].text"
+      type="text"
+      [isDisabled]="true"
+
+        [isDisabled]="true"
+        [control]="form.get('ta_id')"
+        [showIconDropdown]="false"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Product Type -->
+    <div class="form-field">
+      <app-form-input
+      [label]="labels[2].text"
+      type="text"
+      [isDisabled]="true"
+        [required]="true"
+        [control]="form.get('product_type')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Research Pathway -->
+    <div class="form-field">
+      <app-form-input
+      [label]="labels[3].text"
+      type="text"
+      [isDisabled]="true"
+
+        [required]="true"
+        [control]="form.get('pathway_id')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Brand (auto-filled) -->
+    <div class="form-field">
+      <app-form-input
+      [label]="labels[4].text"
+      type="text"
+      [isDisabled]="true"
+
+        [isDisabled]="true"
+        [control]="form.get('brand_id')"
+        [showIconDropdown]="false"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- RTI Year -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[5].text"
+        type="text"
+        [isDisabled]="true"
+
+        [required]="true"
+        [autoSelectFirst]="true"
+        [control]="form.get('rti_year')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Franchise (auto-filled) -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[6].text"
+        type="text"
+        [isDisabled]="true"
+        [control]="form.get('franchise_id')"
+        [showIconDropdown]="false"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Monadic or Comparative -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[7].text"
+        type="text"
+        [isDisabled]="true"
+
+        [required]="true"
+        [control]="form.get('monadic_or_comparative')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Origin Request -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[8].text"
+        type="text"
+        [isDisabled]="true"
+        [autoSelectFirst]="true"
+        [control]="form.get('origin_request')"
+        [showIconDropdown]="false"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Strategic Rationale -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[9].text"
+        type="textarea"
+        [isDisabled]="true"
+        [required]="true"
+        [control]="form.get('strategic_rationale')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Target Aspirational Claim -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[10].text"
+        type="textarea"
+        [isDisabled]="true"
+        [required]="true"
+        [control]="form.get('target_aspirational_claim')"
+      >
+      </app-form-input>
+    </div>
+ 
+    <!-- Launch Claim -->
+    <div class="form-field">
+      <app-form-input
+        [label]="labels[11].text"
+        type="text"
+        [isDisabled]="true"
+
+        [required]="true"
+        [control]="form.get('launch_claim')"
+      >
+      </app-form-input>
+    </div>
+ 
+   
+  </form>
+ 
+ 

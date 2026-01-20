@@ -1,0 +1,30 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 85%;
+
+  .title {
+    margin: 4px;
+    font-size: var(--font-size-h7);
+    font-weight: var(--font-weight-semibold);
+
+    display: flex; /* put button + text in one row */
+    align-items: center; /* vertical alignment */
+    gap: 8px; /* spacing between button and text */
+    .action-btn {
+      margin-left: auto;
+      display: flex; /* keeps buttons in one row */
+      gap: 8px; /* spacing between Previous & Next */
+    }
+  }
+
+  .sub {
+    color: var(--text-secondary);
+    font-size: var(--font-size-b35);
+    .crumb.active {
+      color: var(--primary-400); /* highlight last breadcrumb */
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+}

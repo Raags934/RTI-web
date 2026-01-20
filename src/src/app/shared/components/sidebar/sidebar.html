@@ -1,0 +1,23 @@
+<!-- Brand header -->
+<div class="brand">
+  <img *ngIf="!menuClosed" src="assets/logos/alcon.png" alt="Alcon Logo" (click)="gotoHome()" />
+  <button class="chevron" (click)="onMenuclick()">&laquo;</button>
+</div>
+
+<!-- Navigation -->
+<nav [class.closed]="menuClosed" class="nav py-8">
+
+  <a *ngFor="let item of menuItems"
+   [routerLink]="item.route"
+   routerLinkActive="active"
+   [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+   mat-ripple
+   class="nav-item">
+
+
+    <mat-icon fontSet="material-symbols-outlined">{{ item.icon }}</mat-icon>
+    <span>{{ item.label }}</span>
+
+  </a>
+
+</nav>

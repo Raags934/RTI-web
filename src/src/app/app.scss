@@ -1,0 +1,19 @@
+
+.app-shell { height: 100vh; }
+.app-sidenav {
+  width: 200px;
+  border-right: 1px solid var(--border);
+  background: #fff;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.app-content {
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+@media (max-width: 1024px) {
+  .app-sidenav { width: 240px; }
+}

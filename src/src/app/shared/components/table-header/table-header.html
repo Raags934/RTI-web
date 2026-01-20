@@ -1,0 +1,45 @@
+<div class="ideas-toolbar">
+  <!-- Left side: heading + caption -->
+  <div class="left">
+    <div class="title">Ideas List</div>
+    <div class="caption">Your latest research proposals and ideas</div>
+  </div>
+
+  <div class="search">
+    <input
+      type="text"
+      placeholder="Search ideas..."
+      [(ngModel)]="searchValue"
+      (input)="onSearch()"
+    />
+
+    <button *ngIf="searchValue" class="clear-btn" (click)="onReset()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Right side: buttons -->
+  <div class="right">
+    <app-buttons
+      variant="type2"
+      color="var(--primary-300)"
+      size="medium"
+      icon="ios_share"
+      class="export-btn"
+    >
+      Export Data
+    </app-buttons>
+    <app-buttons
+      [routerLink]="'/addidea'"
+      variant="type1"
+      color="var(--primary-400)"
+      size="medium"
+      icon="add_circle_outline"
+    >
+      New Idea
+    </app-buttons>
+  </div>
+</div>
+
+
+

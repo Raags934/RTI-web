@@ -1,0 +1,119 @@
+/* ------------------------------
+   Base container
+------------------------------ */
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------
+   Label styles
+------------------------------ */
+.form-label {
+  font-weight: var(--font-weight-regular);
+  margin-bottom: 4px;
+  color: var(--neutral-300);
+  font-size: var(--font-size-b3);
+}
+
+.required {
+  color: var(--alert-400);
+  margin-left: 4px;
+}
+
+/* ------------------------------
+   Form field wrapper
+------------------------------ */
+.form-field-control {
+  width: 100%;
+}
+
+/* ------------------------------
+   Input / Textarea / Select typography
+------------------------------ */
+.form-field-control input[matInput],
+.form-field-control textarea[matInput],
+.form-field-control mat-select {
+  font-size: var(--font-size-b3);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Textarea adjustments */
+.form-field-control textarea[matInput] {
+  line-height: 1.4rem;
+  resize: vertical;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* Select spacing */
+.form-field-control mat-select {
+  padding: 4px 0;
+}
+
+/* ------------------------------
+   Error & hint spacing
+------------------------------ */
+:host ::ng-deep .mat-form-field-subscript-wrapper {
+  margin-top: 4px;
+}
+
+/* ------------------------------
+   Searchable select dropdown
+------------------------------ */
+.panel-search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.panel-search-input {
+  flex: 1;
+  font-size: 14px;
+}
+
+.panel-search-input::placeholder {
+  color: var(--neutral-300);
+  opacity: 1;
+}
+
+.search-icon {
+  color: var(--neutral-300);
+  font-size: 20px;
+}
+
+.suffix-icon {
+  color: var(--neutral-150);
+  font-size: 22px;
+}
+
+/* ------------------------------
+   Material form-field height & alignment
+------------------------------ */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+  height: 50px;
+  align-items: center;
+}
+
+:host ::ng-deep input.mat-input-element {
+  height: 100%;
+  padding: 0 8px;
+}
+
+/* ------------------------------
+   Surface background overrides
+------------------------------ */
+:host ::ng-deep .mat-form-field-flex {
+  background-color: var(--surface) !important;
+  border-radius: 6px;
+}
+
+:host ::ng-deep .mat-input-element {
+  background-color: var(--surface) !important;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex,
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+  background-color: var(--surface) !important;
+}

@@ -1,0 +1,65 @@
+<div class="header-filters">
+  <div class="row">
+    <div class="form-field">
+      <label>Franchise :</label>
+      <app-form-input
+        label="Product"
+        type="select"
+        [options]="franchiseOptions"
+        searchPlaceholder="Search franchise"
+        [required]="true"
+        [labelRequired]="false"
+        [showSearchDropdown]="false"
+        [showIconDropdown]="false"
+        [autoSelectFirst]="true"
+        [control]="filterForm.get('franchise')"
+      ></app-form-input>
+    </div>
+    <div class="form-field">
+      <label>TA :</label>
+      <app-form-input
+        label="Product"
+        type="select"
+        [options]="taOptions"
+        searchPlaceholder="Search ta"
+        [required]="true"
+        [labelRequired]="false"
+        [showSearchDropdown]="false"
+        [showIconDropdown]="false"
+        [autoSelectFirst]="true"
+        [control]="filterForm.get('ta')"
+      ></app-form-input>
+    </div>
+    <div class="form-field">
+      <label>Role :</label>
+      <app-form-input
+        label="Product"
+        type="select"
+        [options]="roleOptions"
+        searchPlaceholder="Search role"
+        [required]="true"
+        [labelRequired]="false"
+        [showSearchDropdown]="false"
+        [showIconDropdown]="false"
+        [autoSelectFirst]="true"
+        [control]="filterForm.get('role')"
+      ></app-form-input>
+    </div>
+    <div class="form-field">
+      <label>Function :</label>
+      <app-form-input
+        label="Product"
+        type="select"
+        [options]="functionsOptions"
+        searchPlaceholder="Search function"
+        [required]="true"
+        [labelRequired]="false"
+        [showSearchDropdown]="false"
+        [showIconDropdown]="false"
+        [autoSelectFirst]="true"
+        [control]="filterForm.get('function')"
+      ></app-form-input>
+    </div>
+
+  </div>
+</div>

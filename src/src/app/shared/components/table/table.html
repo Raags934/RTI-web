@@ -1,0 +1,52 @@
+<table mat-table [dataSource]="dataSource" class="custom-table">
+  <!-- Dynamic column generation -->
+  <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
+    <!-- HEADER CELL -->
+    <th
+      mat-header-cell
+      *matHeaderCellDef
+      [ngClass]="col.width"
+      class="header-cell"
+      (click)="col.sortable && onSort(col.key)"
+    >
+      <div class="header-content">
+        <span class="header-text">{{ col.label }}</span>
+
+        <!-- Sorting Icons -->
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === null" class="sort-icon">
+          unfold_more
+        </mat-icon>
+
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'asc'" class="sort-icon">
+          arrow_upward
+        </mat-icon>
+
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'desc'" class="sort-icon">
+          arrow_downward
+        </mat-icon>
+      </div>
+    </th>
+
+    <!-- DATA CELL -->
+    <td mat-cell [ngClass]="col.width" *matCellDef="let element">
+      @if (col.key === 'status.status_name') {
+      <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
+        {{ element.status?.status_name || '.....' }}
+      </app-buttons>
+      }
+      <!-- Options Column -->
+      @else if (col.key === 'options') {
+     
+        <mat-icon (click)="viewIdea(element.idea_uid)">more_vert</mat-icon>
+      } @else {
+      <span [innerHTML]="getValue(element, col.key) | highlight : searchText"></span>
+      }
+    </td>
+  </ng-container>
+
+  <!-- HEADER ROW -->
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+  <!-- DATA ROW -->
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>

@@ -1,0 +1,42 @@
+.status-tabs {
+  display: flex; // put tabs in a single line
+  gap: 1rem; // spacing between tabs
+  flex-wrap: wrap; // allow wrapping if too many tabs
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.tab {
+  display: inline-flex; // keep label + count inline
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 8px;
+  //border-radius: var(--radius-xs);
+  background: var(--mdc-theme-surface);
+  transition: background 0.1s;
+  font-size: var(--font-size-b35);
+
+  &:hover {
+    background: var(--neutral-100);
+  }
+
+  &.active {
+    border-bottom: 1.5px solid var(--primary-400);
+    color: var(--primary-300);
+  }
+
+  .label {
+    font-weight: (--font-weight-semibold);
+    margin-right: 4px;
+  }
+
+  .count {
+    font-size: var(--font-size-b4);
+    color: var(--success-500);
+    background-color: var(--success-50);
+    border-radius: var(--radius-lg);
+    padding: 0px 7px;
+    font-weight: var(--font-weight-semibold);
+    display: inline-block;
+    text-align: center;
+  }
+}

@@ -1,0 +1,80 @@
+<div class="form-field">
+
+  <!-- Static label above -->
+  <label *ngIf="labelRequired" class="form-label">
+    {{ label }}
+    <span *ngIf="required" class="required">*</span>
+  </label>
+
+  <!-- TEXT INPUT -->
+  <mat-form-field *ngIf="type === 'text'" appearance="outline" class="form-field-control">
+    <input
+      matInput
+      [required]="required"
+      [formControl]="formControl"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled"
+    />
+    <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
+      This field is required
+    </mat-error>
+  </mat-form-field>
+
+  <!-- TEXTAREA -->
+  <mat-form-field *ngIf="type === 'textarea'" appearance="outline" class="form-field-control">
+    <textarea
+      matInput
+      rows="3"
+      [required]="required"
+      [formControl]="formControl"
+      [placeholder]="placeholder"
+    ></textarea>
+    <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
+
+      This field is required
+    </mat-error>
+  </mat-form-field>
+
+  <!-- SELECT -->
+  <mat-form-field *ngIf="type === 'select'" appearance="fill" class="form-field-control">
+
+    <mat-select
+      [formControl]="formControl"
+      (selectionChange)="onSelectionChange($event.value)"
+    >
+
+      <!-- Search box -->
+      <mat-option *ngIf="showSearchDropdown">
+        <div class="panel-search-option">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            matInput
+            class="panel-search-input"
+            [formControl]="search"
+            [placeholder]="searchPlaceholder"
+            (click)="$event.stopPropagation()"
+          />
+        </div>
+      </mat-option>
+
+      <!-- Options -->
+      <mat-option *ngFor="let option of filteredOptions" [value]="option.id">
+        {{ option.name }}
+      </mat-option>
+
+    </mat-select>
+
+    <!-- Suffix icon -->
+    <mat-icon *ngIf="showIconDropdown" matSuffix class="suffix-icon">
+      expand_more
+    </mat-icon>
+
+    <!-- Error -->
+    <mat-error *ngIf="required && formControl?.invalid && (submitted || formControl?.touched)">
+      Please select a value
+    </mat-error>
+
+  </mat-form-field>
+
+
+</div>

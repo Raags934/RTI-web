@@ -1,0 +1,24 @@
+trigger:
+  branches:
+    include:
+      - "develop"
+      - "release/*"
+pr:
+  branches:
+    include:
+      - "develop"
+      - "release/*"
+     
+resources:
+  repositories:
+    - repository: AdoPipelines
+      type: github
+      name: AlconEnterprise/adl-devops-toolkit
+      ref: refs/heads/main
+      endpoint: AlconEnterprise
+     
+extends:
+  template: azure/pipelines/ci-facade.yml@AdoPipelines
+  parameters:
+    buildStage: "adl-rti-portal-web-app"
+    cmdb: "apps"

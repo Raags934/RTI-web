@@ -1,0 +1,465 @@
+/* Angular Material theming setup — retained exactly */
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
+
+/* ===============================
+   Design Tokens from your images
+   (only variables shown in images)
+   =============================== */
+:root {
+  /* Typography: Open Sans and sizes exactly per screenshots */
+  --font-family-sans: 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+
+  --font-size-h1: 40px;
+  --font-size-h2: 36px;
+  --font-size-h3: 32px;
+  --font-size-h4: 28px;
+  --font-size-h5: 26px;
+  --font-size-h6: 22px;
+  --font-size-h7: 18px;
+  --font-size-h8: 14px;
+  --font-size-h9: 12px;
+
+  --font-size-b1: 16px;
+  --font-size-b2: 14px;
+  --font-size-b3: 12px;
+  --font-size-b35: 11px;
+  --font-size-b4: 10px;
+  --font-size-b5: 8px;
+
+  --font-size-c1: 14px;
+  --font-size-c2: 13px;
+
+  --ff-family: var(--font-family-sans);
+  --ff-size: var(--font-size-b2);
+  --ff-height: 32px; /* default field height */
+  --ff-padding-x: 12px;
+
+  --ff-compact-height: 32px;
+  --ff-dense-height: 36px;
+  --ff-tall-height: 52px;
+
+  /* Line height & letter spacing */
+  --line-height-default: normal; /* Auto in screenshot */
+  --letter-spacing-default: 0;
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ===== Primary (100–500) ===== */
+  --primary-100: #f5f9ff; /* TODO: confirm */
+  --primary-200: #d9e1ef; /* TODO: confirm */
+  --primary-300: #003595; /* TODO: confirm (unreadable) */
+  --primary-400: #002b70; /* TODO: confirm */
+  --primary-500: #011b43; /* TODO: confirm */
+
+  /* ===== Secondary (100–500) ===== */
+  --secondary-100: #e6f7fd; /* TODO: confirm */
+  --secondary-200: #d0e6fa; /* TODO: confirm */
+  --secondary-300: #00aeef; /* TODO: confirm */
+  --secondary-400: #0183b3; /* TODO: confirm */
+  --secondary-500: #013e4c; /* TODO: confirm */
+
+  /* ===== Alert (100–500) ===== */
+  --alert-100: #f5b6ba; /* TODO: confirm */
+  --alert-200: #e0b8bf; /* TODO: confirm */
+  --alert-300: #b81a2f; /* TODO: confirm */
+  --alert-400: #7a1423; /* TODO: confirm */
+  --alert-500: #4b0c15; /* TODO: confirm */
+
+  /* ===== Success (100–500) ===== */
+  --success-50: #a8e6cf;
+  --success-100: #a6f7ec; /* TODO: confirm */
+  --success-200: #d8eec5; /* TODO: confirm */
+  --success-300: #00a64a; /* TODO: confirm */
+  --success-400: #008133; /* TODO: confirm */
+  --success-500: #004e1f; /* TODO: confirm */
+
+  /* ===== Caution (100–500) ===== */
+  --caution-100: #fff5ea; /* TODO: confirm */
+  --caution-200: #f7e1b7; /* TODO: confirm */
+  --caution-300: #ffb318; /* TODO: confirm */
+  --caution-400: #8b7712; /* TODO: confirm */
+  --caution-500: #7a5718; /* TODO: confirm */
+
+  /* ===== Neutrals ===== */
+  --neutral-white: #ffffff;
+  --neutral-100: #f3f2f2;
+  --neutral-150: #cac7c7;
+  --neutral-200: #f4f2f2;
+  --neutral-300: #787878;
+  --neutral-400: #545454;
+  --neutral-500: #1e1e1e;
+  --neutral-black: #000000;
+
+  /* Your existing semantic tokens mapped to the new palette (non-destructive) */
+  --brand-primary: var(--primary-400);
+
+  --brand-text: var(--neutral-500);
+  --text-secondary: var(--neutral-300);
+
+  --surface: var(--neutral-white);
+  --surface-muted: var(--neutral-100);
+  --border: var(--neutral-200);
+
+  --success: var(--success-400);
+  --warning: var(--caution-300);
+  --danger: var(--alert-300);
+
+  /* Radii & shadows: kept from your base styles */
+  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --shadow-2: 0 6px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* Utilities — retained */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  color: var(--brand-text);
+  background: var(--surface-muted);
+  font-size: var(--font-size-b2);
+}
+
+/* Headings */
+.h1 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-default);
+  letter-spacing: var(--letter-spacing-default);
+}
+.h2 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+}
+.h3 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+}
+.h4 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+}
+.h5 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-semibold);
+}
+.h6 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-semibold);
+}
+.h7 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-semibold);
+}
+.h8 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-h8);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Body */
+.b1 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-b1);
+  font-weight: var(--font-weight-regular);
+}
+.b2 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-b2);
+  font-weight: var(--font-weight-regular);
+}
+.b3 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-b3);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Captions */
+.c1 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-c1);
+  font-weight: var(--font-weight-regular);
+}
+.c2 {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-c2);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Utility classes — retained */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+.px-4 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.px-8 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.pxr-16 {
+  padding-right: 16px;
+}
+.py-4 {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.py-8 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.px-24 {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.py-16 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.mt-16 {
+  margin-top: 16px;
+}
+.mt-24 {
+  margin-top: 24px;
+}
+.mt-32 {
+  margin-top: 32px;
+}
+
+mat-error {
+  display: none !important;
+}
+
+/* Overlay panel radius when dropdown opens below */
+.cdk-overlay-pane {
+  &:not(.mat-mdc-select-panel-above) {
+    div.mat-mdc-select-panel {
+      border-top-left-radius: 6px !important;
+      border-top-right-radius: 6px !important;
+    }
+  }
+
+  /* Dropdown panel */
+  .mat-mdc-select-panel {
+    width: 100%;
+    max-height: 275px;
+    outline: 0;
+    overflow: auto;
+    padding: 8px 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    position: relative;
+    background-color: var(--mat-select-panel-background-color, var(--mat-sys-surface-container));
+  }
+}
+
+/* Select trigger */
+.mat-mdc-select {
+  font-size: var(--font-size-b3) !important;
+  font-family: var(--font-family-sans) !important;
+}
+
+/* Options */
+.mat-mdc-option {
+  min-height: 24px !important;
+  border-bottom: 1px solid var(--border);
+  background-color: white !important;
+  color: inherit !important;
+  /* Allow long dropdown text to wrap and increase height */
+  white-space: normal !important;
+  height: auto !important;
+  line-height: 1.3rem !important;
+
+
+  &.mdc-list-item {
+    height: 28px;
+    padding: 4px 12px;
+  }
+
+  .mdc-list-item__primary-text {
+    font-size: var(--font-size-b4) !important;
+    font-family: var(--font-family-sans);
+  }
+
+  &:hover:not(.mat-mdc-option-disabled):not(.mdc-list-item--selected) {
+    background-color: rgb(246, 248, 250) !important;
+    color: black !important;
+  }
+
+  &.mdc-list-item--selected:not(.mat-mdc-option--disabled):not(.mat-mdc-option-multiple) {
+    background-color: var(--primary-400) !important;
+
+    .mdc-list-item__primary-text {
+      color: #fff !important;
+    }
+  }
+
+  .mat-pseudo-checkbox {
+    display: none !important;
+  }
+
+  .mat-icon {
+    margin-right: 0px !important;
+    flex-shrink: 0;
+  }
+}
+
+/* Suffix icon */
+.suffix-icon {
+  color: #8a94a7;
+  font-size: 22px;
+}
+
+/* Form-field flattening */
+.mat-mdc-select-arrow-wrapper {
+  display: none !important;
+}
+
+/* Only apply when the form-field contains a mat-select */
+.mat-mdc-form-field {
+  &:has(.mat-mdc-select),
+  &:has(input.mat-mdc-input-element) {
+    .mat-mdc-form-field-infix {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      height: 28px !important;
+      min-height: 28px !important;
+    }
+  }
+
+  .mdc-notched-outline,
+  .mdc-line-ripple {
+    display: none !important;
+    border: 0 !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    border: 1px solid var(--neutral-150);
+    border-radius: 8px;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    background-color: rgb(246, 246, 250);
+  }
+
+  &:hover .mat-mdc-text-field-wrapper {
+    border: 1px solid #444;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+  }
+
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    border: 1px solid #260959;
+    box-shadow: 0 0 12px rgba(25, 6, 56, 0.4);
+  }
+
+  &.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+    border: 1px solid #d93636;
+    box-shadow: 0 0 6px rgba(217, 54, 54, 0.4);
+  }
+}
+
+/* Placeholder styling */
+.mdc-text-field__input::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+/* Search option row */
+.panel-search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0px;
+  height: 24px;
+
+  .search-icon {
+    color: var(--neutral-150);
+    font-size: 20px;
+  }
+}
+
+/* Outlined field adjustments */
+.mdc-text-field--outlined,
+.mdc-text-field--no-label {
+  .mat-mdc-form-field-infix {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+}
+
+.mdc-text-field--outlined {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: white !important;
+}
+
+.mat-mdc-select-disabled .mat-mdc-select-trigger {
+  .mat-mdc-select-value-text {
+    color: var(--neutral-400);
+  }
+}

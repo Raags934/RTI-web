@@ -1,0 +1,1 @@
+export interface Brand { brand_id: number; brand_name: string; flag_soft_lock: boolean; ta_id: number; }
