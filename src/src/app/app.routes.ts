@@ -4,8 +4,8 @@ import { IdeaCreate } from './features/ideas/idea-create/idea-create';
 import { MyIdeas } from './features/ideas/my-ideas/my-ideas';
 import { ContactForHelp } from './features/contact-for-help/contact-for-help';
 import { IdeaView } from './features/ideas/idea-view/idea-view';
-import { PrioritizationOne } from './features/ideas/prioritization-one/prioritization-one';
-import { PrioritizationTwo } from './features/ideas/prioritization-two/prioritization-two';
+import { PrioritizationOne } from './features/prioritization-one/prioritization-one';
+import { PrioritizationTwo } from './features/prioritization-two/prioritization-two';
 
 export const routes: Routes = [
   { path: '', component: IdeaDashboard },

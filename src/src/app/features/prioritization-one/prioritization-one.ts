@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { HeaderFilter } from '../../../shared/components/header-filter/header-filter';
-import { Pagination } from '../../../shared/components/pagination/pagination';
-import { TableFilter } from '../../../shared/components/table-filter/table-filter';
-import { TableHeader } from '../../../shared/components/table-header/table-header';
-import { Table, TableColumn } from '../../../shared/components/table/table';
-import { Buttons } from '../../../shared/components/buttons/buttons';
-import { PopUp } from '../../../shared/components/popup/popup';
-import { Popup, PopupConfigs } from '../../../shared/constants/popUp';
+import { HeaderFilter } from '../../shared/components/header-filter/header-filter';
+import { Pagination } from '../../shared/components/pagination/pagination';
+import { TableFilter } from '../../shared/components/table-filter/table-filter';
+import { TableHeader } from '../../shared/components/table-header/table-header';
+import { Table, TableColumn } from '../../shared/components/table/table';
+import { Buttons } from '../../shared/components/buttons/buttons';
+import { PopUp } from '../../shared/components/popup/popup';
+import { Popup, PopupConfigs } from '../../shared/constants/popUp';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, take } from 'rxjs';
-import { AppState } from '../../../app.state';
-import { IdeaEventsService } from '../../../events/ideaServiceEvents';
-import { Idea } from '../../../models/idea.model';
-import { StatusTab } from '../../../shared/constants/statusTabs';
-// import { ideaDisplayColumns } from '../../../shared/constants/tableColumns';
-import { LoadIdeas } from '../../../store/idea.actions';
-import { IdeaService } from '../../../store/idea.service';
+import { AppState } from '../../app.state';
+import { IdeaEventsService } from '../../events/ideaServiceEvents';
+import { Idea } from '../../models/idea.model';
+import { StatusTab } from '../../shared/constants/statusTabs';
+// import { ideaDisplayColumns } from '../../shared/constants/tableColumns';
+import { LoadIdeas } from '../../store/idea.actions';
+import { IdeaService } from '../../store/idea.service';
 
 export const ideaDisplayColumns: TableColumn[] = [
   { key: 'rti_unique_id', label: 'RTI UID', sortable: true, width: 'medium' },
@@ -27,7 +27,6 @@ export const ideaDisplayColumns: TableColumn[] = [
   { key: 'product.product_name', label: 'Product / Project', sortable: true, width: 'medium' },
   { key: 'TAC_or_RP', label: 'Target Aspirational Claim / Research Proposal', sortable: true, width: 'large' },
   { key: 'ranking_brand', label: 'Product Ranking', sortable: true, width: 'small' },
-  { key: 'ranking_franchise', label: 'Franchise Ranking', sortable: true, width: 'small' },
   { key: 'status.status_name', label: 'Status', sortable: true, width: 'small' },
   { key: 'options', label: '', sortable: false, width: 'xsmall' }
 ];
@@ -35,17 +34,17 @@ export const ideaDisplayColumns: TableColumn[] = [
 // Custom status tabs for prioritization page
 const prioritizationStatusTabs: StatusTab[] = [
   { label: 'All', status_id: 0 },
-  { label: 'TA Prioritization Pending', status_id: 12 }, // DATA_CHECKED status
-  { label: 'TA Ranked', status_id: 13 }, // PRODUCT_RANKED status
+  { label: 'Product Prioritization Pending', status_id: 11 }, // DATA_CHECKED status
+  { label: 'Product Ranked', status_id: 12 }, // PRODUCT_RANKED status
 ].map((item) => ({ ...item, count: 0 }));
 
 @Component({
-  selector: 'app-prioritization-two',
+  selector: 'app-prioritization-one',
   imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp],
-  templateUrl: './prioritization-two.html',
-  styleUrl: './prioritization-two.scss',
+  templateUrl: './prioritization-one.html',
+  styleUrl: './prioritization-one.scss',
 })
-export class PrioritizationTwo implements OnInit {
+export class PrioritizationOne implements OnInit {
   userName: string = 'Karthik Perisetti';
   showNewIdeaButton: boolean = false;
 
@@ -63,10 +62,7 @@ export class PrioritizationTwo implements OnInit {
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
   // Array to store ranking changes
-  rankingChanges: {
-    idea_id: number;
-    ranking_franchise: string | null;
-  }[] = [];
+  rankingChanges: { idea_id: number; ranking_brand: string | null }[] = [];
 
   private sub!: Subscription;
 
@@ -104,7 +100,7 @@ export class PrioritizationTwo implements OnInit {
         this.filterBySearchText(event.payload.searchText);
       } else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload);
-      } else if (event.type === 'rankingTaChanged') {
+      } else if (event.type === 'rankingChanged') {
         // Add or update ranking change in array
         console.log('📥 Received ranking change event:', event.payload);
 
@@ -113,13 +109,13 @@ export class PrioritizationTwo implements OnInit {
         );
         if (existingIndex !== -1) {
           // Update existing entry
-          const oldValue = this.rankingChanges[existingIndex].ranking_franchise;
+          const oldValue = this.rankingChanges[existingIndex].ranking_brand;
           this.rankingChanges[existingIndex] = event.payload;
-          console.log(`✏️ Updated ranking for idea_id ${event.payload.idea_id}: ${oldValue} → ${event.payload.ranking_franchise}`);
+          console.log(`✏️ Updated ranking for idea_id ${event.payload.idea_id}: ${oldValue} → ${event.payload.ranking_brand}`);
         } else {
           // Add new entry
           this.rankingChanges.push(event.payload);
-          console.log(`➕ Added new ranking for idea_id ${event.payload.idea_id}: ${event.payload.ranking_franchise}`);
+          console.log(`➕ Added new ranking for idea_id ${event.payload.idea_id}: ${event.payload.ranking_brand}`);
         }
         console.log('📊 Current ranking changes array:', JSON.stringify(this.rankingChanges, null, 2));
       } else if (event.type === 'closePopUp') {
@@ -142,7 +138,7 @@ export class PrioritizationTwo implements OnInit {
     // Populate rankingChanges array with all filtered ideas
     this.rankingChanges = this.filteredIdeas.map(idea => ({
       idea_id: idea.idea_id,
-      ranking_franchise: idea.ranking_franchise || null
+      ranking_brand: idea.ranking_brand || null
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));
@@ -251,15 +247,15 @@ export class PrioritizationTwo implements OnInit {
       locked: false,
       updated_by: 1
     };
-    
-    const url = 'ideas/ta-prioritization';
-    this.popup = PopupConfigs.rankingSaved;
-    this.popup.open = true;
+
+    const url = 'ideas/product-prioritization';
 
     // Call API to save rankings
     this.ideaService.addPrioritization(payload, url).subscribe({
       next: (response) => {
         console.log('Ranking saved successfully:', response);
+        this.popup = PopupConfigs.rankingSaved;
+        this.popup.open = true;
         this.taFilterChange(3);
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
@@ -281,14 +277,14 @@ export class PrioritizationTwo implements OnInit {
       updated_by: 1
     };
 
-    const url = 'ideas/ta-prioritization';
-    this.popup = PopupConfigs.submitRankingConfirm;
-    this.popup.open = true;
+    const url = 'ideas/product-prioritization';
+
     // Call API to save rankings
     this.ideaService.addPrioritization(payload, url).subscribe({
       next: (response) => {
         console.log('Ranking saved successfully:', response);
-      
+        this.popup = PopupConfigs.submitRankingConfirm;
+        this.popup.open = true;
         this.taFilterChange(3);
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
@@ -305,6 +301,7 @@ export class PrioritizationTwo implements OnInit {
 
   // Helper method to view current ranking changes (for debugging)
   getRankingChanges() {
+    console.log('📊 Current Ranking Changes:', this.rankingChanges);
     return this.rankingChanges;
   }
 }
