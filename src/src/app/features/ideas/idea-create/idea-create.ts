@@ -255,7 +255,6 @@ export class IdeaCreate implements OnInit {
       strategic_rationale: raw.strategic_rationale,
       target_aspirational_claim: raw.target_aspirational_claim,
       research_proposal: '',
-      status_id: 5,
       created_by: 2,
       updated_by: 1,
     };

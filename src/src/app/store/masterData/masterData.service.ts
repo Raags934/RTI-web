@@ -6,7 +6,8 @@ import masterData from './masterData.json';
 
 @Injectable({ providedIn: 'root' })
 export class MasterDataService {
-  private baseUrl = '/api/master-data';
+  // private baseUrl = 'http://localhost:5000/user_details';
+   private baseUrl = '/api/master-data';
 
   constructor(private http: HttpClient) {}
 

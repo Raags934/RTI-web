@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import { HighlightPipe } from '../../pipes/highlight.pipe.js';
 import { Buttons } from '../buttons/buttons';
 import { statusColor } from '../../constants/statusColor';
 import { Router } from '@angular/router';
+import { RankingDropdown } from '../ranking-dropdown/ranking-dropdown';
 
 export interface TableColumn {
   key: string; // property name in data
@@ -22,7 +23,7 @@ export type ColumnWidth = 'xsmall' | 'small' | 'medium' | 'large';
 
 @Component({
   selector: 'app-table',
-  imports: [CommonModule, MatTableModule, MatIconModule, HighlightPipe,Buttons],
+  imports: [CommonModule, MatTableModule, MatIconModule, HighlightPipe, Buttons, RankingDropdown],
   templateUrl: './table.html',
   styleUrl: './table.scss',
 })
@@ -41,6 +42,9 @@ export class Table {
 
   // No direction until the first click
   private currentDirection: 'asc' | 'desc' | null = null;
+
+  // Options menu state
+  openOptionsMenuId: string | null = null;
 
   constructor(private ideaEvents: IdeaEventsService, private router: Router) {
     this.sub = this.ideaEvents.events$.subscribe((event) => {
@@ -95,8 +99,28 @@ export class Table {
     return value;
   }
 
-  onOptionsClick(element:any){
+  toggleOptionsMenu(event: Event, ideaUid: string) {
+    event.stopPropagation();
 
+    // Only allow on prioritization routes
+    if (!this.isPrioritizationRoute()) {
+      this.viewIdea(ideaUid);
+      return;
+    }
+
+    if (this.openOptionsMenuId === ideaUid) {
+      this.openOptionsMenuId = null;
+    } else {
+      this.openOptionsMenuId = ideaUid;
+    }
+  }
+
+  closeOptionsMenu() {
+    this.openOptionsMenuId = null;
+  }
+
+  isOptionsMenuOpen(ideaUid: string): boolean {
+    return this.openOptionsMenuId === ideaUid;
   }
  
   getStatusColor(statusId: number): string {
@@ -104,11 +128,85 @@ export class Table {
     return match ? match.color : 'gray'; // fallback color
   }
 
-  viewIdea(key:any) {
-    this.router.navigate(['/ideas/'+key]);
+  viewIdea(key: any) {
+    // Extract just the route path without query params
+    const currentPath = this.router.url.split('?')[0];
+
+    this.router.navigate(['/ideas/' + key], {
+      queryParams: { from: currentPath }
+    });
+    this.closeOptionsMenu();
   }
 
- 
- 
- 
+viewIdeaHistory(key: any) {
+    // Extract just the route path without query params
+    const currentPath = this.router.url.split('?')[0];
+
+    this.router.navigate(['/ideas/' + key + '/history'], {
+      queryParams: { from: currentPath }
+    });
+    this.closeOptionsMenu();
+  }
+
+  onRankingChange(element: Idea, rank: number | null) {
+    this.ideaEvents.rankingChanged(element.idea_id, rank?.toString() || null);
+    element.ranking_brand = rank?.toString() || null;
+
+
+    // Emit ranking change event to parent component
+  }
+
+  getRankingValue(element: Idea): number | null {
+    if (!element.ranking_brand) {
+      return null;
+    }
+    const rank = parseInt(element.ranking_brand, 10);
+    return isNaN(rank) ? null : rank;
+  }
+  onTaRankingChange(element: Idea, rank: number | null) {
+    this.ideaEvents.rankingTaChanged(element.idea_id, rank?.toString() || null);
+    element.ranking_franchise = rank?.toString() || null;
+
+
+    // Emit ranking change event to parent component
+  }
+
+  getTARankingValue(element: Idea): number | null {
+    if (!element.ranking_franchise) {
+      return null;
+    }
+    const rank = parseInt(element.ranking_franchise, 10);
+    return isNaN(rank) ? null : rank;
+  }
+
+  // Check if current route is TA prioritization page
+  isTaPrioritizationRoute(): boolean {
+    return this.router.url.includes('/ta-prioritization');
+  }
+
+  // Check if current route is any prioritization page
+  isPrioritizationRoute(): boolean {
+    return this.router.url.includes('/prioritization') || this.router.url.includes('/ta-prioritization');
+  }
+
+  // Check if element is in last 3 rows
+  isNearBottom(element: any): boolean {
+    const index = this.dataSource.indexOf(element);
+    return index >= this.dataSource.length - 3;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    // Close options menu when clicking outside
+    if (this.openOptionsMenuId) {
+      this.closeOptionsMenu();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+  }
+
 }

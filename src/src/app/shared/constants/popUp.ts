@@ -7,7 +7,8 @@ export interface Popup {
   cancelText: string;
   confirmText: string;
   size: 'small' | 'medium' | 'large';
-  confirmPopupAction: IdeaEvent['type']
+  confirmPopupAction: IdeaEvent['type'];
+  showCancelButton?: boolean;
 }
 
 
@@ -40,10 +41,33 @@ export const draftIdea: Popup = {
   confirmPopupAction: 'saveDraft'
 };
 
+export const rankingSaved: Popup = {
+  open: false,
+  title: 'Ranking saved!',
+  helper: 'You can review or update it anytime before final submission.',
+  cancelText: '',
+  confirmText: 'Close',
+  size: 'small',
+  confirmPopupAction: 'closePopUp',
+  showCancelButton: false
+};
+
+export const submitRankingConfirm: Popup = {
+  open: false,
+  title: 'Are you sure you want to baseline and submit these idea for TA level prioritization within a franchise?',
+  helper: 'Verify all the details before submission.',
+  cancelText: 'No',
+  confirmText: 'Yes',
+  size: 'large',
+  confirmPopupAction: 'confirmSubmitRanking'
+};
+
 
 export const PopupConfigs = {
   submitIdea,
   cancelIdea,
   draftIdea,
+  rankingSaved,
+  submitRankingConfirm,
 } as const;
 

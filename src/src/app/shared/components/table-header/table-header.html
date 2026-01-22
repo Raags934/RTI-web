@@ -5,7 +5,7 @@
     <div class="caption">Your latest research proposals and ideas</div>
   </div>
 
-  <div class="search">
+  <div class="search" *ngIf="showSearch">
     <input
       type="text"
       placeholder="Search ideas..."
@@ -21,15 +21,16 @@
   <!-- Right side: buttons -->
   <div class="right">
     <app-buttons
-      variant="type2"
-      color="var(--primary-300)"
-      size="medium"
-      icon="ios_share"
+      [variant]="exportVariant"
+      [color]="exportColor"
+      [size]="exportSize"
+      [icon]="exportIcon"
       class="export-btn"
     >
       Export Data
     </app-buttons>
     <app-buttons
+      *ngIf="showNewIdea"
       [routerLink]="'/addidea'"
       variant="type1"
       color="var(--primary-400)"

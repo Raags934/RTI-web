@@ -7,17 +7,20 @@ export type IdeaEvent =
   | { type: 'sortByColumn'; payload: { column: string; direction: 'asc' | 'desc' } }
   | { type: 'applyFilterByStatus'; payload: { status_id: number } }
   | { type: 'searchByText'; payload: { searchText: string } }
-  | { type: 'taFilterChange'; payload:  number  }
-  | { type: 'franchiseFilterChange'; payload:  number  }
+  | { type: 'taFilterChange'; payload: number }
+  | { type: 'franchiseFilterChange'; payload: number }
   | { type: 'resetSearch' }
   | { type: 'submitIdea' }
   | { type: 'saveDraft' }
   | { type: 'closePopUp' }
   | { type: 'cancelIdea' }
   | { type: 'confirmPopUp' }
+  | { type: 'confirmSubmitRanking' }
+  | { type: 'rankingChanged'; payload: { idea_id: number; ranking_brand: string | null } }
+  | { type: 'rankingTaChanged'; payload: { idea_id: number; ranking_franchise: string | null } }
   | { type: 'nextIdea' }
   | { type: 'prevIdea' }
-  | { type: 'toastEvent' ; payload: string };
+  | { type: 'toastEvent'; payload: string };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -66,23 +69,35 @@ export class IdeaEventsService {
     this.eventsSubject.next({ type: 'confirmPopUp' });
   }
 
-  toastEvent(message:string) {
-    this.eventsSubject.next({ type: 'toastEvent', payload: message} );
+  toastEvent(message: string) {
+    this.eventsSubject.next({ type: 'toastEvent', payload: message });
   }
 
-  taFilterChange(ta_id:number) {
-    this.eventsSubject.next({ type: 'taFilterChange', payload : ta_id} );
+  taFilterChange(ta_id: number) {
+    this.eventsSubject.next({ type: 'taFilterChange', payload: ta_id });
   }
 
-  franchiseFilterChange(franchise_id:number) {
-    this.eventsSubject.next({ type: 'franchiseFilterChange', payload : franchise_id} );
+  franchiseFilterChange(franchise_id: number) {
+    this.eventsSubject.next({ type: 'franchiseFilterChange', payload: franchise_id });
   }
 
   nextIdea() {
-    this.eventsSubject.next({ type: 'nextIdea'} );
+    this.eventsSubject.next({ type: 'nextIdea' });
   }
 
   prevIdea() {
-    this.eventsSubject.next({ type: 'prevIdea'} );
+    this.eventsSubject.next({ type: 'prevIdea' });
+  }
+
+  confirmSubmitRanking() {
+    this.eventsSubject.next({ type: 'confirmSubmitRanking' });
+  }
+
+  rankingChanged(idea_id: number, ranking_brand: string | null) {
+    this.eventsSubject.next({ type: 'rankingChanged', payload: { idea_id, ranking_brand } });
+  }
+
+  rankingTaChanged(idea_id: number, ranking_franchise: string | null) {
+    this.eventsSubject.next({ type: 'rankingTaChanged', payload: { idea_id, ranking_franchise } });
   }
 }

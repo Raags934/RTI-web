@@ -42,6 +42,11 @@ export class IdeaView implements OnInit {
   index: number = -1;
   statusColor = statusColor;
 
+  // Track where user came from
+  referrer: string | null = null;
+  showProductRank: boolean = false;
+  showTaRank: boolean = false;
+
   private sub!: Subscription;
 
   constructor(
@@ -70,9 +75,21 @@ export class IdeaView implements OnInit {
       if (!ideas.length) this.store.dispatch(LoadIdeas());
     });
 
-    // Combine route params + ideas stream
-    combineLatest([this.route.paramMap, this.ideas$]).subscribe(([params, ideas]) => {
+    // Combine route params + query params + ideas stream
+    combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(([params, queryParams, ideas]) => {
       this.ideas = ideas;
+
+      // Get referrer from query params
+      this.referrer = queryParams.get('from');
+
+      // Set visibility flags based on referrer
+      if (this.referrer === '/prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = false;
+      } else if (this.referrer === '/ta-prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = true;
+      }
 
       const ideaUid = params.get('idea_uid');
       const { index, idea } = this.getIdeasByIdeaUid(ideaUid);

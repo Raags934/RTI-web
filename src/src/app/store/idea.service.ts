@@ -54,4 +54,15 @@ export class IdeaService {
       .post<GetIdeasResponse<Idea>>(`${this.baseUrl}/ideas`, payload, { headers })
       .pipe(map((res) => res.data));
   }
+
+  addPrioritization(payload: any, url: string): Observable<Idea> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      // 'x-api-key': this.x_api_key,
+    });
+
+    return this.http
+      .put<GetIdeasResponse<Idea>>(`${this.baseUrl}/${url}`, payload, { headers })
+      .pipe(map((res) => res.data));
+  }
 }

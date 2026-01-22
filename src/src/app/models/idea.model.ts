@@ -56,7 +56,6 @@ export interface IdeaPayload {
   target_aspirational_claim: string;
   research_proposal: string;
   launch_claim: boolean;
-  status_id: number;
   created_by: number;
   updated_by: number;
 }

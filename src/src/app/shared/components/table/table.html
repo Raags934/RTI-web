@@ -36,9 +36,32 @@
       }
       <!-- Options Column -->
       @else if (col.key === 'options') {
-     
-        <mat-icon (click)="viewIdea(element.idea_uid)">more_vert</mat-icon>
-      } @else {
+      <div class="options-container">
+        <mat-icon (click)="toggleOptionsMenu($event, element.idea_uid)">more_vert</mat-icon>
+
+        @if (isOptionsMenuOpen(element.idea_uid)) {
+        <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
+          <div class="menu-header">More Options</div>
+          <div class="menu-item" (click)="viewIdea(element.idea_uid)">
+            <mat-icon>visibility</mat-icon>
+            <span>View Idea Details</span>
+          </div>
+          <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
+            <mat-icon>history</mat-icon>
+            <span>View Idea History</span>
+          </div>
+        </div>
+        }
+      </div>
+      } @else if (col.key === 'ranking_brand') {
+      <app-ranking-dropdown [value]="getRankingValue(element)" [disabled]="isTaPrioritizationRoute()"
+        (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else if (col.key === 'ranking_franchise') {
+      <app-ranking-dropdown [value]="getTARankingValue(element)"
+        (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else {
       <span [innerHTML]="getValue(element, col.key) | highlight : searchText"></span>
       }
     </td>
