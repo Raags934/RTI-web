@@ -47,4 +47,8 @@ export class TableHeader {
     this.searchValue = '';
     this.ideaEvent.searchByText(this.searchValue);
   }
+
+  onExportClick() {
+    this.ideaEvent.exportData();
+  }
 }

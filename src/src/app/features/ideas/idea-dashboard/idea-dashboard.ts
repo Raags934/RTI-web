@@ -6,8 +6,9 @@ import { Subscription, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { LoadIdeas } from '../../../store/idea.actions.js';
-import { Idea } from '../../../models/idea.model.js';
+import { Idea, ExportIdeasPayload } from '../../../models/idea.model.js';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
+import { IdeaService } from '../../../store/idea.service.js';
 import { TableHeader } from '../../../shared/components/table-header/table-header.js';
 import { Table, TableColumn } from '../../../shared/components/table/table.js';
 import { HeaderFilter } from '../../../shared/components/header-filter/header-filter.js';
@@ -40,7 +41,11 @@ export class IdeaDashboard implements OnInit {
 
   private sub!: Subscription;
 
-  constructor(private store: Store<AppState>, private ideaEvents: IdeaEventsService) {
+  constructor(
+    private store: Store<AppState>,
+    private ideaEvents: IdeaEventsService,
+    private ideaService: IdeaService
+  ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
 
@@ -72,6 +77,8 @@ export class IdeaDashboard implements OnInit {
         this.filterBySearchText(event.payload.searchText);
       }else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload);
+      } else if (event.type === 'exportData') {
+        this.exportData();
       }
     });
   }
@@ -178,5 +185,37 @@ export class IdeaDashboard implements OnInit {
     });
 
     this.updatePagedIdeas();
+  }
+
+  exportData() {
+    const payload: ExportIdeasPayload = {
+      id: this.filteredIdeas.map(idea => idea.idea_id)
+    };
+
+    this.ideaService.exportIdeas(payload).subscribe({
+      next: (base64Data: string) => {
+        // Decode base64 string
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Create blob and trigger download
+        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ideas_export_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error exporting data:', error);
+        alert('Failed to export data. Please try again.');
+      }
+    });
   }
 }

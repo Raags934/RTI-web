@@ -185,6 +185,12 @@
   }
 }
 
+.menu-separator {
+  height: 1px;
+  background-color: var(--neutral-200, #e0e0e0);
+  margin: 4px 0;
+}
+
 // Upward positioning for options menu
 .options-menu.open-upward {
   top: auto !important;

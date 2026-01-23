@@ -11,6 +11,9 @@ import { Buttons } from '../buttons/buttons';
 import { statusColor } from '../../constants/statusColor';
 import { Router } from '@angular/router';
 import { RankingDropdown } from '../ranking-dropdown/ranking-dropdown';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../app.state.js';
+import { DeleteIdea } from '../../../store/idea.actions.js';
 
 export interface TableColumn {
   key: string; // property name in data
@@ -46,7 +49,11 @@ export class Table {
   // Options menu state
   openOptionsMenuId: string | null = null;
 
-  constructor(private ideaEvents: IdeaEventsService, private router: Router) {
+  constructor(
+    private ideaEvents: IdeaEventsService,
+    private router: Router,
+    private store: Store<AppState>
+  ) {
     this.sub = this.ideaEvents.events$.subscribe((event) => {
       if (event.type === 'searchByText') {
         this.searchText = event.payload.searchText;
@@ -102,8 +109,8 @@ export class Table {
   toggleOptionsMenu(event: Event, ideaUid: string) {
     event.stopPropagation();
 
-    // Only allow on prioritization routes
-    if (!this.isPrioritizationRoute()) {
+    // Allow dropdown on prioritization routes and idea-dashboard route
+    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute()) {
       this.viewIdea(ideaUid);
       return;
     }
@@ -148,6 +155,29 @@ viewIdeaHistory(key: any) {
     this.closeOptionsMenu();
   }
 
+  editIdea(ideaUid: string) {
+    const currentPath = this.router.url.split('?')[0];
+    this.router.navigate(['/addidea'], {
+      queryParams: { edit: ideaUid, from: currentPath }
+    });
+    this.closeOptionsMenu();
+  }
+
+  duplicateIdea(ideaUid: string) {
+    const currentPath = this.router.url.split('?')[0];
+    this.router.navigate(['/addidea'], {
+      queryParams: { duplicate: ideaUid, from: currentPath }
+    });
+    this.closeOptionsMenu();
+  }
+
+  deleteIdea(element: Idea) {
+    if (confirm(`Are you sure you want to delete idea ${element.idea_uid}?`)) {
+      this.store.dispatch(DeleteIdea({ ideaId: element.idea_id }));
+      this.closeOptionsMenu();
+    }
+  }
+
   onRankingChange(element: Idea, rank: number | null) {
     this.ideaEvents.rankingChanged(element.idea_id, rank?.toString() || null);
     element.ranking_brand = rank?.toString() || null;
@@ -187,6 +217,12 @@ viewIdeaHistory(key: any) {
   // Check if current route is any prioritization page
   isPrioritizationRoute(): boolean {
     return this.router.url.includes('/prioritization') || this.router.url.includes('/ta-prioritization');
+  }
+
+  // Check if current route is idea-dashboard page
+  isIdeaDashboardRoute(): boolean {
+    const path = this.router.url.split('?')[0];
+    return path === '/' || path === '';
   }
 
   // Check if element is in last 3 rows

@@ -18,7 +18,7 @@ import { PopUp } from '../../../shared/components/popup/popup';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
-import { AddIdea } from '../../../store/idea.actions';
+import { AddIdea, AddDraftIdea } from '../../../store/idea.actions';
 import { toast, createIdeaToast } from '../../../shared/constants/toast';
 import { Franchise } from '../../../models/productsList.model';
 import { Dropdowns } from '../../../models/dropdown.model';
@@ -209,6 +209,7 @@ export class IdeaCreate implements OnInit {
   saveDraft() {
     const payload = this.prepareIdeaPayload();
     console.log('Save draft payload:', payload);
+    this.store.dispatch(AddDraftIdea({ idea: payload }));
     this.popup.open = false;
     this.router.navigate(['/']);
   }

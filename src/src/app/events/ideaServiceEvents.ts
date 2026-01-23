@@ -20,7 +20,11 @@ export type IdeaEvent =
   | { type: 'rankingTaChanged'; payload: { idea_id: number; ranking_franchise: string | null } }
   | { type: 'nextIdea' }
   | { type: 'prevIdea' }
-  | { type: 'toastEvent'; payload: string };
+  | { type: 'toastEvent'; payload: string }
+  | { type: 'savePrioritizationSuccess' }
+  | { type: 'submitPrioritizationSuccess' }
+  | { type: 'prioritizationFailure'; payload: string }
+  | { type: 'exportData' };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -99,5 +103,21 @@ export class IdeaEventsService {
 
   rankingTaChanged(idea_id: number, ranking_franchise: string | null) {
     this.eventsSubject.next({ type: 'rankingTaChanged', payload: { idea_id, ranking_franchise } });
+  }
+
+  savePrioritizationSuccess() {
+    this.eventsSubject.next({ type: 'savePrioritizationSuccess' });
+  }
+
+  submitPrioritizationSuccess() {
+    this.eventsSubject.next({ type: 'submitPrioritizationSuccess' });
+  }
+
+  prioritizationFailure(error: string) {
+    this.eventsSubject.next({ type: 'prioritizationFailure', payload: error });
+  }
+
+  exportData() {
+    this.eventsSubject.next({ type: 'exportData' });
   }
 }

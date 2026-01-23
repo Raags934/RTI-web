@@ -59,3 +59,7 @@ export interface IdeaPayload {
   created_by: number;
   updated_by: number;
 }
+
+export interface ExportIdeasPayload {
+  id: number[];
+}

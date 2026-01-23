@@ -42,14 +42,44 @@
         @if (isOptionsMenuOpen(element.idea_uid)) {
         <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
           <div class="menu-header">More Options</div>
-          <div class="menu-item" (click)="viewIdea(element.idea_uid)">
-            <mat-icon>visibility</mat-icon>
-            <span>View Idea Details</span>
-          </div>
-          <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
-            <mat-icon>history</mat-icon>
-            <span>View Idea History</span>
-          </div>
+          
+          <!-- Idea Dashboard Menu Items -->
+          @if (isIdeaDashboardRoute()) {
+            <div class="menu-item" (click)="editIdea(element.idea_uid)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Idea</span>
+            </div>
+            <div class="menu-item" (click)="viewIdea(element.idea_uid)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="duplicateIdea(element.idea_uid)">
+              <mat-icon>content_copy</mat-icon>
+              <span>Duplicate</span>
+            </div>
+            <div class="menu-item" (click)="deleteIdea(element)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </div>
+          }
+          
+          <!-- Prioritization Routes Menu Items -->
+          @else if (isPrioritizationRoute()) {
+            <div class="menu-item" (click)="viewIdea(element.idea_uid)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+          }
         </div>
         }
       </div>

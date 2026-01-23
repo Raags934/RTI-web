@@ -11,10 +11,11 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription, take } from 'rxjs';
 import { AppState } from '../../app.state';
 import { IdeaEventsService } from '../../events/ideaServiceEvents';
-import { Idea } from '../../models/idea.model';
+import { Idea, ExportIdeasPayload } from '../../models/idea.model';
+import { PrioritizationPayload, TARankingChange } from '../../models/prioritization.model';
 import { StatusTab } from '../../shared/constants/statusTabs';
 // import { ideaDisplayColumns } from '../../shared/constants/tableColumns';
-import { LoadIdeas } from '../../store/idea.actions';
+import { LoadIdeas, SavePrioritization, SubmitPrioritization } from '../../store/idea.actions';
 import { IdeaService } from '../../store/idea.service';
 
 export const ideaDisplayColumns: TableColumn[] = [
@@ -63,14 +64,13 @@ export class PrioritizationTwo implements OnInit {
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
   // Array to store ranking changes
-  rankingChanges: {
-    idea_id: number;
-    ranking_franchise: string | null;
-  }[] = [];
+  rankingChanges: TARankingChange[] = [];
 
   private sub!: Subscription;
 
-  constructor(private store: Store<AppState>, private ideaEvents: IdeaEventsService,
+  constructor(
+    private store: Store<AppState>,
+    private ideaEvents: IdeaEventsService,
     private ideaService: IdeaService
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
@@ -128,6 +128,27 @@ export class PrioritizationTwo implements OnInit {
         this.popup.open = false;
         // TODO: Implement actual submit ranking logic
         console.log('Submit ranking confirmed');
+      } else if (event.type === 'savePrioritizationSuccess') {
+        this.popup = PopupConfigs.rankingSaved;
+        this.popup.open = true;
+        this.taFilterChange(3);
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+        this.rankingChanges = [];
+      } else if (event.type === 'submitPrioritizationSuccess') {
+        this.popup = PopupConfigs.submitRankingConfirm;
+        this.popup.open = true;
+        this.taFilterChange(3);
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+        this.rankingChanges = [];
+      } else if (event.type === 'prioritizationFailure') {
+        alert(event.payload);
+        console.error('Error saving ranking:', event.payload);
+      } else if (event.type === 'exportData') {
+        this.exportData();
       }
     });
   }
@@ -245,67 +266,64 @@ export class PrioritizationTwo implements OnInit {
   }
 
   saveRanking() {
-
-    const payload = {
+    const payload: PrioritizationPayload = {
       ideas: this.rankingChanges,
       locked: false,
       updated_by: 1
     };
-    
-    const url = 'ideas/ta-prioritization';
-    this.popup = PopupConfigs.rankingSaved;
-    this.popup.open = true;
 
-    // Call API to save rankings
-    this.ideaService.addPrioritization(payload, url).subscribe({
-      next: (response) => {
-        console.log('Ranking saved successfully:', response);
-        this.taFilterChange(3);
-        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-        this.updatePagedIdeas();
-        this.updateStatusCounts();
-        this.rankingChanges = [];
-      },
-      error: (error) => {
-        alert(error.error.message);
-        console.error('Error saving ranking:', error);
-        // Handle error - maybe show error popup
-      }
-    });
+    const url = 'ideas/ta-prioritization';
+
+    this.store.dispatch(SavePrioritization({ payload, url }));
   }
 
   submitRanking() {
-    const payload = {
+    const payload: PrioritizationPayload = {
       ideas: this.rankingChanges,
       locked: true,
       updated_by: 1
     };
 
     const url = 'ideas/ta-prioritization';
-    this.popup = PopupConfigs.submitRankingConfirm;
-    this.popup.open = true;
-    // Call API to save rankings
-    this.ideaService.addPrioritization(payload, url).subscribe({
-      next: (response) => {
-        console.log('Ranking saved successfully:', response);
-      
-        this.taFilterChange(3);
-        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-        this.updatePagedIdeas();
-        this.updateStatusCounts();
-        this.rankingChanges = [];
-      },
-      error: (error) => {
-        alert(error.error.message);
-        console.error('Error saving ranking:', error);
-        // Handle error - maybe show error popup
-      }
-    });
+
+    this.store.dispatch(SubmitPrioritization({ payload, url }));
   }
 
   // Helper method to view current ranking changes (for debugging)
   getRankingChanges() {
     return this.rankingChanges;
+  }
+
+  exportData() {
+    const payload: ExportIdeasPayload = {
+      id: this.filteredIdeas.map(idea => idea.idea_id)
+    };
+
+    this.ideaService.exportIdeas(payload).subscribe({
+      next: (base64Data: string) => {
+        // Decode base64 string
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Create blob and trigger download
+        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `prioritization_two_export_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error exporting data:', error);
+        alert('Failed to export data. Please try again.');
+      }
+    });
   }
 }
 
