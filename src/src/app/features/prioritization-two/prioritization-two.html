@@ -3,7 +3,7 @@
     exportColor="var(--primary-400)"></app-table-header>
 <app-table-filter [tabs]="statusTabs"></app-table-filter>
 <div class="table-scroll-container">
-    <app-table [columns]="ideaDisplayColumns" [dataSource]="filteredIdeas"></app-table>
+    <app-table [columns]="ideaDisplayColumns" [dataSource]="filteredIdeas" [currentFilterStatusId]="currentFilterStatusId"></app-table>
 </div>
 <div class="ranking-actions">
     <app-buttons variant="type2" color="var(--primary-400)" size="medium" (click)="saveRanking()">
@@ -17,3 +17,5 @@
 <app-popup [open]="popup.open" [title]="popup.title" [helper]="popup.helper" [cancelText]="popup.cancelText"
     [confirmText]="popup.confirmText" [size]="popup.size" [confirmPopupAction]="popup.confirmPopupAction"
     [showCancelButton]="popup.showCancelButton ?? true"></app-popup>
+
+<app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>

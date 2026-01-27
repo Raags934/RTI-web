@@ -31,7 +31,7 @@
     <td mat-cell [ngClass]="col.width" *matCellDef="let element">
       @if (col.key === 'status.status_name') {
       <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
-        {{ element.status?.status_name || '.....' }}
+        {{ getStatusDisplayValue(element) }}
       </app-buttons>
       }
       <!-- Options Column -->
@@ -54,12 +54,12 @@
               <span>View Idea Details</span>
             </div>
             <div class="menu-separator"></div>
-            <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
               <mat-icon>history</mat-icon>
               <span>View Idea History</span>
             </div>
             <div class="menu-separator"></div>
-            <div class="menu-item" (click)="duplicateIdea(element.idea_uid)">
+            <div class="menu-item" (click)="duplicateIdea(element)">
               <mat-icon>content_copy</mat-icon>
               <span>Duplicate</span>
             </div>
@@ -75,7 +75,7 @@
               <mat-icon>info</mat-icon>
               <span>View Idea Details</span>
             </div>
-            <div class="menu-item" (click)="viewIdeaHistory(element.idea_uid)">
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
               <mat-icon>history</mat-icon>
               <span>View Idea History</span>
             </div>

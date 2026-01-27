@@ -4,3 +4,5 @@
 <app-table [columns]="ideaDisplayColumns"
 [dataSource]="pagedIdeas"></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
+
+<app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>

@@ -7,6 +7,7 @@ import { Table, TableColumn } from '../../shared/components/table/table';
 import { Buttons } from '../../shared/components/buttons/buttons';
 import { PopUp } from '../../shared/components/popup/popup';
 import { Popup, PopupConfigs } from '../../shared/constants/popUp';
+import { IdeaHistory } from '../ideas/idea-history/idea-history';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, take } from 'rxjs';
 import { AppState } from '../../app.state';
@@ -41,7 +42,7 @@ const prioritizationStatusTabs: StatusTab[] = [
 
 @Component({
   selector: 'app-prioritization-one',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp, IdeaHistory],
   templateUrl: './prioritization-one.html',
   styleUrl: './prioritization-one.scss',
 })
@@ -52,6 +53,9 @@ export class PrioritizationOne implements OnInit {
   ideaDisplayColumns: TableColumn[] = ideaDisplayColumns;
   statusTabs: StatusTab[] = prioritizationStatusTabs;
   popup: Popup = PopupConfigs.rankingSaved;
+  showIdeaHistory: boolean = false;
+  selectedIdeaId: number = 0;
+  selectedIdeaUid: string = '';
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];
@@ -59,6 +63,7 @@ export class PrioritizationOne implements OnInit {
   currentPage = 1;
   pageSize = 1000;
   totalPages = 1;
+  currentFilterStatusId: number = 0; // Track current filter status_id
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -125,8 +130,14 @@ export class PrioritizationOne implements OnInit {
         this.popup.open = false;
       } else if (event.type === 'confirmSubmitRanking') {
         this.popup.open = false;
-        // TODO: Implement actual submit ranking logic
-        console.log('Submit ranking confirmed');
+        // Actually submit the ranking
+        const payload: PrioritizationPayload = {
+          ideas: this.rankingChanges,
+          locked: true,
+          updated_by: 1
+        };
+        const url = 'ideas/product-prioritization';
+        this.store.dispatch(SubmitPrioritization({ payload, url }));
       } else if (event.type === 'savePrioritizationSuccess') {
         this.popup = PopupConfigs.rankingSaved;
         this.popup.open = true;
@@ -136,8 +147,8 @@ export class PrioritizationOne implements OnInit {
         this.updateStatusCounts();
         this.rankingChanges = [];
       } else if (event.type === 'submitPrioritizationSuccess') {
-        this.popup = PopupConfigs.submitRankingConfirm;
-        this.popup.open = true;
+        // Close popup after successful submission
+        this.popup.open = false;
         this.taFilterChange(3);
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
@@ -148,6 +159,14 @@ export class PrioritizationOne implements OnInit {
         console.error('Error saving ranking:', event.payload);
       } else if (event.type === 'exportData') {
         this.exportData();
+      } else if (event.type === 'viewIdeaHistory') {
+        this.selectedIdeaId = event.payload.idea_id;
+        this.selectedIdeaUid = event.payload.idea_uid;
+        this.showIdeaHistory = true;
+      } else if (event.type === 'closeIdeaHistory') {
+        this.showIdeaHistory = false;
+        this.selectedIdeaId = 0;
+        this.selectedIdeaUid = '';
       }
     });
   }
@@ -170,6 +189,8 @@ export class PrioritizationOne implements OnInit {
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
     this.updatePagedIdeas();
+    // Reset filter status when TA filter changes
+    this.currentFilterStatusId = 0;
   }
 
 
@@ -208,6 +229,7 @@ export class PrioritizationOne implements OnInit {
 
   filterByStatus(status_id: number) {
     console.log('status :' + status_id);
+    this.currentFilterStatusId = status_id; // Track current filter
     if (status_id === 0) {
       this.filteredIdeas = [...this.ideas];
     } else {
@@ -277,15 +299,9 @@ export class PrioritizationOne implements OnInit {
   }
 
   submitRanking() {
-    const payload: PrioritizationPayload = {
-      ideas: this.rankingChanges,
-      locked: true,
-      updated_by: 1
-    };
-
-    const url = 'ideas/product-prioritization';
-
-    this.store.dispatch(SubmitPrioritization({ payload, url }));
+    // Show confirmation popup before submission
+    this.popup = PopupConfigs.submitRankingConfirm;
+    this.popup.open = true;
   }
 
   // Helper method to view current ranking changes (for debugging)

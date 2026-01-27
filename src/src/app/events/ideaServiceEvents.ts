@@ -7,8 +7,10 @@ export type IdeaEvent =
   | { type: 'sortByColumn'; payload: { column: string; direction: 'asc' | 'desc' } }
   | { type: 'applyFilterByStatus'; payload: { status_id: number } }
   | { type: 'searchByText'; payload: { searchText: string } }
-  | { type: 'taFilterChange'; payload: number }
-  | { type: 'franchiseFilterChange'; payload: number }
+  | { type: 'taFilterChange'; payload: number | null }
+  | { type: 'franchiseFilterChange'; payload: number | null }
+  | { type: 'roleFilterChange'; payload: number | null }
+  | { type: 'functionFilterChange'; payload: number | null }
   | { type: 'resetSearch' }
   | { type: 'submitIdea' }
   | { type: 'saveDraft' }
@@ -24,7 +26,9 @@ export type IdeaEvent =
   | { type: 'savePrioritizationSuccess' }
   | { type: 'submitPrioritizationSuccess' }
   | { type: 'prioritizationFailure'; payload: string }
-  | { type: 'exportData' };
+  | { type: 'exportData' }
+  | { type: 'viewIdeaHistory'; payload: { idea_id: number; idea_uid: string } }
+  | { type: 'closeIdeaHistory' };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -77,12 +81,20 @@ export class IdeaEventsService {
     this.eventsSubject.next({ type: 'toastEvent', payload: message });
   }
 
-  taFilterChange(ta_id: number) {
+  taFilterChange(ta_id: number | null) {
     this.eventsSubject.next({ type: 'taFilterChange', payload: ta_id });
   }
 
-  franchiseFilterChange(franchise_id: number) {
+  franchiseFilterChange(franchise_id: number | null) {
     this.eventsSubject.next({ type: 'franchiseFilterChange', payload: franchise_id });
+  }
+
+  roleFilterChange(role_id: number | null) {
+    this.eventsSubject.next({ type: 'roleFilterChange', payload: role_id });
+  }
+
+  functionFilterChange(function_id: number | null) {
+    this.eventsSubject.next({ type: 'functionFilterChange', payload: function_id });
   }
 
   nextIdea() {
@@ -119,5 +131,13 @@ export class IdeaEventsService {
 
   exportData() {
     this.eventsSubject.next({ type: 'exportData' });
+  }
+
+  viewIdeaHistory(idea_id: number, idea_uid: string) {
+    this.eventsSubject.next({ type: 'viewIdeaHistory', payload: { idea_id, idea_uid } });
+  }
+
+  closeIdeaHistory() {
+    this.eventsSubject.next({ type: 'closeIdeaHistory' });
   }
 }

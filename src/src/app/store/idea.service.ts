@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
 import { MasterDataResponse } from '../models/api-response/masterData.model';
+import { AuditLog, AuditLogResponse } from '../models/audit-log.model';
 
 @Injectable({
   providedIn: 'root',
@@ -120,5 +121,33 @@ export class IdeaService {
     });
 
     return this.http.delete<void>(`${this.baseUrl}/ideas/${ideaId}`, { headers });
+  }
+
+  // ----------------------------------------------------
+  // GET: Get audit logs for an idea
+  // ----------------------------------------------------
+  getAuditLogs(ideaId: number): Observable<AuditLog[]> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      // 'x-api-key': this.x_api_key,
+    });
+
+    const url = `${this.baseUrl}/audit_logs/${ideaId}`;
+    console.log('📡 Making API call to:', url);
+
+    return this.http
+      .get<AuditLogResponse | AuditLog[]>(url, { headers })
+      .pipe(
+        map((res) => {
+          console.log('📦 Raw API response:', res);
+          // Handle both response formats: { data: [...] } or [...]
+          if (Array.isArray(res)) {
+            return res;
+          } else if (res && typeof res === 'object' && 'data' in res) {
+            return res.data || [];
+          }
+          return [];
+        })
+      );
   }
 }

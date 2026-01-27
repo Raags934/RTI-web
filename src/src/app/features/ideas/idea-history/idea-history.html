@@ -1,0 +1,49 @@
+@if (open) {
+  <div class="overlay-backdrop" (mousedown)="onBackdrop($event)">
+    <div class="idea-history-panel">
+
+      <div class="header">
+        <div class="header-left">
+          <button class="icon-btn" (click)="closeHistory()">
+            ←
+          </button>
+          <div class="title-block">
+            <h2>Idea History</h2>
+            <span class="breadcrumb">
+              Home > More option > {{ ideaUid }} > History
+            </span>
+          </div>
+        </div>
+
+        <button class="icon-btn close-btn" (click)="closeHistory()">
+          ✕
+        </button>
+      </div>
+
+      <div class="content">
+        @if (loading) {
+          <div class="loading-state">Loading history...</div>
+        } @else if (historyList.length === 0) {
+          <div class="empty-state">No history available for this idea.</div>
+        } @else {
+          <div class="history-item" *ngFor="let item of historyList">
+            <div class="user-name">
+              {{ item.user }}
+            </div>
+
+            <div class="comment">
+              <span class="label">Comments:</span>
+              {{ item.comment }}
+            </div>
+
+            <div class="timestamp">
+              <span class="clock">🕒</span>
+              {{ item.date }}
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+}

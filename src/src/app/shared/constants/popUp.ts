@@ -62,6 +62,16 @@ export const submitRankingConfirm: Popup = {
   confirmPopupAction: 'confirmSubmitRanking'
 };
 
+export const submitRankingConfirmTwo: Popup = {
+  open: false,
+  title: 'Are you sure you want to submit the overall ranking for the funding phase?',
+  helper: 'Verify all the details before submission.',
+  cancelText: 'No',
+  confirmText: 'Yes',
+  size: 'large',
+  confirmPopupAction: 'confirmSubmitRanking'
+};
+
 
 export const PopupConfigs = {
   submitIdea,
@@ -69,5 +79,6 @@ export const PopupConfigs = {
   draftIdea,
   rankingSaved,
   submitRankingConfirm,
+  submitRankingConfirmTwo,
 } as const;
 

@@ -13,14 +13,14 @@
 
   @if (showProductRank) {
   <p class="status-label" style="margin-left: 24px;">Product Rank:</p>
-  <app-buttons variant="type2" color="blue" size="small" [isStatus]="true">
+  <app-buttons variant="type2" [color]="getStatusColor(viewIdea?.status?.status_id)" size="small" [isStatus]="true">
     {{ viewIdea?.ranking_brand || '.....' }}
   </app-buttons>
   }
 
   @if (showTaRank) {
   <p class="status-label" style="margin-left: 24px;">TA Rank:</p>
-  <app-buttons variant="type2" color="green" size="small" [isStatus]="true">
+  <app-buttons variant="type2" [color]="getStatusColor(viewIdea?.status?.status_id)" size="small" [isStatus]="true">
     {{ viewIdea?.ranking_franchise || '.....' }}
   </app-buttons>
   }

@@ -88,30 +88,26 @@ export class HeaderFilter implements OnInit {
 
     // 🔥 TA-specific change listener
     this.filterForm.get('ta')?.valueChanges.subscribe((taId) => {
-      if (!taId) return;
-      this.eventService.taFilterChange(Number(taId));
-
-      // // Emit TA change event
-      // this.filterChange.emit({
-      //   ...this.filterForm.value,
-      //   ta: taId
-      // });
-
-      // Optional: auto-filter franchises
-      // this.filterFranchisesByTA(taId);
+      const value = taId ? Number(taId) : null;
+      this.eventService.taFilterChange(value);
     });
+
+    // 🔥 Franchise-specific change listener
     this.filterForm.get('franchise')?.valueChanges.subscribe((franchiseId) => {
-      if (!franchiseId) return;
-   
-      // Raise event for franchise change
-      //this.eventService.franchiseFilterChange(Number(franchiseId));
-      console.log(franchiseId)
-   
-      // Or emit through your component output
-      // this.filterChange.emit({
-      //   ...this.filterForm.value,
-      //   franchise: franchiseId
-      // });
+      const value = franchiseId ? Number(franchiseId) : null;
+      this.eventService.franchiseFilterChange(value);
+    });
+
+    // 🔥 Role-specific change listener
+    this.filterForm.get('role')?.valueChanges.subscribe((roleId) => {
+      const value = roleId ? Number(roleId) : null;
+      this.eventService.roleFilterChange(value);
+    });
+
+    // 🔥 Function-specific change listener
+    this.filterForm.get('function')?.valueChanges.subscribe((functionId) => {
+      const value = functionId ? Number(functionId) : null;
+      this.eventService.functionFilterChange(value);
     });
    
   }
