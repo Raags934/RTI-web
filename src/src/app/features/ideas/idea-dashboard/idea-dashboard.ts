@@ -268,105 +268,29 @@ export class IdeaDashboard implements OnInit {
     };
 
     this.ideaService.exportIdeas(payload).subscribe({
-      next: (base64Data: string) => {
+      next: (blob: Blob) => {
         try {
-          console.log('✅ API Response received');
-          console.log('📦 Response type:', typeof base64Data);
-          console.log('📏 Response length:', base64Data?.length);
-          console.log('🔍 First 100 chars:', base64Data?.substring(0, 100));
-          
-          // Validate response
-          if (!base64Data) {
+          if (!blob || blob.size === 0) {
             throw new Error('Empty response received from server');
           }
-
-          if (typeof base64Data !== 'string') {
-            console.error('❌ Invalid response type. Expected string, got:', typeof base64Data);
-            console.error('📦 Full response:', base64Data);
-            throw new Error(`Invalid response type: ${typeof base64Data}. Expected string.`);
-          }
-
-          // Check if it's valid base64
-          const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-          const cleanBase64 = base64Data.trim();
-          if (!base64Regex.test(cleanBase64)) {
-            console.warn('⚠️ Response may not be valid base64. Attempting to decode anyway...');
-            console.log('🔍 Response sample:', cleanBase64.substring(0, 200));
-          }
-
-          // Decode base64 string
-          console.log('🔄 Decoding base64...');
-          let binaryString: string;
-          try {
-            binaryString = atob(cleanBase64);
-            console.log('✅ Base64 decoded successfully');
-            console.log('📏 Binary string length:', binaryString.length);
-          } catch (decodeError) {
-            console.error('❌ Base64 decode error:', decodeError);
-            throw new Error(`Failed to decode base64: ${decodeError}`);
-          }
-
-          // Convert to bytes
-          console.log('🔄 Converting to bytes...');
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          console.log('✅ Bytes array created. Length:', bytes.length);
-          
-          // Create blob and trigger download
-          console.log('🔄 Creating blob...');
-          const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          console.log('✅ Blob created. Size:', blob.size, 'bytes');
-          
-          if (blob.size === 0) {
-            throw new Error('Blob size is 0. Invalid file data.');
-          }
-
-          console.log('🔄 Creating object URL...');
           const url = window.URL.createObjectURL(blob);
-          console.log('✅ Object URL created:', url);
-
-          console.log('🔄 Creating download link...');
           const link = document.createElement('a');
           link.href = url;
-          const fileName = `ideas_export_${new Date().getTime()}.xlsx`;
-          link.download = fileName;
+          link.download = `ideas_export_${new Date().getTime()}.xlsx`;
           link.style.display = 'none';
-          
-          console.log('🔄 Appending link to DOM...');
           document.body.appendChild(link);
-          
-          console.log('🔄 Triggering download...');
           link.click();
-          
-          console.log('🔄 Cleaning up...');
           setTimeout(() => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-            console.log('✅ Download completed and cleaned up');
           }, 100);
-
         } catch (error) {
           console.error('❌ Error in export process:', error);
-          console.error('📋 Error details:', {
-            name: error instanceof Error ? error.name : 'Unknown',
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined
-          });
           alert(`Failed to export data: ${error instanceof Error ? error.message : 'Unknown error'}. Please check console for details.`);
         }
       },
       error: (error) => {
         console.error('❌ API Error exporting data:', error);
-        console.error('📋 Error details:', {
-          status: error?.status,
-          statusText: error?.statusText,
-          message: error?.message,
-          error: error?.error,
-          url: error?.url
-        });
-        
         let errorMessage = 'Failed to export data. Please try again.';
         if (error?.status) {
           errorMessage += ` (Status: ${error.status})`;

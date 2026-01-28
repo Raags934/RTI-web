@@ -87,28 +87,83 @@ export class IdeaService {
 
   // ----------------------------------------------------
   // POST: Export ideas to XLSX
+  // API may return raw binary (YML) or base64 / JSON-wrapped base64 (backend).
+  // We support both: blob → use as-is; text → parse base64, decode → Excel Blob.
   // ----------------------------------------------------
-  exportIdeas(payload: ExportIdeasPayload): Observable<string> {
+  exportIdeas(payload: ExportIdeasPayload): Observable<Blob> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       // 'x-api-key': this.x_api_key,
     });
 
     return this.http
-      .post<any>(`${this.baseUrl}/export_idea`, payload, { headers })
+      .post(`${this.baseUrl}/export_idea`, payload, {
+        headers,
+        responseType: 'text',
+      })
       .pipe(
-        map((res) => {
-          // Handle response format: could be { body: "base64string" } or just "base64string"
-          if (res && typeof res === 'object' && res.body) {
-            return res.body;
-          } else if (typeof res === 'string') {
-            return res;
-          } else {
-            // If response is wrapped in quotes as JSON string, parse it
-            return res;
+        map((res: string) => {
+          if (!res || res.trim().length === 0) {
+            throw new Error('Empty response from export endpoint');
           }
+          const raw = res.trim();
+
+          // JSON error response (e.g. { status: 400/500, message: "..." })
+          if (raw.startsWith('{')) {
+            try {
+              const parsed = JSON.parse(raw) as Record<string, unknown>;
+              if (
+                typeof parsed['status'] === 'number' &&
+                (parsed['status'] as number) >= 400 &&
+                typeof parsed['message'] === 'string'
+              ) {
+                throw new Error(
+                  `Export failed: ${parsed['message']} (status ${parsed['status']})`
+                );
+              }
+              // JSON with base64 in body / data / content
+              const base64 =
+                (parsed['body'] as string) ??
+                (parsed['data'] as string) ??
+                (parsed['content'] as string);
+              if (typeof base64 === 'string' && base64.length > 0) {
+                return this.base64ToExcelBlob(base64);
+              }
+            } catch (e) {
+              if (e instanceof Error && e.message.startsWith('Export failed:')) {
+                throw e;
+              }
+              // Not error JSON; fall through to try as base64
+            }
+          }
+
+          // Quoted JSON string (e.g. "UEsDBBQ...")
+          if (raw.startsWith('"') && raw.endsWith('"')) {
+            try {
+              const decoded = JSON.parse(raw) as string;
+              if (typeof decoded === 'string') {
+                return this.base64ToExcelBlob(decoded);
+              }
+            } catch {
+              // ignore
+            }
+          }
+
+          // Plain base64 string
+          return this.base64ToExcelBlob(raw);
         })
-      );
+      ) as Observable<Blob>;
+  }
+
+  private base64ToExcelBlob(base64: string): Blob {
+    const binary = atob(base64.replace(/\s/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new Blob([bytes], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
   }
 
   // ----------------------------------------------------

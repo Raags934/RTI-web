@@ -8,7 +8,7 @@
     size="small"
     [isStatus]="true"
   >
-    {{ viewIdea?.status?.status_name || '.....' }}
+    {{ statusLabel }}
   </app-buttons>
 
   @if (showProductRank) {

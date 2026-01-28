@@ -41,6 +41,7 @@ export class IdeaView implements OnInit {
   viewIdea: Idea | null = null;
   index: number = -1;
   statusColor = statusColor;
+  statusLabel: string = '.....';
 
   // Track where user came from
   referrer: string | null = null;
@@ -76,31 +77,40 @@ export class IdeaView implements OnInit {
     });
 
     // Combine route params + query params + ideas stream
-    combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(([params, queryParams, ideas]) => {
-      this.ideas = ideas;
+    combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(
+      ([params, queryParams, ideas]) => {
+        this.ideas = ideas;
 
-      // Get referrer from query params
-      this.referrer = queryParams.get('from');
+        // Get referrer and status label from query params
+        this.referrer = queryParams.get('from');
+        const statusLabelFromQuery = queryParams.get('statusLabel');
 
-      // Set visibility flags based on referrer
-      if (this.referrer === '/prioritization') {
-        this.showProductRank = true;
-        this.showTaRank = false;
-      } else if (this.referrer === '/ta-prioritization') {
-        this.showProductRank = true;
-        this.showTaRank = true;
+        // Set visibility flags based on referrer
+        if (this.referrer === '/prioritization') {
+          this.showProductRank = true;
+          this.showTaRank = false;
+        } else if (this.referrer === '/ta-prioritization') {
+          this.showProductRank = true;
+          this.showTaRank = true;
+        }
+
+        const ideaUid = params.get('idea_uid');
+        const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
+
+        this.index = index;
+        this.viewIdea = idea;
+
+        if (this.viewIdea) {
+          // Prefer the label passed from the list (so it exactly matches the filter view);
+          // fall back to a default based on the idea status.
+          this.statusLabel =
+            statusLabelFromQuery || this.getDefaultStatusLabel(this.viewIdea);
+          this.patchForm(this.viewIdea);
+        } else {
+          this.statusLabel = statusLabelFromQuery || '.....';
+        }
       }
-
-      const ideaUid = params.get('idea_uid');
-      const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
-
-      this.index = index;
-      this.viewIdea = idea;
-
-      if (this.viewIdea) {
-        this.patchForm(this.viewIdea);
-      }
-    });
+    );
   }
 
   buildForm() {
@@ -159,6 +169,13 @@ export class IdeaView implements OnInit {
 
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray';
+  }
+
+  private getDefaultStatusLabel(idea: Idea): string {
+    if (!idea) {
+      return '.....';
+    }
+    return idea.status?.status_name || '.....';
   }
 
   nextIdeaView() {

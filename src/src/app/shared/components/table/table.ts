@@ -171,12 +171,29 @@ export class Table {
     return this.router.url.includes('/prioritization') && !this.router.url.includes('/ta-prioritization');
   }
 
-  viewIdea(key: any) {
+  viewIdea(arg: any) {
+    // Support both direct UID and full element object
+    let ideaUid: string;
+    let statusLabel: string | null = null;
+
+    if (typeof arg === 'string') {
+      ideaUid = arg;
+    } else {
+      ideaUid = arg?.idea_uid;
+      // Use the same status text that is shown in the list
+      statusLabel = this.getStatusDisplayValue(arg);
+    }
+
     // Extract just the route path without query params
     const currentPath = this.router.url.split('?')[0];
 
-    this.router.navigate(['/ideas/' + key], {
-      queryParams: { from: currentPath }
+    const queryParams: any = { from: currentPath };
+    if (statusLabel) {
+      queryParams.statusLabel = statusLabel;
+    }
+
+    this.router.navigate(['/ideas/' + ideaUid], {
+      queryParams
     });
     this.closeOptionsMenu();
   }

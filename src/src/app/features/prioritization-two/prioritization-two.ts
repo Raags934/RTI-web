@@ -316,16 +316,11 @@ export class PrioritizationTwo implements OnInit {
     };
 
     this.ideaService.exportIdeas(payload).subscribe({
-      next: (base64Data: string) => {
-        // Decode base64 string
-        const binaryString = atob(base64Data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+      next: (blob: Blob) => {
+        if (!blob || blob.size === 0) {
+          alert('Empty response received from server');
+          return;
         }
-        
-        // Create blob and trigger download
-        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;

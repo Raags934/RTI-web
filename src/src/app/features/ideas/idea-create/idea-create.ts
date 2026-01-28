@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -42,7 +42,7 @@ import { User } from '../../../models/user.model';
   templateUrl: './idea-create.html',
   styleUrl: './idea-create.scss',
 })
-export class IdeaCreate implements OnInit {
+export class IdeaCreate implements OnInit, OnDestroy {
 
   @Input() funtionName = "Franchise";
 
@@ -67,6 +67,10 @@ export class IdeaCreate implements OnInit {
   productMap: Record<string | number, { brand_id: any; ta_id: any; franchise_id: any }> = {};
 
   private eventsSub!: Subscription;
+
+  // Guard flags to prevent duplicate submissions from a single user action
+  private hasSubmitted: boolean = false;
+  private hasSavedDraft: boolean = false;
 
   popup: Popup = PopupConfigs.cancelIdea;
 
@@ -121,6 +125,14 @@ export class IdeaCreate implements OnInit {
     this.buildForm();
     this.setupAutoAssign();
     this.listenToEvents();
+  }
+
+  ngOnDestroy(): void {
+    // Ensure we do not keep listening to shared IdeaEvents after component is destroyed,
+    // otherwise a single "submitIdea" event can trigger multiple component instances.
+    if (this.eventsSub) {
+      this.eventsSub.unsubscribe();
+    }
   }
 
   listenToEvents() {
@@ -207,6 +219,12 @@ export class IdeaCreate implements OnInit {
   }
 
   saveDraft() {
+    // Prevent multiple draft saves from a single user flow (e.g. accidental double click)
+    if (this.hasSavedDraft) {
+      return;
+    }
+    this.hasSavedDraft = true;
+
     const payload = this.prepareIdeaPayload();
     console.log('Save draft payload:', payload);
     this.store.dispatch(AddDraftIdea({ idea: payload }));
@@ -215,10 +233,19 @@ export class IdeaCreate implements OnInit {
   }
 
   submitIdea() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    // Guard against duplicate submissions from the same confirmation click / event
+    if (this.hasSubmitted) {
       return;
     }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      // Allow user to try again after fixing validation errors
+      this.hasSubmitted = false;
+      return;
+    }
+
+    this.hasSubmitted = true;
 
     const payload = this.prepareIdeaPayload();
     console.log(payload);

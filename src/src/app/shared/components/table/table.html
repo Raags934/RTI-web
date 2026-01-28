@@ -49,7 +49,7 @@
               <mat-icon>edit</mat-icon>
               <span>Edit Idea</span>
             </div>
-            <div class="menu-item" (click)="viewIdea(element.idea_uid)">
+            <div class="menu-item" (click)="viewIdea(element)">
               <mat-icon>info</mat-icon>
               <span>View Idea Details</span>
             </div>
@@ -71,7 +71,7 @@
           
           <!-- Prioritization Routes Menu Items -->
           @else if (isPrioritizationRoute()) {
-            <div class="menu-item" (click)="viewIdea(element.idea_uid)">
+            <div class="menu-item" (click)="viewIdea(element)">
               <mat-icon>info</mat-icon>
               <span>View Idea Details</span>
             </div>
