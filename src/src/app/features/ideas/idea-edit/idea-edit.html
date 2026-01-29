@@ -1,0 +1,184 @@
+<form class="material-form" [formGroup]="form">
+  <!-- Product -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[0].text"
+      type="select"
+      [options]="productOptions"
+      [required]="true"
+      [control]="form.get('product_id')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- TA (auto-filled) -->
+  <div class="form-field">
+    <app-form-input
+    [label]="labels[1].text"
+      type="select"
+      [options]="taOptions"
+      [isDisabled]="true"
+      [control]="form.get('ta_id')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Product Type -->
+  <div class="form-field">
+    <app-form-input
+    [label]="labels[2].text"
+      type="select"
+      [options]="productTypeOptions"
+      [required]="true"
+      [control]="form.get('product_type')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Research Pathway -->
+  <div class="form-field">
+    <app-form-input
+    [label]="labels[3].text"
+      type="select"
+      [options]="researchPathwayOptions"
+      [required]="true"
+      [control]="form.get('pathway_id')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Brand (auto-filled) -->
+  <div class="form-field">
+    <app-form-input
+    [label]="labels[4].text"
+      type="select"
+      [options]="brandOptions"
+      [isDisabled]="true"
+      [control]="form.get('brand_id')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- RTI Year -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[5].text"
+      type="select"
+      [options]="rtiYearOptions"
+      [required]="true"
+      [autoSelectFirst]="true"
+      [control]="form.get('rti_year')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Franchise (auto-filled) -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[6].text"
+      type="select"
+      [options]="franchiseOptions"
+      [isDisabled]="true"
+      [control]="form.get('franchise_id')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Monadic or Comparative -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[7].text"
+      type="select"
+      [options]="monadicComparativeOptions"
+      [required]="true"
+      [control]="form.get('monadic_or_comparative')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Origin Request -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[8].text"
+      type="select"
+      [options]="originRequestOptions"
+      [isDisabled]="true"
+      [autoSelectFirst]="true"
+      [control]="form.get('origin_request')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Strategic Rationale -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[9].text"
+      type="textarea"
+      [required]="true"
+      [control]="form.get('strategic_rationale')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Target Aspirational Claim -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[10].text"
+      type="textarea"
+      [required]="true"
+      [control]="form.get('target_aspirational_claim')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Launch Claim -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[11].text"
+      type="select"
+      [options]="launchClaimOptions"
+      [required]="true"
+      [control]="form.get('launch_claim')"
+    >
+    </app-form-input>
+  </div>
+
+  <!-- Buttons -->
+  <div class="form-actions">
+    <app-buttons
+      (click)="openPopUp('cancelIdea')"
+      variant="type2"
+      color="var(--primary-400)"
+      size="large"
+    >
+      Cancel
+    </app-buttons>
+
+    <app-buttons
+      (click)="openPopUp('submitIdea')"
+      variant="type1"
+      color="var(--primary-400)"
+      size="large"
+    >
+      Submit
+    </app-buttons>
+  </div>
+</form>
+
+<app-popup
+  [open]="popup.open"
+  [title]="popup.title"
+  [helper]="popup.helper"
+  [cancelText]="popup.cancelText"
+  [confirmText]="popup.confirmText"
+  [size]="popup.size"
+  [confirmPopupAction]="popup.confirmPopupAction"
+>
+  @if (popup.confirmPopupAction === "submitIdea") {
+    <div class="form-field"><app-form-input label="Comment (Optional)" type="text" placeholder="Enter your comment here" [control]="form.get('comment')" ></app-form-input></div>
+  }
+</app-popup>

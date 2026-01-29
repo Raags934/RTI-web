@@ -207,8 +207,8 @@ viewIdeaHistory(element: Idea) {
 
   editIdea(ideaUid: string) {
     const currentPath = this.router.url.split('?')[0];
-    this.router.navigate(['/addidea'], {
-      queryParams: { edit: ideaUid, from: currentPath }
+    this.router.navigate(['/ideas/' + ideaUid + '/edit'], {
+      queryParams: { from: currentPath }
     });
     this.closeOptionsMenu();
   }

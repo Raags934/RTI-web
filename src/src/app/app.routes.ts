@@ -4,6 +4,7 @@ import { IdeaCreate } from './features/ideas/idea-create/idea-create';
 import { MyIdeas } from './features/ideas/my-ideas/my-ideas';
 import { ContactForHelp } from './features/contact-for-help/contact-for-help';
 import { IdeaView } from './features/ideas/idea-view/idea-view';
+import { IdeaEdit } from './features/ideas/idea-edit/idea-edit';
 import { PrioritizationOne } from './features/prioritization-one/prioritization-one';
 import { PrioritizationTwo } from './features/prioritization-two/prioritization-two';
 
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'myideas', component: MyIdeas },
   { path: 'help', component: ContactForHelp },
   { path: 'ideas/:idea_uid', component: IdeaView },
+  { path: 'ideas/:idea_uid/edit', component: IdeaEdit },
   { path: 'prioritization', component: PrioritizationOne },
   { path: 'ta-prioritization', component: PrioritizationTwo },
 ];

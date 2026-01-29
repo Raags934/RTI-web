@@ -62,3 +62,9 @@ export const DeleteIdea = createAction('[Idea] Delete Idea', props<{ ideaId: num
 export const DeleteIdeaSuccess = createAction('[Idea] Delete Idea Success', props<{ ideaId: number }>());
 
 export const DeleteIdeaFailure = createAction('[Idea] Delete Idea Failure', props<{ error: string }>());
+
+export const UpdateIdea = createAction('[Idea] Update Idea', props<{ ideaId: number; idea: IdeaPayload }>());
+
+export const UpdateIdeaSuccess = createAction('[Idea] Update Idea Success', props<{ idea: Idea }>());
+
+export const UpdateIdeaFailure = createAction('[Idea] Update Idea Failure', props<{ error: string }>());

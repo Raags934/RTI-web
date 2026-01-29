@@ -19,6 +19,9 @@ import {
   DeleteIdea,
   DeleteIdeaSuccess,
   DeleteIdeaFailure,
+  UpdateIdea,
+  UpdateIdeaSuccess,
+  UpdateIdeaFailure,
 } from './idea.actions';
 
 export const initialState: Idea[] = [];
@@ -83,6 +86,21 @@ export const ideaReducer = createReducer(
   }),
   on(DeleteIdeaFailure, (state, { error }) => {
     console.error('Error deleting idea:', error);
+    return state;
+  }),
+  on(UpdateIdea, (state) => {
+    return state;
+  }),
+  on(UpdateIdeaSuccess, (state, { idea }) => {
+    // Only update if we have a complete idea object with idea_uid
+    if (idea && idea.idea_uid) {
+      return state.map((i) => (i.idea_id === idea.idea_id ? idea : i));
+    }
+    // If incomplete, return state as-is (LoadIdeasSuccess will handle full update)
+    return state;
+  }),
+  on(UpdateIdeaFailure, (state, { error }) => {
+    console.error('Error updating idea:', error);
     return state;
   })
 );

@@ -69,6 +69,19 @@ export class IdeaService {
       .pipe(map((res) => res.data));
   }
 
+  // ----------------------------------------------------
+  // PUT: Update existing idea
+  // ----------------------------------------------------
+  updateIdea(ideaId: number, payload: IdeaPayload): Observable<{ idea_id: number; message: string; status: number }> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      // 'x-api-key': this.x_api_key,
+    });
+
+    return this.http
+      .put<{ idea_id: number; message: string; status: number }>(`${this.baseUrl}/ideas/${ideaId}`, payload, { headers });
+  }
+
 
 
   // ----------------------------------------------------

@@ -198,4 +198,10 @@ export class IdeaView implements OnInit {
       this.router.navigate(['/ideas/' + prevIdea.idea_uid]);
     }
   }
+
+  navigateToEdit() {
+    if (this.viewIdea) {
+      this.router.navigate(['/ideas/' + this.viewIdea.idea_uid + '/edit']);
+    }
+  }
 }
