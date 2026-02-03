@@ -1,0 +1,75 @@
+@if (visible && user) {
+  <div class="view-user-backdrop" (mousedown)="onClose()">
+    <div class="view-user-panel" (mousedown)="$event.stopPropagation()">
+      <div class="view-user-header">
+        <div class="header-left">
+          <button type="button" class="icon-btn" (click)="onClose()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-block">
+            <h2>View User Details</h2>
+            <span class="breadcrumb">Manage User &amp; Function &gt; {{ user.name }} &gt; More option &gt; View User Details</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-user-content">
+        <div class="status-badge">
+          <app-buttons
+            variant="type2"
+            [color]="getStatusColor(user)"
+            size="small"
+            [isStatus]="true"
+          >
+            {{ getStatusDisplay(user) }}
+          </app-buttons>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>User Name <span class="required">*</span></label>
+            <input type="text" [value]="user.name ?? '—'" class="form-input" readonly />
+          </div>
+          <div class="form-field">
+            <label>Email ID <span class="required">*</span></label>
+            <input type="text" [value]="user.email ?? '—'" class="form-input" readonly />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Role <span class="required">*</span></label>
+          <div class="selected-tags">
+            @for (r of user.roles; track r.role_id) {
+              <span class="tag">{{ r.role_name }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Function <span class="required">*</span></label>
+          <div class="selected-tags">
+            @for (f of user.functions; track f.function_id) {
+              <span class="tag">{{ f.function_name }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Therapeutic Area (Franchise) <span class="required">*</span></label>
+          <div class="selected-tags">
+            @for (ta of user.therapeutic_areas; track ta.ta_id) {
+              <span class="tag">{{ ta.ta_name }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-edit" (click)="onEditUser()">
+            <mat-icon>edit</mat-icon>
+            Edit User Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

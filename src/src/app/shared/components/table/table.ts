@@ -35,6 +35,8 @@ export class Table {
   @Input() columns: TableColumn[] = [];
   @Input() dataSource: any[] = [];
   @Input() currentFilterStatusId: number = 0; // Current filter status_id for pending filter detection
+  /** When true, "View Idea Details" opens overlay instead of navigating to full page. */
+  @Input() useViewIdeaOverlay = false;
   statusColor = statusColor;
 
   private sub!: Subscription;
@@ -111,8 +113,8 @@ export class Table {
   toggleOptionsMenu(event: Event, ideaUid: string) {
     event.stopPropagation();
 
-    // Allow dropdown on prioritization routes and idea-dashboard route
-    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute()) {
+    // Allow dropdown on prioritization, idea-dashboard, and admin routes
+    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute() && !this.isAdminRoute()) {
       this.viewIdea(ideaUid);
       return;
     }
@@ -172,7 +174,6 @@ export class Table {
   }
 
   viewIdea(arg: any) {
-    // Support both direct UID and full element object
     let ideaUid: string;
     let statusLabel: string | null = null;
 
@@ -180,27 +181,35 @@ export class Table {
       ideaUid = arg;
     } else {
       ideaUid = arg?.idea_uid;
-      // Use the same status text that is shown in the list
       statusLabel = this.getStatusDisplayValue(arg);
     }
 
-    // Extract just the route path without query params
-    const currentPath = this.router.url.split('?')[0];
+    if (this.useViewIdeaOverlay) {
+      this.ideaEvents.viewIdeaOverlay(ideaUid, statusLabel ?? undefined);
+      this.closeOptionsMenu();
+      return;
+    }
 
+    const currentPath = this.router.url.split('?')[0];
     const queryParams: any = { from: currentPath };
     if (statusLabel) {
       queryParams.statusLabel = statusLabel;
     }
-
-    this.router.navigate(['/ideas/' + ideaUid], {
-      queryParams
-    });
+    this.router.navigate(['/ideas/' + ideaUid], { queryParams });
     this.closeOptionsMenu();
   }
 
 viewIdeaHistory(element: Idea) {
     if (element && element.idea_id) {
       this.ideaEvents.viewIdeaHistory(element.idea_id, element.idea_uid);
+      this.closeOptionsMenu();
+    }
+  }
+
+  /** Used only on admin route (More Options → Reset Idea). Other pages unchanged. */
+  resetIdea(element: Idea) {
+    if (element && element.idea_id) {
+      this.ideaEvents.resetIdea(element.idea_id, element.idea_uid);
       this.closeOptionsMenu();
     }
   }
@@ -299,6 +308,12 @@ viewIdeaHistory(element: Idea) {
   isIdeaDashboardRoute(): boolean {
     const path = this.router.url.split('?')[0];
     return path === '/' || path === '';
+  }
+
+  // Check if current route is admin home page
+  isAdminRoute(): boolean {
+    const path = this.router.url.split('?')[0];
+    return path === '/admin' || path.startsWith('/admin/');
   }
 
   // Check if element is in last 3 rows

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { FormInput } from '../../../shared/components/form-input/form-input';
 import { VIEW_IDEA_FORM_LABELS } from '../../../shared/constants/labels';
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { Idea } from '../../../models/idea.model';
 
 import { AppState } from '../../../app.state.js';
@@ -22,15 +22,15 @@ import {
 import { Buttons } from '../../../shared/components/buttons/buttons';
 import { statusColor } from '../../../shared/constants/statusColor';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
-import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-idea-view',
   imports: [FormInput, Buttons],
   templateUrl: './idea-view.html',
   styleUrl: './idea-view.scss',
+  host: { '[class.overlay-mode]': 'overlayMode' },
 })
-export class IdeaView implements OnInit {
+export class IdeaView implements OnInit, OnDestroy {
   labels = VIEW_IDEA_FORM_LABELS;
 
   form!: FormGroup;
@@ -48,7 +48,20 @@ export class IdeaView implements OnInit {
   showProductRank: boolean = false;
   showTaRank: boolean = false;
 
+  /** When true, idea is driven by overlayIdeaUid (no route). */
+  @Input() overlayMode = false;
+  private _overlayIdeaUid: string | null = null;
+  overlayIdeaUid$ = new BehaviorSubject<string | null>(null);
+  @Input() set overlayIdeaUid(v: string | null) {
+    this._overlayIdeaUid = v;
+    this.overlayIdeaUid$.next(v);
+  }
+  @Input() overlayReferrer: string | null = null;
+  @Input() overlayStatusLabel: string | null = null;
+  @Output() editDetails = new EventEmitter<Idea>();
+
   private sub!: Subscription;
+  private overlaySub?: Subscription;
 
   constructor(
     private ideaEvents: IdeaEventsService,
@@ -76,16 +89,41 @@ export class IdeaView implements OnInit {
       if (!ideas.length) this.store.dispatch(LoadIdeas());
     });
 
-    // Combine route params + query params + ideas stream
+    if (this.overlayMode) {
+      this.referrer = this.overlayReferrer;
+      if (this.referrer === '/prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = false;
+      } else if (this.referrer === '/ta-prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = true;
+      }
+      this.overlaySub = combineLatest([this.ideas$, this.overlayIdeaUid$]).subscribe(
+        ([ideas, ideaUid]) => {
+          this.ideas = ideas;
+          const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
+          this.index = index;
+          this.viewIdea = idea;
+          if (this.viewIdea) {
+            this.statusLabel =
+              this.overlayStatusLabel ?? this.getDefaultStatusLabel(this.viewIdea);
+            this.patchForm(this.viewIdea);
+          } else {
+            this.statusLabel = this.overlayStatusLabel ?? '.....';
+          }
+        }
+      );
+      return;
+    }
+
+    // Full-page mode: combine route params + query params + ideas stream
     combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(
       ([params, queryParams, ideas]) => {
         this.ideas = ideas;
 
-        // Get referrer and status label from query params
         this.referrer = queryParams.get('from');
         const statusLabelFromQuery = queryParams.get('statusLabel');
 
-        // Set visibility flags based on referrer
         if (this.referrer === '/prioritization') {
           this.showProductRank = true;
           this.showTaRank = false;
@@ -101,8 +139,6 @@ export class IdeaView implements OnInit {
         this.viewIdea = idea;
 
         if (this.viewIdea) {
-          // Prefer the label passed from the list (so it exactly matches the filter view);
-          // fall back to a default based on the idea status.
           this.statusLabel =
             statusLabelFromQuery || this.getDefaultStatusLabel(this.viewIdea);
           this.patchForm(this.viewIdea);
@@ -111,6 +147,10 @@ export class IdeaView implements OnInit {
         }
       }
     );
+  }
+
+  ngOnDestroy(): void {
+    this.overlaySub?.unsubscribe();
   }
 
   buildForm() {
@@ -200,7 +240,10 @@ export class IdeaView implements OnInit {
   }
 
   navigateToEdit() {
-    if (this.viewIdea) {
+    if (!this.viewIdea) return;
+    if (this.overlayMode) {
+      this.editDetails.emit(this.viewIdea);
+    } else {
       this.router.navigate(['/ideas/' + this.viewIdea.idea_uid + '/edit']);
     }
   }

@@ -38,7 +38,7 @@
 }
 
 
-/* Navigation items */
+/* Navigation items (default: used for idea-dashboard and all non-admin routes) */
 .nav-item {
   display: flex;
   font-size: 13px;
@@ -66,6 +66,38 @@
 
 .nav-item:not(.active):hover {
   background: var(--primary-100);
+}
+
+/* ===== Admin sidebar only (when host has .sidebar-admin); does not affect idea or other routes ===== */
+:host.sidebar-admin {
+  display: block;
+  background: var(--neutral-100);
+  min-height: 100%;
+}
+
+:host.sidebar-admin .brand .chevron {
+  color: var(--neutral-400);
+}
+
+:host.sidebar-admin .brand .chevron:hover {
+  background: var(--neutral-200);
+}
+
+:host.sidebar-admin .nav {
+  border-top-color: var(--neutral-200);
+}
+
+:host.sidebar-admin .nav-item {
+  color: var(--neutral-400);
+}
+
+:host.sidebar-admin .nav-item.active {
+  background: var(--brand-primary);
+  color: var(--neutral-100);
+}
+
+:host.sidebar-admin .nav-item:not(.active):hover {
+  background: var(--neutral-200);
 }
 
 

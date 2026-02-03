@@ -28,7 +28,9 @@ export type IdeaEvent =
   | { type: 'prioritizationFailure'; payload: string }
   | { type: 'exportData' }
   | { type: 'viewIdeaHistory'; payload: { idea_id: number; idea_uid: string } }
-  | { type: 'closeIdeaHistory' };
+  | { type: 'closeIdeaHistory' }
+  | { type: 'resetIdea'; payload: { idea_id: number; idea_uid: string } }
+  | { type: 'viewIdeaOverlay'; payload: { idea_uid: string; statusLabel?: string } };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -139,5 +141,15 @@ export class IdeaEventsService {
 
   closeIdeaHistory() {
     this.eventsSubject.next({ type: 'closeIdeaHistory' });
+  }
+
+  /** Emitted when "Reset Idea" is clicked on admin page only; handled by admin-home. */
+  resetIdea(idea_id: number, idea_uid: string) {
+    this.eventsSubject.next({ type: 'resetIdea', payload: { idea_id, idea_uid } });
+  }
+
+  /** Open View Idea Details in overlay instead of full page (dashboard, prioritization, admin). */
+  viewIdeaOverlay(idea_uid: string, statusLabel?: string) {
+    this.eventsSubject.next({ type: 'viewIdeaOverlay', payload: { idea_uid, statusLabel } });
   }
 }

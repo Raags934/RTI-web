@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
-import { Idea, IdeaPayload, ExportIdeasPayload } from '../models/idea.model';
+import { Idea, IdeaPayload, ExportIdeasPayload, ResetIdeaPayload } from '../models/idea.model';
 import { PrioritizationPayload } from '../models/prioritization.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
@@ -177,6 +177,16 @@ export class IdeaService {
     return new Blob([bytes], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Reset idea (path param: idea_id; body: comment optional, updated_by required)
+  // ----------------------------------------------------
+  resetIdea(ideaId: number, payload: ResetIdeaPayload): Observable<unknown> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/reset`, payload, { headers });
   }
 
   // ----------------------------------------------------

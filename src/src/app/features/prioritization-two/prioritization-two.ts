@@ -8,10 +8,12 @@ import { Buttons } from '../../shared/components/buttons/buttons';
 import { PopUp } from '../../shared/components/popup/popup';
 import { Popup, PopupConfigs } from '../../shared/constants/popUp';
 import { IdeaHistory } from '../ideas/idea-history/idea-history';
+import { ViewIdeaOverlay } from '../ideas/view-idea-overlay/view-idea-overlay';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, take } from 'rxjs';
 import { AppState } from '../../app.state';
 import { IdeaEventsService } from '../../events/ideaServiceEvents';
+import { Router } from '@angular/router';
 import { Idea, ExportIdeasPayload } from '../../models/idea.model';
 import { PrioritizationPayload, TARankingChange } from '../../models/prioritization.model';
 import { StatusTab } from '../../shared/constants/statusTabs';
@@ -43,7 +45,7 @@ const prioritizationStatusTabs: StatusTab[] = [
 
 @Component({
   selector: 'app-prioritization-two',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp, IdeaHistory],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp, IdeaHistory, ViewIdeaOverlay],
   templateUrl: './prioritization-two.html',
   styleUrl: './prioritization-two.scss',
 })
@@ -57,6 +59,9 @@ export class PrioritizationTwo implements OnInit {
   showIdeaHistory: boolean = false;
   selectedIdeaId: number = 0;
   selectedIdeaUid: string = '';
+  showViewIdeaOverlay = false;
+  overlayIdeaUid: string | null = null;
+  overlayStatusLabel: string | null = null;
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];
@@ -76,7 +81,8 @@ export class PrioritizationTwo implements OnInit {
   constructor(
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
-    private ideaService: IdeaService
+    private ideaService: IdeaService,
+    private router: Router
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
@@ -168,8 +174,19 @@ export class PrioritizationTwo implements OnInit {
         this.showIdeaHistory = false;
         this.selectedIdeaId = 0;
         this.selectedIdeaUid = '';
+      } else if (event.type === 'viewIdeaOverlay') {
+        this.overlayIdeaUid = event.payload.idea_uid;
+        this.overlayStatusLabel = event.payload.statusLabel ?? null;
+        this.showViewIdeaOverlay = true;
       }
     });
+  }
+
+  onEditFromOverlay(idea: Idea): void {
+    this.showViewIdeaOverlay = false;
+    this.overlayIdeaUid = null;
+    this.overlayStatusLabel = null;
+    this.router.navigate(['/ideas/', idea.idea_uid, 'edit']);
   }
 
   ngOnDestroy() {

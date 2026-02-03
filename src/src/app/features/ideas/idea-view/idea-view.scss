@@ -35,9 +35,9 @@
     flex-direction: column;
   }
 
-  /* Buttons row spans all 3 columns */
+  /* Buttons row spans all columns */
   .form-actions {
-    grid-column: span 3;
+    grid-column: 1 / -1;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -50,6 +50,24 @@
 
 :host ::ng-deep .mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
   color: var(--neutral-300);
+}
+
+/* Overlay: two columns per row (e.g. UID | Created By) + word wrap so no horizontal scaling */
+:host.overlay-mode .material-form {
+  grid-template-columns: repeat(2, 1fr);
+}
+:host.overlay-mode .form-field {
+  min-width: 0;
+}
+:host.overlay-mode ::ng-deep .mdc-text-field__input,
+:host.overlay-mode ::ng-deep textarea {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+:host.overlay-mode ::ng-deep .mdc-notched-outline {
+  min-width: 0;
 }
 
 .edit-button-container {

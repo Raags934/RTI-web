@@ -68,6 +68,22 @@
               <span>Delete</span>
             </div>
           }
+
+          <!-- Admin Home Menu Items: only 3 options (no impact on idea-dashboard or other pages) -->
+          @else if (isAdminRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-item" (click)="resetIdea(element)">
+              <mat-icon>refresh</mat-icon>
+              <span>Reset Idea</span>
+            </div>
+          }
           
           <!-- Prioritization Routes Menu Items -->
           @else if (isPrioritizationRoute()) {

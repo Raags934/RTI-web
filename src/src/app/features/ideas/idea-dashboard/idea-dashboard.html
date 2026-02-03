@@ -1,8 +1,17 @@
 <app-header-filter class="header-filter"></app-header-filter>
 <app-table-header></app-table-header>
 <app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns"
-[dataSource]="pagedIdeas"></app-table>
+<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [useViewIdeaOverlay]="true"></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
 
 <app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>
+
+<app-view-idea-overlay
+  [open]="showViewIdeaOverlay"
+  [ideaUid]="overlayIdeaUid"
+  [ideas]="pagedIdeas"
+  [referrer]="'/ideas'"
+  [statusLabel]="overlayStatusLabel"
+  (closeOverlay)="showViewIdeaOverlay = false; overlayIdeaUid = null; overlayStatusLabel = null"
+  (editDetails)="onEditFromOverlay($event)"
+></app-view-idea-overlay>

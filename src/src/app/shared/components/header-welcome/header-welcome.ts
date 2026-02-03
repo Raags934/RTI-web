@@ -44,7 +44,12 @@ export class HeaderWelcome implements OnInit {
 
   updatePageTitle(): void {
     const path = this.currentRoute.replace(/^\/+/, '').split('/')[0];
+    const fullPath = this.currentRoute.split('?')[0].replace(/^\/+/, '');
     this.prevNextBtnsVisible = false
+    if (fullPath.includes('admin/users')) {
+      this.pageHeader = headerConfigs.adminManageUsersHeader;
+      return;
+    }
     switch (path) {
       case headerConfigs.addIdeaHeader.expected:
         this.pageHeader = headerConfigs.addIdeaHeader;
@@ -56,6 +61,10 @@ export class HeaderWelcome implements OnInit {
    
       case headerConfigs.contactForHelpHeader.expected:
         this.pageHeader = headerConfigs.contactForHelpHeader;
+        break;
+
+      case headerConfigs.adminHomeHeader.expected:
+        this.pageHeader = headerConfigs.adminHomeHeader;
         break;
 
       case headerConfigs.viewIdeaHeader.expected:

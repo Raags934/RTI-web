@@ -63,3 +63,9 @@ export interface IdeaPayload {
 export interface ExportIdeasPayload {
   id: number[];
 }
+
+/** Payload for PUT /ideas/:idea_id/reset. comment is optional; updated_by is required (e.g. hardcoded user id). */
+export interface ResetIdeaPayload {
+  comment?: string;
+  updated_by: number;
+}

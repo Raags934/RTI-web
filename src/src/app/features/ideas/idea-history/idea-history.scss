@@ -3,18 +3,19 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: stretch;
   z-index: 1000;
 }
 .idea-history-panel {
-width: 520px;
-max-height: 85vh;
-background: #ffffff;
-border-radius: 10px;
-display: flex;
-flex-direction: column;
-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 45%;
+  max-width: 520px;
+  height: 100vh;
+  background: #ffffff;
+  border-radius: 10px 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
 }
 /* Header */
 .header {
