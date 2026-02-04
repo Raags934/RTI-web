@@ -1,0 +1,40 @@
+<app-table-header [showNewIdea]="false" [showSearch]="false" exportVariant="type1"
+  exportColor="var(--primary-400)"></app-table-header>
+<app-table-filter [tabs]="statusTabs"></app-table-filter>
+<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [useViewIdeaOverlay]="true"></app-table>
+<app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
+
+<app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>
+
+<app-view-idea-overlay
+  [open]="showViewIdeaOverlay"
+  [ideaUid]="overlayIdeaUid"
+  [ideas]="pagedIdeas"
+  [referrer]="'/admin'"
+  [statusLabel]="overlayStatusLabel"
+  (closeOverlay)="showViewIdeaOverlay = false; overlayIdeaUid = null; overlayStatusLabel = null"
+  (editDetails)="onEditDetailsFromOverlay($event)"
+></app-view-idea-overlay>
+
+<!-- Reset Idea confirmation pop-up -->
+@if (showResetConfirm) {
+  <div class="reset-backdrop" (mousedown)="onResetBackdrop($event)">
+    <div class="reset-dialog">
+      <h2 class="reset-title">Are you sure you want to reset this idea?</h2>
+      <p class="reset-helper">If you select 'Yes,' the idea will move to the Idea Pool, and this action cannot be undone.</p>
+      <div class="reset-field">
+        <label class="reset-label">Admin Comment: <span class="required">*</span></label>
+        <textarea
+          class="reset-textarea"
+          [(ngModel)]="resetComment"
+          placeholder="Enter your comment here..."
+          rows="4"
+        ></textarea>
+      </div>
+      <div class="reset-actions">
+        <button type="button" class="reset-btn reset-btn-no" (click)="closeResetConfirm()">No</button>
+        <button type="button" class="reset-btn reset-btn-yes" (click)="confirmReset()">Yes</button>
+      </div>
+    </div>
+  </div>
+}

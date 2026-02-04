@@ -31,14 +31,83 @@
     <td mat-cell [ngClass]="col.width" *matCellDef="let element">
       @if (col.key === 'status.status_name') {
       <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
-        {{ element.status?.status_name || '.....' }}
+        {{ getStatusDisplayValue(element) }}
       </app-buttons>
       }
       <!-- Options Column -->
       @else if (col.key === 'options') {
-     
-        <mat-icon (click)="viewIdea(element.idea_uid)">more_vert</mat-icon>
-      } @else {
+      <div class="options-container">
+        <mat-icon (click)="toggleOptionsMenu($event, element.idea_uid)">more_vert</mat-icon>
+
+        @if (isOptionsMenuOpen(element.idea_uid)) {
+        <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
+          <div class="menu-header">More Options</div>
+          
+          <!-- Idea Dashboard Menu Items -->
+          @if (isIdeaDashboardRoute()) {
+            <div class="menu-item" (click)="editIdea(element.idea_uid)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Idea</span>
+            </div>
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="duplicateIdea(element)">
+              <mat-icon>content_copy</mat-icon>
+              <span>Duplicate</span>
+            </div>
+            <div class="menu-item" (click)="deleteIdea(element)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </div>
+          }
+
+          <!-- Admin Home Menu Items: only 3 options (no impact on idea-dashboard or other pages) -->
+          @else if (isAdminRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-item" (click)="resetIdea(element)">
+              <mat-icon>refresh</mat-icon>
+              <span>Reset Idea</span>
+            </div>
+          }
+          
+          <!-- Prioritization Routes Menu Items -->
+          @else if (isPrioritizationRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+          }
+        </div>
+        }
+      </div>
+      } @else if (col.key === 'ranking_brand') {
+      <app-ranking-dropdown [value]="getRankingValue(element)" [disabled]="isTaPrioritizationRoute()"
+        (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else if (col.key === 'ranking_franchise') {
+      <app-ranking-dropdown [value]="getTARankingValue(element)"
+        (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else {
       <span [innerHTML]="getValue(element, col.key) | highlight : searchText"></span>
       }
     </td>

@@ -1,0 +1,103 @@
+// Reset Idea confirmation pop-up
+.reset-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.reset-dialog {
+  background: var(--neutral-white, #fff);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 20px 24px;
+  width: min(440px, 92vw);
+}
+
+.reset-title {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--neutral-500, #374151);
+  line-height: 1.35;
+}
+
+.reset-helper {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: var(--neutral-400, #6b7280);
+  line-height: 1.4;
+}
+
+.reset-field {
+  margin-bottom: 16px;
+}
+
+.reset-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neutral-500, #374151);
+  .required {
+    color: #dc2626;
+  }
+}
+
+.reset-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+  &:focus {
+    outline: none;
+    border-color: var(--primary-400, #2563eb);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+.reset-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.reset-btn {
+  padding: 10px 20px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  min-width: 80px;
+}
+
+.reset-btn-no {
+  background: #fff;
+  color: var(--primary-400, #2563eb);
+  border: 1px solid var(--primary-400, #2563eb);
+  &:hover {
+    background: #f9fafb;
+  }
+}
+
+.reset-btn-yes {
+  background: var(--primary-400, #2563eb);
+  color: #fff;
+  &:hover {
+    filter: brightness(1.05);
+  }
+}

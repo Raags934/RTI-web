@@ -23,11 +23,12 @@
   <div class="right">
     <app-buttons
       *ngIf="!showNewIdea"
-      variant="type2"
-      color="var(--primary-300)"
-      size="medium"
-      icon="ios_share"
+      [variant]="exportVariant"
+      [color]="exportColor"
+      [size]="exportSize"
+      [icon]="exportIcon"
       class="export-btn"
+      (click)="onExportClick()"
     >
       Export Data
     </app-buttons>

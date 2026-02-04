@@ -72,7 +72,7 @@ export class Assessor implements OnInit {
         this.filterByStatus(event.payload.status_id);
       } else if (event.type === 'searchByText') {
         this.filterBySearchText(event.payload.searchText);
-      }else if (event.type === 'taFilterChange') {
+      } else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload);
       }
     });
@@ -82,8 +82,12 @@ export class Assessor implements OnInit {
     if (this.sub) this.sub.unsubscribe();
   }
 
-  taFilterChange(ta_id: number) {
-    this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+  taFilterChange(ta_id: number | null) {
+    if (ta_id == null) {
+      this.filteredIdeas = [...this.ideas];
+    } else {
+      this.filteredIdeas = this.ideas.filter((idea) => idea.ta_id === ta_id);
+    }
  
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;

@@ -1,28 +1,57 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import {MatIconModule} from '@angular/material/icon';
-import { Router, RouterModule } from '@angular/router';
-import { menuItems } from '../../constants/sidebar';
+import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { menuItems, adminMenuItems } from '../../constants/sidebar';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [ RouterModule,CommonModule, MatIconModule],
+  host: {
+    '[class.sidebar-admin]': 'isAdminMode',
+  },
+  imports: [RouterModule, CommonModule, MatIconModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
-export class Sidebar {
+export class Sidebar implements OnInit, OnDestroy {
   menuClosed: boolean = false;
   menuItems = menuItems;
+  adminMenuItems = adminMenuItems;
+  /** True when current route is /admin (or under). Switches menu and styling only; no impact on idea or other routes. */
+  isAdminMode = false;
+
+  private sub?: Subscription;
 
   constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.updateAdminMode(this.router.url);
+    this.sub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.updateAdminMode(e.urlAfterRedirects));
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private updateAdminMode(url: string): void {
+    const path = url.split('?')[0];
+    this.isAdminMode = path === '/admin' || path.startsWith('/admin/');
+  }
 
   onMenuclick(): void {
     this.menuClosed = !this.menuClosed;
   }
 
   gotoHome(): void {
-    this.router.navigate(['/']);
+    if (this.isAdminMode) {
+      this.router.navigate(['/admin']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
- 
 }

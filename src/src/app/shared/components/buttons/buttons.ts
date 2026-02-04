@@ -47,6 +47,9 @@ export class Buttons {
         this.ideaEvents.confirmPopUp();
         break;
 
+      case 'confirmSubmitRanking':
+        this.ideaEvents.confirmSubmitRanking();
+        break;
       case 'nextIdea':
         this.ideaEvents.nextIdea();
         break;

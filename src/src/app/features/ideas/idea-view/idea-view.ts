@@ -1,18 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Input,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormInput } from '../../../shared/components/form-input/form-input';
-import { VIEW_IDEA_FORM_LABELS } from '../../../shared/constants/labels';
 
-import { Observable, Subscription } from 'rxjs';
-import { Idea } from '../../../models/idea.model';
-
-import { AppState } from '../../../app.state.js';
-import { Store, select } from '@ngrx/store';
-
-import { ActivatedRoute, Router } from '@angular/router';
-
+import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { LoadIdeas } from '../../../store/idea.actions';
+
 import {
   FormBuilder,
   FormGroup,
@@ -20,20 +18,29 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
+
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+
+import { FormInput } from '../../../shared/components/form-input/form-input';
+import { VIEW_IDEA_FORM_LABELS } from '../../../shared/constants/labels';
+import { Idea } from '../../../models/idea.model';
+import { AppState } from '../../../app.state.js';
+import { LoadIdeas } from '../../../store/idea.actions';
 import { Buttons } from '../../../shared/components/buttons/buttons';
 import { statusColor } from '../../../shared/constants/statusColor';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
-import { combineLatest } from 'rxjs';
 import { Popup, PopupConfigs } from '../../../shared/constants/popUp';
 import { PopUp } from '../../../shared/components/popup/popup';
 
 @Component({
   selector: 'app-idea-view',
-  imports: [CommonModule, FormInput, Buttons, PopUp],
+  imports: [CommonModule, FormInput, Buttons, PopUp, ReactiveFormsModule],
   templateUrl: './idea-view.html',
   styleUrl: './idea-view.scss',
+  host: { '[class.overlay-mode]': 'overlayMode' },
 })
-export class IdeaView implements OnInit {
+export class IdeaView implements OnInit, OnDestroy {
   labels = VIEW_IDEA_FORM_LABELS;
 
   form!: FormGroup;
@@ -42,18 +49,45 @@ export class IdeaView implements OnInit {
   ideas: Idea[] = [];
 
   viewIdea: Idea | null = null;
-  index: number = -1;
+  index = -1;
   statusColor = statusColor;
-  from: string = '';
 
+  /** Query param indicating assessor/harmonizer mode. */
+  from = '';
+
+  /** Popup configurations for assessor / harmonizer flows. */
   popup: Popup = PopupConfigs.abandonIdea;
   needMoreInfoPopup: Popup = PopupConfigs.needMoreInfo;
   assessIdeaPopup: Popup = PopupConfigs.assessIdea;
   submitToHarmonizationPopup: Popup = PopupConfigs.submitToHarmonization;
   enterStudyDetailsPopup: Popup = PopupConfigs.enterStudyDetails;
-  submitStudyDetailsConfirmationPopup: Popup = PopupConfigs.submitStudyDetailsConfirmation;
+  submitStudyDetailsConfirmationPopup: Popup =
+    PopupConfigs.submitStudyDetailsConfirmation;
+
+  /** Status label used for both full-page and overlay modes. */
+  statusLabel = '.....';
+
+  // Track where user came from
+  referrer: string | null = null;
+  showProductRank = false;
+  showTaRank = false;
+
+  /** When true, idea is driven by overlayIdeaUid (no route). */
+  @Input() overlayMode = false;
+  private _overlayIdeaUid: string | null = null;
+  overlayIdeaUid$ = new BehaviorSubject<string | null>(null);
+
+  @Input() set overlayIdeaUid(v: string | null) {
+    this._overlayIdeaUid = v;
+    this.overlayIdeaUid$.next(v);
+  }
+
+  @Input() overlayReferrer: string | null = null;
+  @Input() overlayStatusLabel: string | null = null;
+  @Output() editDetails = new EventEmitter<Idea>();
 
   private sub!: Subscription;
+  private overlaySub?: Subscription;
 
   constructor(
     private ideaEvents: IdeaEventsService,
@@ -92,6 +126,7 @@ export class IdeaView implements OnInit {
           this.assessIdeaPopup.open = false;
           this.submitToHarmonizationPopup.open = false;
           this.enterStudyDetailsPopup.open = false;
+
           if (this.from === 'assessor') {
             // Reset assessIdeaPopup form fields when closed
             this.form.patchValue({
@@ -127,37 +162,99 @@ export class IdeaView implements OnInit {
       if (!ideas.length) this.store.dispatch(LoadIdeas());
     });
 
-    // Combine route params + ideas stream
-    combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(([params, queryParams, ideas]) => {
-      this.ideas = ideas;
-
-      const ideaUid = params.get('idea_uid');
-      const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
-
-      this.index = index;
-      this.viewIdea = idea;
-      this.from = queryParams.get('from') || '';
-
-      if (this.viewIdea) {
-        this.patchForm(this.viewIdea);
+    if (this.overlayMode) {
+      this.referrer = this.overlayReferrer;
+      if (this.referrer === '/prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = false;
+      } else if (this.referrer === '/ta-prioritization') {
+        this.showProductRank = true;
+        this.showTaRank = true;
       }
-    });
+
+      this.overlaySub = combineLatest([this.ideas$, this.overlayIdeaUid$]).subscribe(
+        ([ideas, ideaUid]) => {
+          this.ideas = ideas;
+          const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
+          this.index = index;
+          this.viewIdea = idea;
+          if (this.viewIdea) {
+            this.statusLabel =
+              this.overlayStatusLabel ?? this.getDefaultStatusLabel(this.viewIdea);
+            this.patchForm(this.viewIdea);
+          } else {
+            this.statusLabel = this.overlayStatusLabel ?? '.....';
+          }
+        }
+      );
+      return;
+    }
+
+    // Full-page mode: combine route params + query params + ideas stream
+    combineLatest([this.route.paramMap, this.route.queryParamMap, this.ideas$]).subscribe(
+      ([params, queryParams, ideas]) => {
+        this.ideas = ideas;
+
+        this.referrer = queryParams.get('from');
+        this.from = this.referrer || '';
+        const statusLabelFromQuery = queryParams.get('statusLabel');
+
+        if (this.referrer === '/prioritization') {
+          this.showProductRank = true;
+          this.showTaRank = false;
+        } else if (this.referrer === '/ta-prioritization') {
+          this.showProductRank = true;
+          this.showTaRank = true;
+        }
+
+        const ideaUid = params.get('idea_uid');
+        const { index, idea } = this.getIdeasByIdeaUid(ideaUid);
+
+        this.index = index;
+        this.viewIdea = idea;
+
+        if (this.viewIdea) {
+          this.statusLabel =
+            statusLabelFromQuery || this.getDefaultStatusLabel(this.viewIdea);
+          this.patchForm(this.viewIdea);
+        } else {
+          this.statusLabel = statusLabelFromQuery || '.....';
+        }
+      }
+    );
   }
 
-  buildForm() {
+  ngOnDestroy(): void {
+    this.overlaySub?.unsubscribe();
+    this.sub?.unsubscribe();
+  }
+
+  private buildForm() {
     this.form = this.fb.group({
       pathway_id: new FormControl(null, Validators.required),
       rti_year: new FormControl(null, Validators.required),
       product_type: new FormControl(null, Validators.required),
       product_id: new FormControl(null, Validators.required),
 
-      brand_id: new FormControl({ value: null, disabled: true }, Validators.required),
-      ta_id: new FormControl({ value: null, disabled: true }, Validators.required),
-      franchise_id: new FormControl({ value: null, disabled: true }, Validators.required),
+      brand_id: new FormControl(
+        { value: null, disabled: true },
+        Validators.required
+      ),
+      ta_id: new FormControl(
+        { value: null, disabled: true },
+        Validators.required
+      ),
+      franchise_id: new FormControl(
+        { value: null, disabled: true },
+        Validators.required
+      ),
 
       origin_request: new FormControl(null, Validators.required),
 
-      strategic_rationale: new FormControl('', [Validators.required, Validators.minLength(10)]),
+      strategic_rationale: new FormControl('', [
+        Validators.required,
+        Validators.minLength(10),
+      ]),
 
       monadic_or_comparative: new FormControl(null, Validators.required),
       target_aspirational_claim: new FormControl('', Validators.required),
@@ -168,18 +265,20 @@ export class IdeaView implements OnInit {
       pos_reasons: new FormControl('', Validators.required),
       ef_assessment_comments: new FormControl('', Validators.required),
       research_questions: new FormControl('', Validators.required),
-        potential_claims: new FormControl('', Validators.required),
-        primary_endpoints: new FormControl('', Validators.required),
-        secondary_endpoints: new FormControl('', Validators.required),
-        estimated_study_start_date: new FormControl(null, Validators.required),
-        estimated_study_end_date: new FormControl(null, Validators.required),
-        estimated_sample_size: new FormControl('', Validators.required),
-        total_estimated_budget: new FormControl('', Validators.required),
-
+      potential_claims: new FormControl('', Validators.required),
+      primary_endpoints: new FormControl('', Validators.required),
+      secondary_endpoints: new FormControl('', Validators.required),
+      estimated_study_start_date: new FormControl(null, Validators.required),
+      estimated_study_end_date: new FormControl(null, Validators.required),
+      estimated_sample_size: new FormControl('', Validators.required),
+      total_estimated_budget: new FormControl('', Validators.required),
     });
   }
 
-  getIdeasByIdeaUid(ideaUid: string | null): { index: number; idea: Idea | null } {
+  private getIdeasByIdeaUid(ideaUid: string | null): {
+    index: number;
+    idea: Idea | null;
+  } {
     if (!ideaUid) return { index: -1, idea: null };
 
     const index = this.ideas.findIndex((i) => i.idea_uid === ideaUid);
@@ -188,7 +287,7 @@ export class IdeaView implements OnInit {
     return { index, idea };
   }
 
-  patchForm(idea: Idea) {
+  private patchForm(idea: Idea) {
     this.form.patchValue({
       pathway_id: idea.research_pathway?.pathway_name,
       rti_year: idea.rti_year,
@@ -209,10 +308,17 @@ export class IdeaView implements OnInit {
   }
 
   getStatusColor(statusId: number | null | undefined): string {
-    if (!statusId) return 'gray'; // fallback color
+    if (!statusId) return 'gray';
 
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray';
+  }
+
+  private getDefaultStatusLabel(idea: Idea): string {
+    if (!idea) {
+      return '.....';
+    }
+    return idea.status?.status_name || '.....';
   }
 
   nextIdeaView() {
@@ -225,6 +331,7 @@ export class IdeaView implements OnInit {
       this.router.navigate(['/ideas/' + nextIdea.idea_uid]);
     }
   }
+
   prevIdeaView() {
     if (this.index === -1 || !this.ideas.length) return;
 
@@ -237,17 +344,14 @@ export class IdeaView implements OnInit {
   }
 
   onAbandon() {
-    // Handle abandon action
     this.popup.open = true;
   }
 
   onNeedMoreInfo() {
-    // Handle need more info action
     this.needMoreInfoPopup.open = true;
   }
 
   onAssessIdea() {
-    // Handle assess idea action
     if (this.from === 'harmonizer') {
       this.enterStudyDetailsPopup.open = true;
     } else {
@@ -256,51 +360,43 @@ export class IdeaView implements OnInit {
   }
 
   abandonIdea() {
-    // Handle abandon idea action
-    console.log('Abandon idea confirmed');
+    // TODO: integrate with backend
     this.popup.open = false;
   }
 
   needMoreInfo() {
-    // Handle need more info action
-    console.log('Need more info confirmed');
+    // TODO: integrate with backend
     this.needMoreInfoPopup.open = false;
   }
 
   assessIdea() {
-    // Handle assess idea action
-    console.log('Assess idea confirmed');
-
-    // Check if required fields are filled
     const studyRecommended = this.form.get('study_recommended');
     const pos = this.form.get('pos');
     const posReasons = this.form.get('pos_reasons');
     const efAssessmentComments = this.form.get('ef_assessment_comments');
 
-    if (studyRecommended?.valid && pos?.valid && posReasons?.valid && efAssessmentComments?.valid) {
+    if (
+      studyRecommended?.valid &&
+      pos?.valid &&
+      posReasons?.valid &&
+      efAssessmentComments?.valid
+    ) {
       this.assessIdeaPopup.open = false;
       this.submitToHarmonizationPopup.open = true;
     } else {
-      // Mark fields as touched to show validation errors
       studyRecommended?.markAsTouched();
       pos?.markAsTouched();
       posReasons?.markAsTouched();
       efAssessmentComments?.markAsTouched();
-      console.log('Please fill all required fields');
     }
   }
 
   submitToHarmonization() {
-    // Handle submit to harmonization action
-    console.log('Submit to harmonization confirmed');
+    // TODO: integrate with backend
     this.submitToHarmonizationPopup.open = false;
   }
 
   enterStudyDetails() {
-    // Handle enter study details action
-    console.log('Enter study details confirmed');
-
-    // Check if required fields are filled
     const researchQuestions = this.form.get('research_questions');
     const potentialClaims = this.form.get('potential_claims');
     const primaryEndpoints = this.form.get('primary_endpoints');
@@ -310,11 +406,18 @@ export class IdeaView implements OnInit {
     const estimatedSampleSize = this.form.get('estimated_sample_size');
     const totalEstimatedBudget = this.form.get('total_estimated_budget');
 
-    if (researchQuestions?.valid && potentialClaims?.valid && primaryEndpoints?.valid && secondaryEndpoints?.valid && estimatedStudyStartDate?.valid && estimatedStudyEndDate?.valid && estimatedSampleSize?.valid && totalEstimatedBudget?.valid) {
-      // Keep the study details popup open and show confirmation on top
+    if (
+      researchQuestions?.valid &&
+      potentialClaims?.valid &&
+      primaryEndpoints?.valid &&
+      secondaryEndpoints?.valid &&
+      estimatedStudyStartDate?.valid &&
+      estimatedStudyEndDate?.valid &&
+      estimatedSampleSize?.valid &&
+      totalEstimatedBudget?.valid
+    ) {
       this.submitStudyDetailsConfirmationPopup.open = true;
     } else {
-      // Mark fields as touched to show validation errors
       researchQuestions?.markAsTouched();
       potentialClaims?.markAsTouched();
       primaryEndpoints?.markAsTouched();
@@ -323,16 +426,27 @@ export class IdeaView implements OnInit {
       estimatedStudyEndDate?.markAsTouched();
       estimatedSampleSize?.markAsTouched();
       totalEstimatedBudget?.markAsTouched();
-      console.log('Please fill all required fields');
     }
   }
 
   submitStudyDetailsConfirmation() {
-    // Handle submit study details confirmation action
-    console.log('Submit study details confirmation confirmed');
+    // TODO: integrate with backend
     this.submitStudyDetailsConfirmationPopup.open = true;
     this.enterStudyDetailsPopup.open = false;
-    // TODO: Handle final submission
-    console.log('Study details submitted');
+  }
+
+  navigateToEdit() {
+    if (!this.viewIdea) return;
+    if (this.overlayMode) {
+      this.editDetails.emit(this.viewIdea);
+    } else {
+      this.router.navigate(['/ideas/' + this.viewIdea.idea_uid + '/edit'], {
+        queryParams: {
+          from: this.referrer || undefined,
+          statusLabel: this.statusLabel !== '.....' ? this.statusLabel : undefined,
+        },
+      });
+    }
   }
 }
+

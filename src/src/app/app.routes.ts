@@ -4,7 +4,12 @@ import { IdeaCreate } from './features/ideas/idea-create/idea-create';
 import { MyIdeas } from './features/ideas/my-ideas/my-ideas';
 import { ContactForHelp } from './features/contact-for-help/contact-for-help';
 import { IdeaView } from './features/ideas/idea-view/idea-view';
+import { IdeaEdit } from './features/ideas/idea-edit/idea-edit';
+import { PrioritizationOne } from './features/prioritization-one/prioritization-one';
+import { PrioritizationTwo } from './features/prioritization-two/prioritization-two';
 import { Harmonizer } from './features/harmonizer/harmonizer';
+import { AdminHome } from './features/admin/admin-home/admin-home';
+import { ManageUser } from './features/admin/manage-user/manage-user';
 import { AdminProduct } from './features/admin/admin-product/admin-product';
 
 export const routes: Routes = [
@@ -13,6 +18,11 @@ export const routes: Routes = [
   { path: 'myideas', component: MyIdeas },
   { path: 'help', component: ContactForHelp },
   { path: 'ideas/:idea_uid', component: IdeaView },
+  { path: 'ideas/:idea_uid/edit', component: IdeaEdit },
+  { path: 'prioritization', component: PrioritizationOne },
+  { path: 'ta-prioritization', component: PrioritizationTwo },
   { path: 'harmonizer', component: Harmonizer },
-  { path: 'admin', component: AdminProduct }
+  { path: 'admin', component: AdminHome },
+  { path: 'admin/users', component: ManageUser },
+  { path: 'admin/products', component: AdminProduct },
 ];

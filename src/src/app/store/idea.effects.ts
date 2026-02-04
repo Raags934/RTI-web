@@ -9,7 +9,12 @@ import { IdeaEventsService } from '../events/ideaServiceEvents';
 @Injectable()
 export class IdeaEffects {
   addIdea$;
+  addDraftIdea$;
   loadIdeas$;
+  savePrioritization$;
+  submitPrioritization$;
+  deleteIdea$;
+  updateIdea$;
 
   constructor(
     private actions$: Actions,
@@ -39,6 +44,130 @@ export class IdeaEffects {
             })
             ,
             catchError((error) => of(ideaActions.AddIdeaFailure({ error: error.message })))
+          )
+        )
+      )
+    );
+
+    this.addDraftIdea$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(ideaActions.AddDraftIdea),
+        mergeMap(({ idea }) =>
+          this.service.addDraftIdea(idea).pipe(
+            map((idea) => {
+              this.ideaEvents.toastEvent(`Idea #${idea.idea_uid} saved as draft successfully`);
+              return ideaActions.AddDraftIdeaSuccess({ idea });
+            }),
+            catchError((error) => of(ideaActions.AddDraftIdeaFailure({ error: error.message })))
+          )
+        )
+      )
+    );
+
+    this.savePrioritization$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(ideaActions.SavePrioritization),
+        mergeMap(({ payload, url }) =>
+          this.service.addPrioritization(payload, url).pipe(
+            mergeMap(() =>
+              this.service.loadIdeas().pipe(
+                map((ideas) => {
+                  this.ideaEvents.toastEvent('Ranking saved successfully');
+                  this.ideaEvents.savePrioritizationSuccess();
+                  return ideaActions.SavePrioritizationSuccess({ ideas });
+                }),
+                catchError((error) => {
+                  this.ideaEvents.prioritizationFailure(error.message);
+                  return of(ideaActions.SavePrioritizationFailure({ error: error.message }));
+                })
+              )
+            ),
+            catchError((error) => {
+              this.ideaEvents.prioritizationFailure(error.message);
+              return of(ideaActions.SavePrioritizationFailure({ error: error.message }));
+            })
+          )
+        )
+      )
+    );
+
+    this.submitPrioritization$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(ideaActions.SubmitPrioritization),
+        mergeMap(({ payload, url }) =>
+          this.service.addPrioritization(payload, url).pipe(
+            mergeMap(() =>
+              this.service.loadIdeas().pipe(
+                map((ideas) => {
+                  this.ideaEvents.toastEvent('Ranking submitted successfully');
+                  this.ideaEvents.submitPrioritizationSuccess();
+                  return ideaActions.SubmitPrioritizationSuccess({ ideas });
+                }),
+                catchError((error) => {
+                  this.ideaEvents.prioritizationFailure(error.message);
+                  return of(ideaActions.SubmitPrioritizationFailure({ error: error.message }));
+                })
+              )
+            ),
+            catchError((error) => {
+              this.ideaEvents.prioritizationFailure(error.message);
+              return of(ideaActions.SubmitPrioritizationFailure({ error: error.message }));
+            })
+          )
+        )
+      )
+    );
+
+    this.deleteIdea$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(ideaActions.DeleteIdea),
+        mergeMap(({ ideaId }) =>
+          this.service.deleteIdea(ideaId).pipe(
+            map(() => {
+              this.ideaEvents.toastEvent(`Idea deleted successfully`);
+              return ideaActions.DeleteIdeaSuccess({ ideaId });
+            }),
+            catchError((error) => {
+              this.ideaEvents.toastEvent(`Failed to delete idea: ${error.message}`);
+              return of(ideaActions.DeleteIdeaFailure({ error: error.message }));
+            })
+          )
+        )
+      )
+    );
+
+    this.updateIdea$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(ideaActions.UpdateIdea),
+        mergeMap(({ ideaId, idea }) =>
+          this.service.updateIdea(ideaId, idea).pipe(
+            mergeMap((response) =>
+              this.service.loadIdeas().pipe(
+                map((ideas) => {
+                  // Find the updated idea from the reloaded list
+                  const updatedIdea = ideas.find((i) => i.idea_id === response.idea_id);
+                  if (updatedIdea) {
+                    this.ideaEvents.toastEvent(`Idea #${updatedIdea.idea_uid} updated successfully`);
+                    return ideaActions.UpdateIdeaSuccess({ idea: updatedIdea });
+                  } else {
+                    // Fallback: show success message and reload ideas (idea will be updated via LoadIdeasSuccess)
+                    this.ideaEvents.toastEvent(response.message || 'Idea updated successfully');
+                    // Return success with a minimal idea object - reducer will handle via LoadIdeasSuccess
+                    return ideaActions.UpdateIdeaSuccess({ 
+                      idea: { idea_id: response.idea_id } as any 
+                    });
+                  }
+                }),
+                catchError((error) => {
+                  this.ideaEvents.toastEvent(`Failed to reload ideas after update: ${error.message}`);
+                  return of(ideaActions.UpdateIdeaFailure({ error: error.message }));
+                })
+              )
+            ),
+            catchError((error) => {
+              this.ideaEvents.toastEvent(`Failed to update idea: ${error.message}`);
+              return of(ideaActions.UpdateIdeaFailure({ error: error.message }));
+            })
           )
         )
       )

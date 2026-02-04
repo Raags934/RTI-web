@@ -7,23 +7,36 @@ export type IdeaEvent =
   | { type: 'sortByColumn'; payload: { column: string; direction: 'asc' | 'desc' } }
   | { type: 'applyFilterByStatus'; payload: { status_id: number } }
   | { type: 'searchByText'; payload: { searchText: string } }
-  | { type: 'taFilterChange'; payload:  number  }
-  | { type: 'franchiseFilterChange'; payload:  number  }
+  | { type: 'taFilterChange'; payload: number | null }
+  | { type: 'franchiseFilterChange'; payload: number | null }
+  | { type: 'roleFilterChange'; payload: number | null }
+  | { type: 'functionFilterChange'; payload: number | null }
   | { type: 'resetSearch' }
   | { type: 'submitIdea' }
   | { type: 'saveDraft' }
   | { type: 'closePopUp' }
   | { type: 'cancelIdea' }
   | { type: 'confirmPopUp' }
+  | { type: 'confirmSubmitRanking' }
+  | { type: 'rankingChanged'; payload: { idea_id: number; ranking_brand: string | null } }
+  | { type: 'rankingTaChanged'; payload: { idea_id: number; ranking_franchise: string | null } }
   | { type: 'nextIdea' }
   | { type: 'prevIdea' }
-  | { type: 'toastEvent' ; payload: string }
+  | { type: 'toastEvent'; payload: string }
   | { type: 'abandonIdea' }
   | { type: 'needMoreInfo' }
   | { type: 'assessIdea' }
   | { type: 'submitToHarmonization' }
   | { type: 'enterStudyDetails' }
-  | { type: 'submitStudyDetailsConfirmation' };
+  | { type: 'submitStudyDetailsConfirmation' }
+  | { type: 'savePrioritizationSuccess' }
+  | { type: 'submitPrioritizationSuccess' }
+  | { type: 'prioritizationFailure'; payload: string }
+  | { type: 'exportData' }
+  | { type: 'viewIdeaHistory'; payload: { idea_id: number; idea_uid: string } }
+  | { type: 'closeIdeaHistory' }
+  | { type: 'resetIdea'; payload: { idea_id: number; idea_uid: string } }
+  | { type: 'viewIdeaOverlay'; payload: { idea_uid: string; statusLabel?: string } };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -72,24 +85,78 @@ export class IdeaEventsService {
     this.eventsSubject.next({ type: 'confirmPopUp' });
   }
 
-  toastEvent(message:string) {
-    this.eventsSubject.next({ type: 'toastEvent', payload: message} );
+  toastEvent(message: string) {
+    this.eventsSubject.next({ type: 'toastEvent', payload: message });
   }
 
-  taFilterChange(ta_id:number) {
-    this.eventsSubject.next({ type: 'taFilterChange', payload : ta_id} );
+  taFilterChange(ta_id: number | null) {
+    this.eventsSubject.next({ type: 'taFilterChange', payload: ta_id });
   }
 
-  franchiseFilterChange(franchise_id:number) {
-    this.eventsSubject.next({ type: 'franchiseFilterChange', payload : franchise_id} );
+  franchiseFilterChange(franchise_id: number | null) {
+    this.eventsSubject.next({ type: 'franchiseFilterChange', payload: franchise_id });
+  }
+
+  roleFilterChange(role_id: number | null) {
+    this.eventsSubject.next({ type: 'roleFilterChange', payload: role_id });
+  }
+
+  functionFilterChange(function_id: number | null) {
+    this.eventsSubject.next({ type: 'functionFilterChange', payload: function_id });
   }
 
   nextIdea() {
-    this.eventsSubject.next({ type: 'nextIdea'} );
+    this.eventsSubject.next({ type: 'nextIdea' });
   }
 
   prevIdea() {
-    this.eventsSubject.next({ type: 'prevIdea'} );
+    this.eventsSubject.next({ type: 'prevIdea' });
+  }
+
+  confirmSubmitRanking() {
+    this.eventsSubject.next({ type: 'confirmSubmitRanking' });
+  }
+
+  rankingChanged(idea_id: number, ranking_brand: string | null) {
+    this.eventsSubject.next({ type: 'rankingChanged', payload: { idea_id, ranking_brand } });
+  }
+
+  rankingTaChanged(idea_id: number, ranking_franchise: string | null) {
+    this.eventsSubject.next({ type: 'rankingTaChanged', payload: { idea_id, ranking_franchise } });
+  }
+
+  savePrioritizationSuccess() {
+    this.eventsSubject.next({ type: 'savePrioritizationSuccess' });
+  }
+
+  submitPrioritizationSuccess() {
+    this.eventsSubject.next({ type: 'submitPrioritizationSuccess' });
+  }
+
+  prioritizationFailure(error: string) {
+    this.eventsSubject.next({ type: 'prioritizationFailure', payload: error });
+  }
+
+  exportData() {
+    this.eventsSubject.next({ type: 'exportData' });
+  }
+
+  viewIdeaHistory(idea_id: number, idea_uid: string) {
+    this.eventsSubject.next({ type: 'viewIdeaHistory', payload: { idea_id, idea_uid } });
+  }
+
+  closeIdeaHistory() {
+    this.eventsSubject.next({ type: 'closeIdeaHistory' });
+  }
+
+  /** Emitted when "Reset Idea" is clicked on admin page only; handled by admin-home. */
+  resetIdea(idea_id: number, idea_uid: string) {
+    this.eventsSubject.next({ type: 'resetIdea', payload: { idea_id, idea_uid } });
+  }
+
+  /** Open View Idea Details in overlay instead of full page (dashboard, prioritization, admin). */
+  viewIdeaOverlay(idea_uid: string, statusLabel?: string) {
+    this.eventsSubject.next({ type: 'viewIdeaOverlay', payload: { idea_uid, statusLabel } });
   }
 
   abandonIdea() {

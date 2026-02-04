@@ -40,10 +40,26 @@ export const contactForHelpHeader: headerTitle = {
     expected: 'help'
 };
 
+export const adminHomeHeader: headerTitle = {
+    title: "ADMIN_HOME PAGE",
+    breadcrumbParts: ['Role: Admin'],
+    backIconVisible: false,
+    expected: 'admin'
+};
+
+export const adminManageUsersHeader: headerTitle = {
+    title: "ADMIN_MANAGE USERS PAGE",
+    breadcrumbParts: ['Manage Users', 'Role: Admin'],
+    backIconVisible: false,
+    expected: 'admin/users'
+};
+
 export const headerConfigs = {
     homeHeader,
     addIdeaHeader,
     viewIdeaHeader,
     myIdeasHeader,
-    contactForHelpHeader
+    contactForHelpHeader,
+    adminHomeHeader,
+    adminManageUsersHeader
   } as const;

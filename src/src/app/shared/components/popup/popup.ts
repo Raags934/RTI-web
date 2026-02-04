@@ -17,6 +17,7 @@ export class PopUp {
   @Input() confirmText = 'Confirm';
   @Input() size : 'small' | 'medium' | 'large' = 'medium';
   @Input() confirmPopupAction: IdeaEvent['type'] = "closePopUp";
+  @Input() showCancelButton: boolean = true;
 
   constructor(private ideaEvent: IdeaEventsService) {}
 

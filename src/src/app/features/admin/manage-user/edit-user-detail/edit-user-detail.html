@@ -1,0 +1,154 @@
+@if (visible && user) {
+  <div class="edit-user-backdrop" (mousedown)="onClose()">
+    <div class="edit-user-panel" (mousedown)="$event.stopPropagation()">
+      <div class="edit-user-header">
+        <div class="header-left">
+          <button type="button" class="icon-btn" (click)="onClose()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-block">
+            <h2>Edit User Details</h2>
+            <span class="breadcrumb">Manage User &amp; Function &gt; {{ user.name }} &gt; More option &gt; Edit User Details</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="edit-user-content">
+        <div class="form-row">
+          <div class="form-field">
+            <label>User Name <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="editUserName" placeholder="User Name" class="form-input" />
+          </div>
+          <div class="form-field">
+            <label>Email ID <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="editUserEmail" placeholder="Email ID" class="form-input" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Status <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="editStatus" [value]="true" [(ngModel)]="editUserActive" />
+              <span>Active</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="editStatus" [value]="false" [(ngModel)]="editUserActive" />
+              <span>Inactive</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Role <span class="required">*</span></label>
+          <div class="multi-select-wrap">
+            <div class="select-trigger" (click)="openRoleDropdown()">
+              <span class="placeholder">Select Role</span>
+              <mat-icon>expand_more</mat-icon>
+            </div>
+            <button type="button" class="assign-btn" (click)="assignRoles()">Assign</button>
+          </div>
+          @if (roleDropdownOpen) {
+            <div class="dropdown-panel">
+              <div class="dropdown-search">
+                <mat-icon>search</mat-icon>
+                <input type="text" [(ngModel)]="roleSearch" placeholder="Search User Roles..." (click)="$event.stopPropagation()" />
+              </div>
+              <div class="dropdown-options">
+                @for (r of filteredStaticRoles; track r.id) {
+                  <label class="dropdown-option">
+                    <input type="checkbox" [checked]="isPendingRole(r.id)" (change)="togglePendingRole(r.id)" (click)="$event.stopPropagation()" />
+                    <span>{{ r.name }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+          <div class="selected-tags">
+            @for (r of getSelectedRoles(); track r.id) {
+              <span class="tag">
+                {{ r.name }}
+                <mat-icon (click)="removeRole(r.id)">close</mat-icon>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Function <span class="required">*</span></label>
+          <div class="multi-select-wrap">
+            <div class="select-trigger" (click)="openFunctionDropdown()">
+              <span class="placeholder">Select Function</span>
+              <mat-icon>expand_more</mat-icon>
+            </div>
+            <button type="button" class="assign-btn" (click)="assignFunctions()">Assign</button>
+          </div>
+          @if (functionDropdownOpen) {
+            <div class="dropdown-panel">
+              <div class="dropdown-search">
+                <mat-icon>search</mat-icon>
+                <input type="text" [(ngModel)]="functionSearch" placeholder="Search Function..." (click)="$event.stopPropagation()" />
+              </div>
+              <div class="dropdown-options">
+                @for (f of filteredFunctions; track f.function_id) {
+                  <label class="dropdown-option">
+                    <input type="checkbox" [checked]="isPendingFunction(f.function_id)" (change)="togglePendingFunction(f.function_id)" (click)="$event.stopPropagation()" />
+                    <span>{{ f.function_name }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+          <div class="selected-tags">
+            @for (f of getSelectedFunctions(); track f.function_id) {
+              <span class="tag">
+                {{ f.function_name }}
+                <mat-icon (click)="removeFunction(f.function_id)">close</mat-icon>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Therapeutic Area (Franchise) <span class="required">*</span></label>
+          <div class="multi-select-wrap">
+            <div class="select-trigger" (click)="openTaDropdown()">
+              <span class="placeholder">Select Therapeutic Area</span>
+              <mat-icon>expand_more</mat-icon>
+            </div>
+            <button type="button" class="assign-btn" (click)="assignTherapeuticAreas()">Assign</button>
+          </div>
+          @if (taDropdownOpen) {
+            <div class="dropdown-panel">
+              <div class="dropdown-search">
+                <mat-icon>search</mat-icon>
+                <input type="text" [(ngModel)]="taSearch" placeholder="Search Therapeutic Area..." (click)="$event.stopPropagation()" />
+              </div>
+              <div class="dropdown-options">
+                @for (ta of filteredTherapeuticAreas; track ta.ta_id) {
+                  <label class="dropdown-option">
+                    <input type="checkbox" [checked]="isPendingTa(ta.ta_id)" (change)="togglePendingTa(ta.ta_id)" (click)="$event.stopPropagation()" />
+                    <span>{{ ta.ta_name }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+          <div class="selected-tags">
+            @for (ta of getSelectedTherapeuticAreas(); track ta.ta_id) {
+              <span class="tag">
+                {{ ta.ta_name }}
+                <mat-icon (click)="removeTa(ta.ta_id)">close</mat-icon>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="onClose()">Cancel</button>
+          <button type="button" class="btn-submit" (click)="onUpdate()">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

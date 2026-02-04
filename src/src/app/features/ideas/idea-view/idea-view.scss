@@ -1,8 +1,7 @@
-
-.status-row {
+ .status-row {
   display: flex;
   align-items: center;
-  gap: 8px; // space between label and button
+  gap: 8px;
   margin: 8px 0;
 
   ::ng-deep .mdc-button__label {
@@ -13,38 +12,35 @@
 .status-label {
   font-weight: 600;
   font-size: 12px;
-  color: #444; // subtle dark gray
+  color: #444;
   margin: 0;
- 
 }
 
 .card-heading {
-  color:var(--primary-400);
+  color: var(--primary-400);
   font-weight: var(--font-weight-semibold);
   font-size: 12px;
 }
 
 .material-form {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
-  gap: 0px 15px; /* row gap | column gap */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0px 15px;
   width: 100%;
   border-top: 1.5px solid var(--neutral-200);
   padding: 20px 0px;
 
-  /* Ensures each row stays aligned */
   grid-auto-rows: minmax(70px, auto);
 
   .form-field {
     width: 100%;
     display: flex;
     flex-direction: column;
-     font-size: 20px ;
+    font-size: 20px;
   }
 
-  /* Buttons row spans all 3 columns */
   .form-actions {
-    grid-column: span 3;
+    grid-column: 1 / -1;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -53,24 +49,23 @@
 
   flex: 1;
   overflow-y: auto;
-
 }
 
 .material-form.assessor-view {
-  gap: 0px 10px; /* row gap | column gap */
+  gap: 0px 10px;
   padding: 0px 0px 10px 0px;
   grid-auto-rows: minmax(40px, auto);
   font-size: 2px;
 }
 
-:host ::ng-deep .mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
+::host ::ng-deep .mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
   color: var(--neutral-300);
 }
 
 .assessor-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 8px; /* minimal space between buttons */
+  gap: 8px;
   margin-top: -5px;
   margin-bottom: 10px;
   flex-shrink: 0;
@@ -83,22 +78,14 @@
   text-align: left;
   padding: 5px 0;
   margin-top: 30px;
-  border-bottom: 4px solid var(--neutral-200); /* thicker border */
+  border-bottom: 4px solid var(--neutral-200);
   margin-bottom: 5px;
   grid-column: span 3;
 }
 
-// .full-width-break {
-//   grid-column: span 3;
-//   margin: 0px ;
-//   // margin-top: 20px;
-//   border: none;
-//   border-top: 1px solid var(--neutral-200);
-// }
-
 .confirmer-comment {
   font-weight: var(--font-weight-semibold);
-  font-size: 12px; /* same as confirmation */
+  font-size: 12px;
   margin-top: 10px;
   margin-bottom: 10px;
   grid-column: span 3;
@@ -116,12 +103,13 @@
   box-sizing: border-box;
 }
 
-:host {
+::host {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
+
 .assess-form {
   display: flex;
   flex-direction: column;
@@ -140,5 +128,33 @@
 
 .assess-form .form-field {
   margin: 0;
+}
+
+/* Overlay mode layout and wrapping */
+:host.overlay-mode .material-form {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+:host.overlay-mode .form-field {
+  min-width: 0;
+}
+
+:host.overlay-mode ::ng-deep .mdc-text-field__input,
+:host.overlay-mode ::ng-deep textarea {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+:host.overlay-mode ::ng-deep .mdc-notched-outline {
+  min-width: 0;
+}
+
+.edit-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 20px;
 }
 
