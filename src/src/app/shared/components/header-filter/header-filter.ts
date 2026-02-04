@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component,Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
@@ -38,6 +38,7 @@ import { IdeaEventsService } from '../../../events/ideaServiceEvents';
   styleUrl: './header-filter.scss',
 })
 export class HeaderFilter implements OnInit {
+  @Input() isAdmin: boolean = false;
   filterForm = new FormGroup({
     franchise: new FormControl<string | null>(null),
     ta: new FormControl<string | null>(null),
@@ -53,6 +54,7 @@ export class HeaderFilter implements OnInit {
   taFilteredOptions: DropdownOption[] = [];
   roleOptions: DropdownOption[] = [];
   functionsOptions: DropdownOption[] = [];
+  groupsOptions: DropdownOption[] = [];
 
   private sub= Subscription;
 
@@ -65,13 +67,13 @@ export class HeaderFilter implements OnInit {
       //this.filterChange.emit(value);
     });
   }
-
   ngOnInit(): void {
     this.user$.subscribe((user) => {
       if (!user) return;
 
       this.roleOptions = mapRolesToDropdown(user);
       this.functionsOptions = mapFunctionsToDropdown(user);
+      this.groupsOptions = mapFunctionsToDropdown(user);
     });
 
     this.franchises$.subscribe((list) => {

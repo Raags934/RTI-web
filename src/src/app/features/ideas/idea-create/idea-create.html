@@ -151,6 +151,8 @@
   <div class="form-actions">
     <app-buttons
       (click)="openPopUp('cancelIdea')"
+      (keydown.enter)="openPopUp('cancelIdea')"
+       (keydown.space)="openPopUp('cancelIdea')"
       variant="type2"
       color="var(--primary-400)"
       size="large"
@@ -159,6 +161,8 @@
     </app-buttons>
     <app-buttons
       (click)="openPopUp('draftIdea')"
+      (keydown.enter)="openPopUp('draftIdea')"
+      (keydown.space)="openPopUp('draftIdea')"
       variant="type2"
       color="var(--primary-400)"
       size="large"
@@ -168,6 +172,8 @@
 
     <app-buttons
       (click)="openPopUp('submitIdea')"
+      (keydown.enter)="openPopUp('submitIdea')"
+       (keydown.space)="openPopUp('submitIdea')"
       variant="type1"
       color="var(--primary-400)"
       size="large"

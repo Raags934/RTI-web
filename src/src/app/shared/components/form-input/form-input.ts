@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 
@@ -24,6 +26,8 @@ export interface DropdownOption<T = any> {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     TextFieldModule,
   ],
   templateUrl: './form-input.html',
@@ -34,7 +38,7 @@ export class FormInput<T = any> implements OnInit {
      Inputs
   ------------------------------ */
   @Input() label!: string;
-  @Input() type: 'text' | 'textarea' | 'select' = 'text';
+  @Input() type: 'text' | 'textarea' | 'select' | 'date' = 'text';
   @Input() placeholder = '';
   @Input() options: DropdownOption<T>[] = [];
   @Input() required = false;

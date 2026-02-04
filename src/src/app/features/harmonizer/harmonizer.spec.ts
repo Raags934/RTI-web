@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Header } from './header';
+import { Harmonizer } from './harmonizer';
 
-fdescribe('Header', () => {
-  let component: Header;
-  let fixture: ComponentFixture<Header>;
+describe('Harmonizer', () => {
+  let component: Harmonizer;
+  let fixture: ComponentFixture<Harmonizer>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Header]
+      imports: [Harmonizer]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Header);
+    fixture = TestBed.createComponent(Harmonizer);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

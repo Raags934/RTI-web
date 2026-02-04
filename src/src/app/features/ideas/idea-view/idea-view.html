@@ -4,17 +4,19 @@
 
   <app-buttons
     variant="type2"
-    [color]="getStatusColor(viewIdea?.status?.status_id)"
+    [color]="(from === 'assessor' || from === 'harmonizer') ? 'var( --caution-300)' : getStatusColor(viewIdea?.status?.status_id)"
     size="small"
     [isStatus]="true"
   >
-    {{ viewIdea?.status?.status_name || '.....' }}
+    <span style="white-space: nowrap;">
+      {{ from === 'assessor' ? 'Assessment Pending' : from === 'harmonizer' ? 'Harmonization Pending' : (viewIdea?.status?.status_name || '.....') }}
+    </span>
   </app-buttons>
 </div>
 <div class="card-heading">
   <p>Ideation</p>
 </div>
-<form class="material-form">
+<form class="material-form" [class.assessor-view]="from === 'assessor'">
     <!-- Product -->
     <div class="form-field">
       <app-form-input
@@ -26,21 +28,20 @@
       >
       </app-form-input>
     </div>
- 
+
     <!-- TA (auto-filled) -->
     <div class="form-field">
       <app-form-input
       [label]="labels[1].text"
       type="text"
       [isDisabled]="true"
-
-        [isDisabled]="true"
+      [required]="true"
         [control]="form.get('ta_id')"
         [showIconDropdown]="false"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Product Type -->
     <div class="form-field">
       <app-form-input
@@ -52,86 +53,84 @@
       >
       </app-form-input>
     </div>
- 
+
     <!-- Research Pathway -->
     <div class="form-field">
       <app-form-input
       [label]="labels[3].text"
       type="text"
       [isDisabled]="true"
-
         [required]="true"
         [control]="form.get('pathway_id')"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Brand (auto-filled) -->
     <div class="form-field">
       <app-form-input
       [label]="labels[4].text"
       type="text"
       [isDisabled]="true"
-
-        [isDisabled]="true"
+      [required]="true"
         [control]="form.get('brand_id')"
         [showIconDropdown]="false"
       >
       </app-form-input>
     </div>
- 
+
     <!-- RTI Year -->
     <div class="form-field">
       <app-form-input
         [label]="labels[5].text"
         type="text"
         [isDisabled]="true"
-
         [required]="true"
         [autoSelectFirst]="true"
         [control]="form.get('rti_year')"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Franchise (auto-filled) -->
     <div class="form-field">
       <app-form-input
         [label]="labels[6].text"
         type="text"
         [isDisabled]="true"
+        [required]="true"
         [control]="form.get('franchise_id')"
         [showIconDropdown]="false"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Monadic or Comparative -->
     <div class="form-field">
       <app-form-input
         [label]="labels[7].text"
         type="text"
         [isDisabled]="true"
-
         [required]="true"
         [control]="form.get('monadic_or_comparative')"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Origin Request -->
     <div class="form-field">
       <app-form-input
         [label]="labels[8].text"
         type="text"
         [isDisabled]="true"
+        [required]="true"
         [autoSelectFirst]="true"
         [control]="form.get('origin_request')"
         [showIconDropdown]="false"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Strategic Rationale -->
     <div class="form-field">
       <app-form-input
@@ -139,11 +138,12 @@
         type="textarea"
         [isDisabled]="true"
         [required]="true"
+        rows="1"
         [control]="form.get('strategic_rationale')"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Target Aspirational Claim -->
     <div class="form-field">
       <app-form-input
@@ -151,25 +151,238 @@
         type="textarea"
         [isDisabled]="true"
         [required]="true"
+        rows="1"
         [control]="form.get('target_aspirational_claim')"
       >
       </app-form-input>
     </div>
- 
+
     <!-- Launch Claim -->
     <div class="form-field">
       <app-form-input
         [label]="labels[11].text"
         type="text"
         [isDisabled]="true"
-
         [required]="true"
         [control]="form.get('launch_claim')"
       >
       </app-form-input>
     </div>
- 
-   
+
+    <!-- Confirmation -->
+    <div class="confirmation-row" *ngIf="from === 'assessor' || from === 'harmonizer'">
+      Confirmation
+    </div>
+
+    <!-- Confirmer Comment section -->
+    <div class="confirmer-comment" *ngIf="from === 'assessor' || from === 'harmonizer'">
+      <app-form-input
+        label="Confirmer Comment"
+        type="textarea"
+        [control]="form.get('comment')"
+        placeholder="Enter comment here"
+        rows="1"
+      ></app-form-input>
+    </div>
+
+
   </form>
+
+  <!-- Assessor buttons -->
+  <div class="assessor-buttons" *ngIf="from === 'assessor' || from === 'harmonizer'">
+    <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="onAbandon()">Abandon</app-buttons>
+    <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="onNeedMoreInfo()">Need More Info</app-buttons>
+    <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="onAssessIdea()">{{ from === 'assessor' ? 'Assess Idea' : 'Harmonize Idea' }}</app-buttons>
+  </div>
+
+  <app-popup
+    [open]="popup.open"
+    [title]="popup.title"
+    [helper]="popup.helper"
+    [cancelText]="popup.cancelText"
+    [confirmText]="popup.confirmText"
+    [size]="popup.size"
+    [confirmPopupAction]="popup.confirmPopupAction"
+  >
+    @if (popup.confirmPopupAction === "abandonIdea") {
+      <div class="form-field"><app-form-input label="Comment" type="textarea" placeholder="Please provide a reason before abandoning" [required]="true" [control]="form.get('comment')" ></app-form-input></div>
+    }
+  </app-popup>
+
+  <app-popup
+    [open]="needMoreInfoPopup.open"
+    [title]="needMoreInfoPopup.title"
+    [helper]="needMoreInfoPopup.helper"
+    [cancelText]="needMoreInfoPopup.cancelText"
+    [confirmText]="needMoreInfoPopup.confirmText"
+    [size]="needMoreInfoPopup.size"
+    [confirmPopupAction]="needMoreInfoPopup.confirmPopupAction"
+  >
+    @if (needMoreInfoPopup.confirmPopupAction === "needMoreInfo") {
+      <div class="form-field"><app-form-input label="Comment" type="textarea" placeholder="provide more information to continue the process" [required]="true" [control]="form.get('comment')" ></app-form-input></div>
+    }
+  </app-popup>
+
+  <app-popup
+    [open]="assessIdeaPopup.open"
+    [title]="assessIdeaPopup.title"
+    [helper]="assessIdeaPopup.helper"
+    [cancelText]="assessIdeaPopup.cancelText"
+    [confirmText]="assessIdeaPopup.confirmText"
+    [size]="assessIdeaPopup.size"
+    [confirmPopupAction]="assessIdeaPopup.confirmPopupAction"
+  >
+    @if (assessIdeaPopup.confirmPopupAction === "assessIdea") {
+      <div class="assess-form">
+        <div class="dropdown-row">
+          <div class="form-field">
+            <app-form-input
+              label="Is the study recommended to be conducted?"
+              type="select"
+              [required]="true"
+              [control]="form.get('study_recommended')"
+              [options]="[{id: 'Yes', name: 'Yes'}, {id: 'No', name: 'No'}]"
+            ></app-form-input>
+          </div>
+          <div class="form-field">
+            <app-form-input
+              label="POS"
+              type="text"
+              [required]="true"
+              [control]="form.get('pos')"
+              placeholder="Free Text(0-100%)"
+            ></app-form-input>
+          </div>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="POS Reasons"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('pos_reasons')"
+            rows="2"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="EF Assessment Comments"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('ef_assessment_comments')"
+          ></app-form-input>
+        </div>
+      </div>
+    }
+  </app-popup>
+
+  <app-popup
+    [open]="submitToHarmonizationPopup.open"
+    [title]="submitToHarmonizationPopup.title"
+    [helper]="submitToHarmonizationPopup.helper"
+    [cancelText]="submitToHarmonizationPopup.cancelText"
+    [confirmText]="submitToHarmonizationPopup.confirmText"
+    [size]="submitToHarmonizationPopup.size"
+    [confirmPopupAction]="submitToHarmonizationPopup.confirmPopupAction"
+  >
+    @if (submitToHarmonizationPopup.confirmPopupAction === "submitToHarmonization") {
+      <div class="form-field">
+        <app-form-input
+          label="Comment (Optional)"
+          type="textarea"
+          [control]="form.get('comment')"
+        ></app-form-input>
+      </div>
+    }
+  </app-popup>
+
+  <app-popup
+    [open]="enterStudyDetailsPopup.open"
+    [title]="enterStudyDetailsPopup.title"
+    [helper]="enterStudyDetailsPopup.helper"
+    [cancelText]="enterStudyDetailsPopup.cancelText"
+    [confirmText]="enterStudyDetailsPopup.confirmText"
+    [size]="enterStudyDetailsPopup.size"
+    [confirmPopupAction]="enterStudyDetailsPopup.confirmPopupAction"
+  >
+    @if (enterStudyDetailsPopup.confirmPopupAction === "enterStudyDetails") {
+      <div class="study-details-form">
+        <div class="form-field">
+          <app-form-input
+            label="Research Questions"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('research_questions')"
+            rows="2"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Potential Claims"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('potential_claims')"
+            rows="4"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Primary Endpoints"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('primary_endpoints')"
+            rows="1"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Secondary Endpoints"
+            type="textarea"
+            [required]="true"
+            [control]="form.get('secondary_endpoints')"
+            rows="3"
+          ></app-form-input>
+        </div>
+        <div class="date-fields-row">
+          <div class="form-field">
+            <app-form-input
+              label="Estimated Start Date"
+              type="date"
+              [required]="true"
+              [control]="form.get('estimated_study_start_date')"
+              placeholder="MM/DD/YYYY"
+            ></app-form-input>
+          </div>
+          <div class="form-field">
+            <app-form-input
+              label="Estimated End Date"
+              type="date"
+              [required]="true"
+              [control]="form.get('estimated_study_end_date')"
+              placeholder="MM/DD/YYYY"
+            ></app-form-input>
+          </div>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Estimated Sample Size"
+            type="text"
+            [required]="true"
+            [control]="form.get('estimated_sample_size')"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Total Estimated Budget"
+            type="text"
+            [required]="true"
+            [control]="form.get('total_estimated_budget')"
+          ></app-form-input>
+        </div>
+      </div>
+    }
+  </app-popup>
+
+
+
  
  

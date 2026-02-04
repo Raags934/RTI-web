@@ -29,6 +29,7 @@ export type ColumnWidth = 'xsmall' | 'small' | 'medium' | 'large';
 export class Table {
   @Input() columns: TableColumn[] = [];
   @Input() dataSource: any[] = [];
+  @Input() from: string = '';
   statusColor = statusColor;
 
   private sub!: Subscription;
@@ -96,6 +97,7 @@ export class Table {
   }
 
   onOptionsClick(element:any){
+    // this.ideaEvents.openOptions(element);
 
   }
  
@@ -105,7 +107,7 @@ export class Table {
   }
 
   viewIdea(key:any) {
-    this.router.navigate(['/ideas/'+key]);
+    this.router.navigate(['/ideas/'+key], { queryParams: { from: this.from } });
   }
 
  

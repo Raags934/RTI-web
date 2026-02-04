@@ -55,6 +55,22 @@ export class Buttons {
         this.ideaEvents.prevIdea();
         break;
 
+      case 'assessIdea':
+        this.ideaEvents.assessIdea();
+        break;
+
+      case 'submitToHarmonization':
+        this.ideaEvents.submitToHarmonization();
+        break;
+
+      case 'enterStudyDetails':
+        this.ideaEvents.enterStudyDetails();
+        break;
+
+      case 'submitStudyDetailsConfirmation':
+        this.ideaEvents.submitStudyDetailsConfirmation();
+        break;
+
       default:
         console.warn('Unhandled actionType:', this.actionType);
         break;

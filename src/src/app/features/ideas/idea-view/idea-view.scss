@@ -4,18 +4,24 @@
   align-items: center;
   gap: 8px; // space between label and button
   margin: 8px 0;
+
+  ::ng-deep .mdc-button__label {
+    white-space: nowrap;
+  }
 }
 
 .status-label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   color: #444; // subtle dark gray
   margin: 0;
+ 
 }
 
 .card-heading {
   color:var(--primary-400);
   font-weight: var(--font-weight-semibold);
+  font-size: 12px;
 }
 
 .material-form {
@@ -33,6 +39,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+     font-size: 20px ;
   }
 
   /* Buttons row spans all 3 columns */
@@ -44,10 +51,94 @@
     margin-top: 20px;
   }
 
- 
- 
+  flex: 1;
+  overflow-y: auto;
+
+}
+
+.material-form.assessor-view {
+  gap: 0px 10px; /* row gap | column gap */
+  padding: 0px 0px 10px 0px;
+  grid-auto-rows: minmax(40px, auto);
+  font-size: 2px;
 }
 
 :host ::ng-deep .mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
   color: var(--neutral-300);
 }
+
+.assessor-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px; /* minimal space between buttons */
+  margin-top: -5px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.confirmation-row {
+  color: var(--primary-400);
+  font-weight: var(--font-weight-semibold);
+  font-size: 12px;
+  text-align: left;
+  padding: 5px 0;
+  margin-top: 30px;
+  border-bottom: 4px solid var(--neutral-200); /* thicker border */
+  margin-bottom: 5px;
+  grid-column: span 3;
+}
+
+// .full-width-break {
+//   grid-column: span 3;
+//   margin: 0px ;
+//   // margin-top: 20px;
+//   border: none;
+//   border-top: 1px solid var(--neutral-200);
+// }
+
+.confirmer-comment {
+  font-weight: var(--font-weight-semibold);
+  font-size: 12px; /* same as confirmation */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  grid-column: span 3;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: horizontal;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.assess-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dropdown-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.dropdown-row .form-field {
+  flex: 1;
+}
+
+.assess-form .form-field {
+  margin: 0;
+}
+

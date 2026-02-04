@@ -17,12 +17,13 @@ import { ideaDisplayColumns } from '../../../shared/constants/tableColumns.js';
 import { loadMasterData } from '../../../store/masterData/masterData.actions.js';
 
 @Component({
-  selector: 'app-idea-dashboard',
+  selector: 'app-admin-product',
   imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
-  templateUrl: './idea-dashboard.html',
-  styleUrl: './idea-dashboard.scss',
+  templateUrl: './admin-product.html',
+  styleUrl: './admin-product.scss',
 })
-export class IdeaDashboard implements OnInit {
+
+export class AdminProduct implements OnInit {
   userName: string = 'Karthik Perisetti';
 
   ideaDisplayColumns: TableColumn[] = ideaDisplayColumns;
@@ -34,6 +35,9 @@ export class IdeaDashboard implements OnInit {
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
+  pageTitle: string = 'All Listed Products';
+  pageCaption: string = ''; // Empty string since no caption is needed
+
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -178,4 +182,6 @@ export class IdeaDashboard implements OnInit {
 
     this.updatePagedIdeas();
   }
+ 
 }
+

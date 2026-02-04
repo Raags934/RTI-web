@@ -1,11 +1,12 @@
 <div class="ideas-toolbar">
   <!-- Left side: heading + caption -->
   <div class="left">
-    <div class="title">Ideas List</div>
-    <div class="caption">Your latest research proposals and ideas</div>
+    <div class="title">{{ title }}</div>
+<div class="caption" *ngIf="caption">{{ caption }}</div>
+
   </div>
 
-  <div class="search">
+  <div class="search" *ngIf="showSearch">
     <input
       type="text"
       placeholder="Search ideas..."
@@ -21,6 +22,7 @@
   <!-- Right side: buttons -->
   <div class="right">
     <app-buttons
+      *ngIf="!showNewIdea"
       variant="type2"
       color="var(--primary-300)"
       size="medium"
@@ -30,6 +32,7 @@
       Export Data
     </app-buttons>
     <app-buttons
+      *ngIf="showNewIdea"
       [routerLink]="'/addidea'"
       variant="type1"
       color="var(--primary-400)"
@@ -37,6 +40,16 @@
       icon="add_circle_outline"
     >
       New Idea
+    </app-buttons>
+    <app-buttons
+      *ngIf="showNewIdea"
+      variant="type2"
+      color="var(--primary-300)"
+      size="medium"
+      icon="ios_share"
+      class="export-btn"
+    >
+      Export Data
     </app-buttons>
   </div>
 </div>

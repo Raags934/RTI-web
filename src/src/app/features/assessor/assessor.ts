@@ -1,32 +1,35 @@
 import { Component, OnInit } from '@angular/core';
 
-import { AppState } from '../../../app.state.js';
+import { AppState } from '../../app.state';
 import { Store, select } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { LoadIdeas } from '../../../store/idea.actions.js';
-import { Idea } from '../../../models/idea.model.js';
-import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
-import { TableHeader } from '../../../shared/components/table-header/table-header.js';
-import { Table, TableColumn } from '../../../shared/components/table/table.js';
-import { HeaderFilter } from '../../../shared/components/header-filter/header-filter.js';
-import { TableFilter } from '../../../shared/components/table-filter/table-filter.js';
-import { Pagination } from '../../../shared/components/pagination/pagination.js';
-import { StatusTab, creator } from '../../../shared/constants/statusTabs.js';
-import { ideaDisplayColumns } from '../../../shared/constants/tableColumns.js';
-import { loadMasterData } from '../../../store/masterData/masterData.actions.js';
+
+import { LoadIdeas } from '../../store/idea.actions';
+import { Idea } from '../../models/idea.model';
+import { User } from '../../models/user.model';
+import { IdeaEventsService } from '../../events/ideaServiceEvents';
+import { TableHeader } from '../../shared/components/table-header/table-header';
+import { Table, TableColumn } from '../../shared/components/table/table';
+import { HeaderFilter } from '../../shared/components/header-filter/header-filter';
+import { TableFilter } from '../../shared/components/table-filter/table-filter';
+import { Pagination } from '../../shared/components/pagination/pagination';
+import { StatusTab, assessor } from '../../shared/constants/statusTabs';
+import { ideaDisplayColumns } from '../../shared/constants/tableColumns';
+import { loadMasterData } from '../../store/masterData/masterData.actions';
 
 @Component({
-  selector: 'app-idea-dashboard',
+  selector: 'app-assessor',
   imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
-  templateUrl: './idea-dashboard.html',
-  styleUrl: './idea-dashboard.scss',
+  templateUrl: './assessor.html',
+  styleUrl: './assessor.scss',
 })
-export class IdeaDashboard implements OnInit {
+export class Assessor implements OnInit {
   userName: string = 'Karthik Perisetti';
+ 
 
   ideaDisplayColumns: TableColumn[] = ideaDisplayColumns;
-  statusTabs: StatusTab[] = creator;
+  statusTabs: StatusTab[] = assessor;
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];
@@ -52,7 +55,7 @@ export class IdeaDashboard implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.taFilterChange(3);
+      this.filteredIdeas = [...this.ideas]; // Show all ideas for assessors
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();

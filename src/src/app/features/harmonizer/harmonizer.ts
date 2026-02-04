@@ -1,32 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 
-import { AppState } from '../../../app.state.js';
+import { AppState } from '../../app.state.js';
 import { Store, select } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { LoadIdeas } from '../../../store/idea.actions.js';
-import { Idea } from '../../../models/idea.model.js';
-import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
-import { TableHeader } from '../../../shared/components/table-header/table-header.js';
-import { Table, TableColumn } from '../../../shared/components/table/table.js';
-import { HeaderFilter } from '../../../shared/components/header-filter/header-filter.js';
-import { TableFilter } from '../../../shared/components/table-filter/table-filter.js';
-import { Pagination } from '../../../shared/components/pagination/pagination.js';
-import { StatusTab, creator } from '../../../shared/constants/statusTabs.js';
-import { ideaDisplayColumns } from '../../../shared/constants/tableColumns.js';
-import { loadMasterData } from '../../../store/masterData/masterData.actions.js';
+
+import { LoadIdeas } from '../../store/idea.actions.js';
+import { Idea } from '../../models/idea.model.js';
+import { IdeaEventsService } from '../../events/ideaServiceEvents.js';
+import { TableHeader } from '../../shared/components/table-header/table-header.js';
+import { Table, TableColumn } from '../../shared/components/table/table.js';
+import { HeaderFilter } from '../../shared/components/header-filter/header-filter.js';
+import { TableFilter } from '../../shared/components/table-filter/table-filter.js';
+import { Pagination } from '../../shared/components/pagination/pagination.js';
+import { StatusTab, creator, harmonizer } from '../../shared/constants/statusTabs.js';
+import { ideaDisplayColumns } from '../../shared/constants/tableColumns.js';
+import { loadMasterData } from '../../store/masterData/masterData.actions.js';
 
 @Component({
-  selector: 'app-idea-dashboard',
+  selector: 'app-harmonizer',
   imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
-  templateUrl: './idea-dashboard.html',
-  styleUrl: './idea-dashboard.scss',
+  templateUrl: './harmonizer.html',
+  styleUrl: './harmonizer.scss',
 })
-export class IdeaDashboard implements OnInit {
+export class Harmonizer implements OnInit {
   userName: string = 'Karthik Perisetti';
 
   ideaDisplayColumns: TableColumn[] = ideaDisplayColumns;
-  statusTabs: StatusTab[] = creator;
+  statusTabs: StatusTab[] = harmonizer;
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];

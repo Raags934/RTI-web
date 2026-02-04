@@ -1,0 +1,6 @@
+<app-header-filter class="header-filter"></app-header-filter>
+<app-table-header [showSearch]="false" [showNewIdea]="false"></app-table-header>
+<app-table-filter [tabs]="statusTabs"></app-table-filter>
+<app-table [columns]="ideaDisplayColumns"
+[dataSource]="pagedIdeas" [from]="'assessor'"></app-table>
+<app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>

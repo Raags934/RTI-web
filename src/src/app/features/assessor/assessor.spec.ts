@@ -1,10 +1,9 @@
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IdeaDashboard } from './idea-dashboard';
+import { Assessor } from './assessor';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { LoadIdeas } from '../../../store/idea.actions.js';
-import { Idea } from '../../../models/idea.model.js';
-import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
+import { LoadIdeas } from '../../store/idea.actions.js';
+import { Idea } from '../../models/idea.model.js';
+import { IdeaEventsService } from '../../events/ideaServiceEvents.js';
 import { Subject } from 'rxjs';
 
 // A tiny mock for IdeaEventsService that lets us emit events on demand
@@ -16,15 +15,15 @@ class IdeaEventsServiceMock {
   }
 }
 
-fdescribe('IdeaDashboard ', () => {
-  let fixture: ComponentFixture<IdeaDashboard>;
-  let component: IdeaDashboard;
+fdescribe('Assessor', () => {
+  let component: Assessor;
+  let fixture: ComponentFixture<Assessor>;
   let store: MockStore;
   let dispatchSpy: jasmine.Spy;
   let ideaEvents: IdeaEventsServiceMock;
 
-  // Utility to create mock ideas; relaxed typing so we can add fields freely
-  const makeIdea = (overrides: Partial<Record<string, any>> = {}): Idea =>
+   // Utility to create mock ideas; relaxed typing so we can add fields freely
+   const makeIdea = (overrides: Partial<Record<string, any>> = {}): Idea =>
     ({
       idea_uid: 'id-' + Math.random().toString(36).slice(2),
       name: 'Default',
@@ -38,89 +37,39 @@ fdescribe('IdeaDashboard ', () => {
 
   beforeEach(async () => {
     ideaEvents = new IdeaEventsServiceMock();
-
     await TestBed.configureTestingModule({
-      imports: [IdeaDashboard],
+      imports: [Assessor],
       providers: [
         provideMockStore({ initialState: { ideas: [] } }),
         { provide: IdeaEventsService, useValue: ideaEvents },
       ],
     })
-      // Avoid loading the real external template/subcomponents—focus on TS logic.
-      .overrideComponent(IdeaDashboard, {
-        set: {
-          template: '<div>Test Host</div>',
-          // If needed, you can also clear imports here to avoid resolving child comps:
-          // imports: [],
-        },
-      })
-      .compileComponents();
+     // Avoid loading the real external template/subcomponents—focus on TS logic.
+     .overrideComponent(Assessor, {
+      set: {
+        template: '<div>Test Host</div>',
+        // If needed, you can also clear imports here to avoid resolving child comps:
+        // imports: [],
+      },
+    })
+    .compileComponents();
 
-    fixture = TestBed.createComponent(IdeaDashboard);
+    fixture = TestBed.createComponent(Assessor);
     component = fixture.componentInstance;
-
     store = TestBed.inject(MockStore);
     dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
-
-    fixture.detectChanges(); // triggers ngOnInit()
+    fixture.detectChanges();
   });
 
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+ 
   it('should create and dispatch LoadIdeas when initial ideas are empty', () => {
     expect(component).toBeTruthy();
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
     expect(dispatchSpy).toHaveBeenCalledWith(LoadIdeas());
   });
-
-  it('should react to ideas stream: set ideas, call taFilterChange(3), update totals & status counts', () => {
-    // Make some ideas across TA and status
-    const ideas: Idea[] = [
-      makeIdea({ idea_uid: 'A', ta_id: 3, status_id: 1, name: 'Alpha', details: { score: 2 } }),
-      makeIdea({ idea_uid: 'B', ta_id: 3, status_id: 2, name: 'Beta', details: { score: 1 } }),
-      makeIdea({ idea_uid: 'C', ta_id: 1, status_id: 1, name: 'Gamma', details: { score: 3 } }),
-      makeIdea({
-        idea_uid: 'D',
-        ta_id: 3,
-        status_id: 1,
-        name: 'Delta',
-        target_aspirational_claim: 'Claim X',
-        research_proposal: 'Proposal Y',
-        details: { score: 4 },
-      }),
-    ] as any;
-
-    // Spy on taFilterChange to ensure ngOnInit invokes it with 3
-    const taSpy = spyOn(component, 'taFilterChange').and.callThrough();
-
-    // Emit non-empty ideas
-    store.setState({ ideas } as any);
-
-    // After non-empty emission, taFilterChange(3) is called
-    expect(taSpy).toHaveBeenCalledWith(3);
-
-    // Ideas are updated
-    expect(component.ideas.length).toBe(4);
-
-    // taFilterChange(3) should have filtered to those with ta_id === 3
-    expect(component.filteredIdeas.map((i: any) => i.idea_uid).sort()).toEqual(['A', 'B', 'D'].sort());
-
-    // With default pageSize=6 and 3 items -> totalPages = 1, currentPage reset to 1
-    expect(component.totalPages).toBe(1);
-    expect(component.currentPage).toBe(1);
-    expect(component.pagedIdeas.length).toBe(3);
-
-    // Update status counts using a deterministic tab set
-    (component as any).statusTabs = [
-      { status_id: undefined, count: 0 }, // "All"
-      { status_id: 1, count: 0 },
-      { status_id: 2, count: 0 },
-    ];
-    component.updateStatusCounts();
-    const tabs = (component as any).statusTabs;
-    expect(tabs.find((t: any) => t.status_id === undefined).count).toBe(4);
-    expect(tabs.find((t: any) => t.status_id === 1).count).toBe(3);
-    expect(tabs.find((t: any) => t.status_id === 2).count).toBe(1);
-  });
-
   it('taFilterChange should filter by TA, reset to page 1, and update paged items', () => {
     const ideas: Idea[] = [
       makeIdea({ ta_id: 3, name: 'X' }),

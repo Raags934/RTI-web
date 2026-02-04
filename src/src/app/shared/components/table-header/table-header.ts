@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
@@ -21,6 +21,11 @@ import { Buttons } from '../buttons/buttons';
   styleUrl: './table-header.scss',
 })
 export class TableHeader {
+  @Input() showSearch: boolean = true;
+  @Input() showNewIdea: boolean = true;
+  @Input() title: string = 'Ideas List';
+@Input() caption: string = 'Your latest research proposals and ideas';
+
   searchValue: string = '';
 
   constructor(private ideaEvent: IdeaEventsService) {

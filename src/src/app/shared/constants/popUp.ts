@@ -41,9 +41,75 @@ export const draftIdea: Popup = {
 };
 
 
+export const abandonIdea: Popup = {
+  open: false,
+  title: 'Abandon this idea',
+  helper: 'Please provide a reason before abandoning',
+  cancelText: 'Cancel',
+  confirmText: 'Abandon Idea',
+  size: 'medium',
+  confirmPopupAction: 'abandonIdea'
+};
+
+export const needMoreInfo: Popup = {
+  open: false,
+  title: 'Need More Information',
+  helper: 'provide more information to continue the process',
+  cancelText: 'Cancel',
+  confirmText: 'Send it back',
+  size: 'medium',
+  confirmPopupAction: 'needMoreInfo'
+};
+
+export const assessIdea: Popup = {
+  open: false,
+  title: 'Assess this idea',
+  helper: 'Review all details before submitting for evaluation',
+  cancelText: 'Cancel',
+  confirmText: 'Submit Idea',
+  size: 'large',
+  confirmPopupAction: 'assessIdea'
+};
+
+export const submitToHarmonization: Popup = {
+  open: false,
+  title: 'Are you sure you want to move this idea to harmonization phase?',
+  helper: 'Verify idea details before submission.',
+  cancelText: 'No',
+  confirmText: 'Yes',
+  size: 'medium',
+  confirmPopupAction: 'submitToHarmonization'
+};
+
+export const enterStudyDetails: Popup = {
+  open: false,
+  title: 'Enter Study Details',
+  helper: 'Please verify that all the information is correct before submitting.',
+  cancelText: 'Save as a Study Draft',
+  confirmText: 'Submit Study Details',
+  size: 'large',
+  confirmPopupAction: 'enterStudyDetails'
+};
+
+export const submitStudyDetailsConfirmation: Popup = {
+  open: false,
+  title: 'Are you sure you want to submit this idea for the final data check phase?',
+  helper: 'Verify idea and study details before submission.',
+  cancelText: 'No',
+  confirmText: 'Yes',
+  size: 'medium',
+  confirmPopupAction: 'submitStudyDetailsConfirmation'
+};
+
 export const PopupConfigs = {
   submitIdea,
   cancelIdea,
   draftIdea,
+  abandonIdea,
+  needMoreInfo,
+  assessIdea,
+  submitToHarmonization,
+  enterStudyDetails,
+  submitStudyDetailsConfirmation,
 } as const;
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
 export type IdeaEvent =
@@ -17,7 +17,13 @@ export type IdeaEvent =
   | { type: 'confirmPopUp' }
   | { type: 'nextIdea' }
   | { type: 'prevIdea' }
-  | { type: 'toastEvent' ; payload: string };
+  | { type: 'toastEvent' ; payload: string }
+  | { type: 'abandonIdea' }
+  | { type: 'needMoreInfo' }
+  | { type: 'assessIdea' }
+  | { type: 'submitToHarmonization' }
+  | { type: 'enterStudyDetails' }
+  | { type: 'submitStudyDetailsConfirmation' };
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -84,5 +90,29 @@ export class IdeaEventsService {
 
   prevIdea() {
     this.eventsSubject.next({ type: 'prevIdea'} );
+  }
+
+  abandonIdea() {
+    this.eventsSubject.next({ type: 'abandonIdea'} );
+  }
+
+  needMoreInfo() {
+    this.eventsSubject.next({ type: 'needMoreInfo'} );
+  }
+
+  assessIdea() {
+    this.eventsSubject.next({ type: 'assessIdea'} );
+  }
+
+  submitToHarmonization() {
+    this.eventsSubject.next({ type: 'submitToHarmonization'} );
+  }
+
+  enterStudyDetails() {
+    this.eventsSubject.next({ type: 'enterStudyDetails'} );
+  }
+
+  submitStudyDetailsConfirmation() {
+    this.eventsSubject.next({ type: 'submitStudyDetailsConfirmation'} );
   }
 }

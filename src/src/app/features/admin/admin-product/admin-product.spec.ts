@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PrioritizationOne } from './prioritization-one';
+import { AdminProduct } from './admin-product';
 
-describe('PrioritizationOne', () => {
-  let component: PrioritizationOne;
-  let fixture: ComponentFixture<PrioritizationOne>;
+describe('AdminProduct', () => {
+  let component: AdminProduct;
+  let fixture: ComponentFixture<AdminProduct>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PrioritizationOne]
+      imports: [AdminProduct]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PrioritizationOne);
+    fixture = TestBed.createComponent(AdminProduct);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
