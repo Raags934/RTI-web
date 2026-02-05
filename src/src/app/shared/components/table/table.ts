@@ -118,8 +118,8 @@ export class Table {
   toggleOptionsMenu(event: Event, ideaUid: string) {
     event.stopPropagation();
 
-    // Allow dropdown on prioritization, idea-dashboard, and admin routes
-    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute() && !this.isAdminRoute()) {
+    // Allow dropdown on prioritization, idea-dashboard, harmonizer, and admin routes
+    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute() && !this.isAdminRoute() && !this.isHarmonizerRoute()) {
       this.viewIdea(ideaUid);
       return;
     }
@@ -153,22 +153,27 @@ export class Table {
   }
 
   // Check if current filter is a pending status based on the component/route
-  // Prioritization One: status_id 11 = Product Prioritization Pending
+  // Prioritization One: status_id 10 = Product Prioritization Pending (display "Product ranking")
   // Prioritization Two: status_id 12 = TA Prioritization Pending
+  // Harmonizer: status_id 5 = Harmonization Pending (Submitted ideas, show "Harmonization pending")
   isPendingFilter(): boolean {
+    if (this.isHarmonizerRoute()) {
+      return this.currentFilterStatusId === 5;
+    }
     if (this.isPrioritizationOneRoute()) {
-      // In Prioritization One, only status_id 11 is "Product Prioritization Pending"
-      return this.currentFilterStatusId === 11;
-    } else if (this.isTaPrioritizationRoute()) {
-      // In Prioritization Two, status_id 12 is "TA Prioritization Pending"
+      return this.currentFilterStatusId === 10;
+    }
+    if (this.isTaPrioritizationRoute()) {
       return this.currentFilterStatusId === 12;
     }
-    // For other components (idea-dashboard, etc.), never show pending_with
     return false;
   }
 
-  // Get status display value - show pending_with if in pending filter mode, otherwise show status_name
+  // Get status display value - show pending label if in pending filter mode, otherwise show status_name
   getStatusDisplayValue(element: any): string {
+    if (this.isHarmonizerRoute() && this.currentFilterStatusId === 5) {
+      return 'Harmonization pending';
+    }
     if (this.isPendingFilter() && element?.status?.pending_with) {
       return element.status.pending_with;
     }
@@ -207,6 +212,12 @@ export class Table {
   isAdminRoute(): boolean {
     const path = this.router.url.split('?')[0];
     return path === '/admin' || path.startsWith('/admin/');
+  }
+
+  // Check if current route is harmonizer page
+  isHarmonizerRoute(): boolean {
+    const path = this.router.url.split('?')[0];
+    return path === '/harmonizer';
   }
 
   // ----- Idea actions -----

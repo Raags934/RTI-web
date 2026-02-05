@@ -96,6 +96,18 @@
               <span>View Idea History</span>
             </div>
           }
+
+          <!-- Harmonizer Menu Items -->
+          @else if (isHarmonizerRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+          }
         </div>
         }
       </div>

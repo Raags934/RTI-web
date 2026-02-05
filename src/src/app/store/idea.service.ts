@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 import { Idea, IdeaPayload, ExportIdeasPayload, ResetIdeaPayload } from '../models/idea.model';
 import { PrioritizationPayload } from '../models/prioritization.model';
+import { StudyDetailsPayload } from '../models/study-details.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
@@ -83,6 +84,30 @@ export class IdeaService {
   }
 
 
+
+  // ----------------------------------------------------
+  // POST: Submit study details (Enter Study Details form)
+  // ----------------------------------------------------
+  submitStudyDetails(payload: StudyDetailsPayload): Observable<unknown> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+    return this.http.post<unknown>(`${this.baseUrl}/study_details`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Idea harmonization (called after study details submit success)
+  // ----------------------------------------------------
+  putHarmonization(ideaId: number, payload: { updated_by: number }): Observable<{ idea_id?: string; message?: string; status?: number }> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+    return this.http.put<{ idea_id?: string; message?: string; status?: number }>(
+      `${this.baseUrl}/ideas/${ideaId}/harmonization`,
+      payload,
+      { headers }
+    );
+  }
 
   // ----------------------------------------------------
   // PUT: Save/Submit prioritization

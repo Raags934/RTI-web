@@ -209,21 +209,82 @@
   </div>
 </form>
 
-<!-- Assessor / Harmonizer buttons -->
-<div class="assessor-buttons" *ngIf="from === 'assessor' || from === 'harmonizer'">
-  <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="onAbandon()">
-    Abandon
-  </app-buttons>
-  <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="onNeedMoreInfo()">
-    Need More Info
-  </app-buttons>
+<!-- Accordion: Study Details & Prioritization (when data exists) -->
+@if (hasStudyDetails() || hasPrioritizationOne() || hasPrioritizationTwo()) {
+  <div class="view-accordions">
+    @if (hasStudyDetails()) {
+      <div class="accordion-item">
+        <button type="button" class="accordion-header" (click)="toggleAccordion('studyDetails')" [attr.aria-expanded]="accordionStudyDetailsOpen">
+          <span class="accordion-title">Study Details</span>
+          <span class="accordion-icon">{{ accordionStudyDetailsOpen ? '−' : '+' }}</span>
+        </button>
+        @if (accordionStudyDetailsOpen) {
+          <div class="accordion-content">
+            <div class="study-details-grid">
+              @for (row of getStudyDetailsDisplayRows(); track row.label) {
+                <div class="study-details-grid-item">
+                  <span class="accordion-label">{{ row.label }}</span>
+                  <span class="accordion-value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (hasPrioritizationOne()) {
+      <div class="accordion-item">
+        <button type="button" class="accordion-header" (click)="toggleAccordion('prioritizationOne')" [attr.aria-expanded]="accordionPrioritizationOneOpen">
+          <span class="accordion-title">Prioritization One (Ranking Brand)</span>
+          <span class="accordion-icon">{{ accordionPrioritizationOneOpen ? '−' : '+' }}</span>
+        </button>
+        @if (accordionPrioritizationOneOpen) {
+          <div class="accordion-content">
+            <div class="accordion-detail-row">
+              <span class="accordion-label">Ranking Brand</span>
+              <span class="accordion-value">{{ viewIdea?.ranking_brand ?? '.....' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (hasPrioritizationTwo()) {
+      <div class="accordion-item">
+        <button type="button" class="accordion-header" (click)="toggleAccordion('prioritizationTwo')" [attr.aria-expanded]="accordionPrioritizationTwoOpen">
+          <span class="accordion-title">Prioritization Two (Ranking Franchise)</span>
+          <span class="accordion-icon">{{ accordionPrioritizationTwoOpen ? '−' : '+' }}</span>
+        </button>
+        @if (accordionPrioritizationTwoOpen) {
+          <div class="accordion-content">
+            <div class="accordion-detail-row">
+              <span class="accordion-label">Ranking Franchise</span>
+              <span class="accordion-value">{{ viewIdea?.ranking_franchise ?? '.....' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
+<!-- Action buttons row: Enter Study Details / Assess Idea + Edit Details -->
+<div class="action-buttons-row">
   <app-buttons
+    *ngIf="from === 'assessor' || from === 'harmonizer'"
     variant="type1"
     color="var(--primary-400)"
     size="medium"
     (click)="onAssessIdea()"
   >
-    {{ from === 'assessor' ? 'Assess Idea' : 'Harmonize Idea' }}
+    {{ from === 'assessor' ? 'Assess Idea' : 'Enter Study Details' }}
+  </app-buttons>
+  <app-buttons
+    (click)="navigateToEdit()"
+    variant="type1"
+    color="var(--primary-400)"
+    size="medium"
+  >
+    Edit Details
   </app-buttons>
 </div>
 
@@ -355,9 +416,30 @@
   [confirmText]="enterStudyDetailsPopup.confirmText"
   [size]="enterStudyDetailsPopup.size"
   [confirmPopupAction]="enterStudyDetailsPopup.confirmPopupAction"
+  [showCancelButton]="enterStudyDetailsPopup.showCancelButton ?? true"
 >
   @if (enterStudyDetailsPopup.confirmPopupAction === 'enterStudyDetails') {
     <div class="study-details-form">
+      <div class="study-details-top-row">
+        <div class="form-field">
+          <app-form-input
+            label="Recommended"
+            type="select"
+            [required]="true"
+            [control]="form.get('recommended')"
+            [options]="recommendedOptions"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Pilot"
+            type="select"
+            [required]="true"
+            [control]="form.get('pilot')"
+            [options]="recommendedOptions"
+          ></app-form-input>
+        </div>
+      </div>
       <div class="form-field">
         <app-form-input
           label="Research Questions"
@@ -430,6 +512,62 @@
           [control]="form.get('total_estimated_budget')"
         ></app-form-input>
       </div>
+      <div class="form-field">
+        <app-form-input
+          label="Budget Currency"
+          type="text"
+          [required]="true"
+          [control]="form.get('budget_currency')"
+          placeholder="e.g. USD"
+        ></app-form-input>
+      </div>
+      <div class="study-details-number-fields">
+        <div class="form-field">
+          <app-form-input
+            label="Estimated Spend +1"
+            type="text"
+            [required]="true"
+            [control]="form.get('estimated_spend_plus_1')"
+            placeholder="Number only"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Estimated Spend +2"
+            type="text"
+            [required]="true"
+            [control]="form.get('estimated_spend_plus_2')"
+            placeholder="Number only"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Estimated Spend +3"
+            type="text"
+            [required]="true"
+            [control]="form.get('estimated_spend_plus_3')"
+            placeholder="Number only"
+          ></app-form-input>
+        </div>
+      </div>
+      <div class="form-field">
+        <app-form-input
+          label="POS"
+          type="text"
+          [required]="true"
+          [control]="form.get('study_details_pos')"
+          placeholder="Number only (0-100)"
+        ></app-form-input>
+      </div>
+      <div class="form-field">
+        <app-form-input
+          label="Regions Accepting Submissions"
+          type="select"
+          [required]="true"
+          [control]="form.get('regions_accepting_submissions')"
+          [options]="regionsAcceptingSubmissionsOptions"
+        ></app-form-input>
+      </div>
     </div>
   }
 </app-popup>
@@ -449,15 +587,4 @@
   }
 </app-popup>
 
-<!-- Edit Details Button (always shown for view page / overlay) -->
-<div class="edit-button-container">
-  <app-buttons
-    (click)="navigateToEdit()"
-    variant="type1"
-    color="var(--primary-400)"
-    size="large"
-  >
-    Edit Details
-  </app-buttons>
-</div>
 

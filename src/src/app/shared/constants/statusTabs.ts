@@ -20,9 +20,7 @@ export const assessor: StatusTab[] = [
 
 export const harmonizer: StatusTab[] = [
   { label: 'All', status_id: 0 },
-  { label: 'Harmonization Pending', status_id: 8 },
-  // { label: 'Revision Required', status_id: 3 },
-  { label: 'Study Draft', status_id: 9 },
+  { label: 'Harmonization Pending', status_id: 5 }, // Submitted ideas – status column shows "Harmonization pending"
   { label: 'Harmonized', status_id: 10 }
 ].map((item) => ({ ...item, count: 0 }));
 

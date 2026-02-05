@@ -38,7 +38,7 @@ export const ideaDisplayColumns: TableColumn[] = [
 // Custom status tabs for prioritization page
 const prioritizationStatusTabs: StatusTab[] = [
   { label: 'All', status_id: 0 },
-  { label: 'Product Prioritization Pending', status_id: 11 }, // DATA_CHECKED status
+  { label: 'Product Prioritization Pending', status_id: 10 }, // DATA_CHECKED status
   { label: 'Product Ranked', status_id: 12 }, // PRODUCT_RANKED status
 ].map((item) => ({ ...item, count: 0 }));
 

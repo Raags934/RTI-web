@@ -120,7 +120,8 @@ export const enterStudyDetails: Popup = {
   cancelText: 'Save as a Study Draft',
   confirmText: 'Submit Study Details',
   size: 'large',
-  confirmPopupAction: 'enterStudyDetails'
+  confirmPopupAction: 'enterStudyDetails',
+  showCancelButton: false
 };
 
 export const submitStudyDetailsConfirmation: Popup = {

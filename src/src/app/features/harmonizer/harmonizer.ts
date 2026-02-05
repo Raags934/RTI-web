@@ -6,8 +6,9 @@ import { Subscription, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { LoadIdeas } from '../../store/idea.actions.js';
-import { Idea } from '../../models/idea.model.js';
+import { Idea, ExportIdeasPayload } from '../../models/idea.model.js';
 import { IdeaEventsService } from '../../events/ideaServiceEvents.js';
+import { IdeaService } from '../../store/idea.service.js';
 import { TableHeader } from '../../shared/components/table-header/table-header.js';
 import { Table, TableColumn } from '../../shared/components/table/table.js';
 import { HeaderFilter } from '../../shared/components/header-filter/header-filter.js';
@@ -16,10 +17,11 @@ import { Pagination } from '../../shared/components/pagination/pagination.js';
 import { StatusTab, creator, harmonizer } from '../../shared/constants/statusTabs.js';
 import { ideaDisplayColumns } from '../../shared/constants/tableColumns.js';
 import { loadMasterData } from '../../store/masterData/masterData.actions.js';
+import { IdeaHistory } from '../ideas/idea-history/idea-history.js';
 
 @Component({
   selector: 'app-harmonizer',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, IdeaHistory],
   templateUrl: './harmonizer.html',
   styleUrl: './harmonizer.scss',
 })
@@ -28,6 +30,9 @@ export class Harmonizer implements OnInit {
 
   ideaDisplayColumns: TableColumn[] = ideaDisplayColumns;
   statusTabs: StatusTab[] = harmonizer;
+  showIdeaHistory = false;
+  selectedIdeaId = 0;
+  selectedIdeaUid = '';
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];
@@ -35,12 +40,17 @@ export class Harmonizer implements OnInit {
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
+  currentFilterStatusId: number = 0; // For status column display (e.g. "Harmonization pending" when tab is 5)
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
   private sub!: Subscription;
 
-  constructor(private store: Store<AppState>, private ideaEvents: IdeaEventsService) {
+  constructor(
+    private store: Store<AppState>,
+    private ideaEvents: IdeaEventsService,
+    private ideaService: IdeaService
+  ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
 
@@ -72,6 +82,16 @@ export class Harmonizer implements OnInit {
         this.filterBySearchText(event.payload.searchText);
       } else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload);
+      } else if (event.type === 'exportData') {
+        this.exportData();
+      } else if (event.type === 'viewIdeaHistory') {
+        this.selectedIdeaId = event.payload.idea_id;
+        this.selectedIdeaUid = event.payload.idea_uid;
+        this.showIdeaHistory = true;
+      } else if (event.type === 'closeIdeaHistory') {
+        this.showIdeaHistory = false;
+        this.selectedIdeaId = 0;
+        this.selectedIdeaUid = '';
       }
     });
   }
@@ -127,7 +147,7 @@ export class Harmonizer implements OnInit {
   }
 
   filterByStatus(status_id: number) {
-    console.log('status :' + status_id);
+    this.currentFilterStatusId = status_id;
     if (status_id === 0) {
       this.filteredIdeas = [...this.ideas];
     } else {
@@ -182,5 +202,46 @@ export class Harmonizer implements OnInit {
     });
 
     this.updatePagedIdeas();
+  }
+
+  exportData() {
+    const payload: ExportIdeasPayload = {
+      id: this.filteredIdeas.map((idea) => idea.idea_id),
+    };
+
+    this.ideaService.exportIdeas(payload).subscribe({
+      next: (blob: Blob) => {
+        try {
+          if (!blob || blob.size === 0) {
+            throw new Error('Empty response received from server');
+          }
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `ideas_export_${new Date().getTime()}.xlsx`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+        } catch (error) {
+          console.error('❌ Error in export process:', error);
+          alert(`Failed to export data: ${error instanceof Error ? error.message : 'Unknown error'}. Please check console for details.`);
+        }
+      },
+      error: (error) => {
+        console.error('❌ API Error exporting data:', error);
+        let errorMessage = 'Failed to export data. Please try again.';
+        if (error?.status) {
+          errorMessage += ` (Status: ${error.status})`;
+        }
+        if (error?.message) {
+          errorMessage += ` - ${error.message}`;
+        }
+        alert(errorMessage);
+      },
+    });
   }
 }

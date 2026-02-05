@@ -40,6 +40,8 @@ export interface Idea {
   therapeutic_area: TherapeuticArea;
   created_by: User;
   updated_by: User | null;
+  /** Present when idea has study details (from API). Array of study detail objects. */
+  study_details?: Array<Record<string, unknown>> | null;
 }
 
 export interface IdeaPayload {
