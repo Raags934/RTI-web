@@ -3,7 +3,7 @@
 
   <app-buttons
     variant="type2"
-    [color]="(from === 'assessor' || from === 'harmonizer') ? 'var( --caution-300)' : getStatusColor(viewIdea?.status?.status_id)"
+    [color]="from === 'assessor' ? 'var(--caution-300)' : getStatusColor(viewIdea?.status?.status_id)"
     size="small"
     [isStatus]="true"
   >

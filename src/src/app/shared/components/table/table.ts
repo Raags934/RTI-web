@@ -148,6 +148,19 @@ export class Table {
       return 'var(--caution-300)';
     }
 
+    // Harmonizer route only: use same colors as prioritization (no change to prioritization one)
+    // Harmonization Pending (5) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
+    if (this.isHarmonizerRoute()) {
+      if (statusId === 5) {
+        const match = this.statusColor.find((s) => s.status_id === 10);
+        return match ? match.color : 'gray';
+      }
+      if (statusId === 10) {
+        const match = this.statusColor.find((s) => s.status_id === 12);
+        return match ? match.color : 'gray';
+      }
+    }
+
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray'; // fallback color
   }

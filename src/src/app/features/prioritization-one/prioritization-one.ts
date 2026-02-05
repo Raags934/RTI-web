@@ -195,10 +195,10 @@ export class PrioritizationOne implements OnInit {
   taFilterChange(ta_id: number) {
     this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
 
-    // Populate rankingChanges array with all filtered ideas
+    // Populate rankingChanges with all filtered ideas; start with null - only user selections (rankingChanged) set values
     this.rankingChanges = this.filteredIdeas.map(idea => ({
       idea_id: idea.idea_id,
-      ranking_brand: idea.ranking_brand || null
+      ranking_brand: null
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));

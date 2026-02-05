@@ -419,6 +419,18 @@ export class IdeaView implements OnInit, OnDestroy {
   getStatusColor(statusId: number | null | undefined): string {
     if (!statusId) return 'gray';
 
+    // Harmonizer only: Harmonization Pending (5) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
+    if (this.from === 'harmonizer') {
+      if (statusId === 5) {
+        const match = this.statusColor.find((s) => s.status_id === 10);
+        return match ? match.color : 'gray';
+      }
+      if (statusId === 10) {
+        const match = this.statusColor.find((s) => s.status_id === 12);
+        return match ? match.color : 'gray';
+      }
+    }
+
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray';
   }
