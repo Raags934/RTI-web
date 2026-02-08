@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AppState } from '../../../app.state.js';
 import { Store, select } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { LoadIdeas } from '../../../store/idea.actions.js';
 import { Idea, ExportIdeasPayload } from '../../../models/idea.model.js';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
@@ -67,16 +66,15 @@ export class IdeaDashboard implements OnInit {
   }
 
   ngOnInit(): void {
-    this.ideas$.pipe(take(1)).subscribe((ideas) => {
-      if (!ideas || ideas.length === 0) {
-        this.store.dispatch(LoadIdeas());
-      }
-    });
+    // On every load/redirect: reset all filters to All and refresh list
+    this.activeFilters.franchise_id = null;
+    this.activeFilters.ta_id = null;
+    this.activeFilters.role_id = null;
+    this.activeFilters.function_id = null;
+    this.store.dispatch(LoadIdeas());
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      // Set default TA filter and apply all filters
-      this.activeFilters.ta_id = 3;
       this.applyAllFilters();
       this.updateStatusCounts();
     });

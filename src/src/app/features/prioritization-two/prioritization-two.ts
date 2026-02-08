@@ -10,7 +10,7 @@ import { Popup, PopupConfigs } from '../../shared/constants/popUp';
 import { IdeaHistory } from '../ideas/idea-history/idea-history';
 import { ViewIdeaOverlay } from '../ideas/view-idea-overlay/view-idea-overlay';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, take } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AppState } from '../../app.state';
 import { IdeaEventsService } from '../../events/ideaServiceEvents';
 import { Router } from '@angular/router';
@@ -45,7 +45,7 @@ const prioritizationStatusTabs: StatusTab[] = [
 
 @Component({
   selector: 'app-prioritization-two',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp, IdeaHistory, ViewIdeaOverlay],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Buttons, PopUp, IdeaHistory, ViewIdeaOverlay, Pagination],
   templateUrl: './prioritization-two.html',
   styleUrl: './prioritization-two.scss',
 })
@@ -67,7 +67,7 @@ export class PrioritizationTwo implements OnInit {
   filteredIdeas: Idea[] = [];
   pagedIdeas: Idea[] = [];
   currentPage = 1;
-  pageSize = 1000;
+  pageSize = 10;
   totalPages = 1;
   currentFilterStatusId: number = 0; // Track current filter status_id
 
@@ -88,15 +88,12 @@ export class PrioritizationTwo implements OnInit {
   }
 
   ngOnInit(): void {
-    this.ideas$.pipe(take(1)).subscribe((ideas) => {
-      if (!ideas || ideas.length === 0) {
-        this.store.dispatch(LoadIdeas());
-      }
-    });
+    // On every load/redirect: refresh list and show All (no TA filter)
+    this.store.dispatch(LoadIdeas());
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.taFilterChange(3);
+      this.taFilterChange(null);
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();
@@ -137,9 +134,13 @@ export class PrioritizationTwo implements OnInit {
         this.popup.open = false;
       } else if (event.type === 'confirmSubmitRanking') {
         this.popup.open = false;
-        // Actually submit the ranking
+        // Only send ideas that appear on the current pagination page (same as what user sees)
+        const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
+        const rankedIdeas = this.rankingChanges.filter(
+          (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
+        );
         const payload: PrioritizationPayload = {
-          ideas: this.rankingChanges,
+          ideas: rankedIdeas,
           locked: true,
           updated_by: 1
         };
@@ -148,7 +149,7 @@ export class PrioritizationTwo implements OnInit {
       } else if (event.type === 'savePrioritizationSuccess') {
         this.popup = PopupConfigs.rankingSaved;
         this.popup.open = true;
-        this.taFilterChange(3);
+        this.taFilterChange(null);
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
         this.updateStatusCounts();
@@ -156,7 +157,7 @@ export class PrioritizationTwo implements OnInit {
       } else if (event.type === 'submitPrioritizationSuccess') {
         // Close popup after successful submission
         this.popup.open = false;
-        this.taFilterChange(3);
+        this.taFilterChange(null);
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
         this.updateStatusCounts();
@@ -193,13 +194,17 @@ export class PrioritizationTwo implements OnInit {
     if (this.sub) this.sub.unsubscribe();
   }
 
-  taFilterChange(ta_id: number) {
-    this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+  taFilterChange(ta_id: number | null) {
+    if (ta_id == null) {
+      this.filteredIdeas = [...this.ideas];
+    } else {
+      this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+    }
 
-    // Populate rankingChanges with all filtered ideas; start with null - only user selections (rankingTaChanged) set values
+    // Populate rankingChanges with all filtered ideas; use existing rank from response so unchanged ranks are sent in payload
     this.rankingChanges = this.filteredIdeas.map(idea => ({
       idea_id: idea.idea_id,
-      ranking_franchise: null
+      ranking_franchise: idea.ranking_franchise ?? null
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));
@@ -305,8 +310,17 @@ export class PrioritizationTwo implements OnInit {
   }
 
   saveRanking() {
+    const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
+    const rankedInView = this.rankingChanges.filter(
+      (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
+    );
+    if (rankedInView.length < 10) {
+      this.popup = PopupConfigs.rankAtLeast10Ideas;
+      this.popup.open = true;
+      return;
+    }
     const payload: PrioritizationPayload = {
-      ideas: this.rankingChanges,
+      ideas: rankedInView,
       locked: false,
       updated_by: 1
     };
@@ -317,6 +331,15 @@ export class PrioritizationTwo implements OnInit {
   }
 
   submitRanking() {
+    const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
+    const rankedCount = this.rankingChanges.filter(
+      (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
+    ).length;
+    if (rankedCount < 10) {
+      this.popup = PopupConfigs.rankAtLeast10Ideas;
+      this.popup.open = true;
+      return;
+    }
     // Show confirmation popup before submission
     this.popup = PopupConfigs.submitRankingConfirmTwo;
     this.popup.open = true;

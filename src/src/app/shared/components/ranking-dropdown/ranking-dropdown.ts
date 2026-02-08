@@ -50,6 +50,7 @@ export class RankingDropdown implements OnInit, OnDestroy {
     if (this.isOpen) {
       this.dropdownService.closeAll();
     }
+    this.value = null;
   }
 
   get displayValue(): string {

@@ -72,6 +72,16 @@ export const submitRankingConfirmTwo: Popup = {
   confirmPopupAction: 'confirmSubmitRanking'
 };
 
+export const rankAtLeast10Ideas: Popup = {
+  open: false,
+  title: 'Cannot submit',
+  helper: 'Rank at least 10 ideas.',
+  cancelText: '',
+  confirmText: 'Close',
+  size: 'small',
+  confirmPopupAction: 'closePopUp',
+  showCancelButton: false
+};
 
 export const abandonIdea: Popup = {
   open: false,
@@ -115,8 +125,8 @@ export const submitToHarmonization: Popup = {
 
 export const enterStudyDetails: Popup = {
   open: false,
-  title: 'Enter Study Details',
-  helper: 'Please verify that all the information is correct before submitting.',
+  title: '',
+  helper: '',
   cancelText: 'Save as a Study Draft',
   confirmText: 'Submit Study Details',
   size: 'large',
@@ -141,6 +151,7 @@ export const PopupConfigs = {
   rankingSaved,
   submitRankingConfirm,
   submitRankingConfirmTwo,
+  rankAtLeast10Ideas,
   abandonIdea,
   needMoreInfo,
   assessIdea,

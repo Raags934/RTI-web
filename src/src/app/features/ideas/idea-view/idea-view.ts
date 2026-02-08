@@ -96,6 +96,9 @@ export class IdeaView implements OnInit, OnDestroy {
   accordionPrioritizationOneOpen = false;
   accordionPrioritizationTwoOpen = false;
 
+  /** Accordion open state for Enter Study Details popup form (Study Details section). */
+  enterStudyDetailsSectionOpen = true;
+
   /** When true, idea is driven by overlayIdeaUid (no route). */
   @Input() overlayMode = false;
   private _overlayIdeaUid: string | null = null;
@@ -574,6 +577,7 @@ export class IdeaView implements OnInit, OnDestroy {
                 (harmonizationRes as { message?: string })?.message ||
                 'Idea harmonization completed successfully';
               this.ideaEvents.toastEvent(message);
+              this.router.navigate(['/harmonizer']);
             },
             error: () => {},
           });
@@ -641,6 +645,14 @@ export class IdeaView implements OnInit, OnDestroy {
     if (panel === 'studyDetails') this.accordionStudyDetailsOpen = !this.accordionStudyDetailsOpen;
     if (panel === 'prioritizationOne') this.accordionPrioritizationOneOpen = !this.accordionPrioritizationOneOpen;
     if (panel === 'prioritizationTwo') this.accordionPrioritizationTwoOpen = !this.accordionPrioritizationTwoOpen;
+  }
+
+  toggleEnterStudyDetailsSection(): void {
+    this.enterStudyDetailsSectionOpen = !this.enterStudyDetailsSectionOpen;
+  }
+
+  onPilotToggle(checked: boolean): void {
+    this.form.get('pilot')?.setValue(checked ? 'Yes' : 'No');
   }
 
   private studyDetailsLabelMap: Record<string, string> = {

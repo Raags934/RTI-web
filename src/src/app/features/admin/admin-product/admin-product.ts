@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AppState } from '../../../app.state.js';
 import { Store, select } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { LoadIdeas } from '../../../store/idea.actions.js';
 import { Idea } from '../../../models/idea.model.js';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
@@ -48,15 +47,12 @@ export class AdminProduct implements OnInit {
   }
 
   ngOnInit(): void {
-    this.ideas$.pipe(take(1)).subscribe((ideas) => {
-      if (!ideas || ideas.length === 0) {
-        this.store.dispatch(LoadIdeas());
-      }
-    });
+    // On every load/redirect: refresh list and show All (no TA filter)
+    this.store.dispatch(LoadIdeas());
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.taFilterChange(3);
+      this.taFilterChange(null);
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();

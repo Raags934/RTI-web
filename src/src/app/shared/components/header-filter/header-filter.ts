@@ -39,6 +39,8 @@ import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 })
 export class HeaderFilter implements OnInit {
   @Input() isAdmin: boolean = false;
+  /** When true, dropdowns start with no selection (All); when false, first option is auto-selected. */
+  @Input() useAllByDefault: boolean = false;
   filterForm = new FormGroup({
     franchise: new FormControl<string | null>(null),
     ta: new FormControl<string | null>(null),

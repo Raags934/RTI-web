@@ -5,8 +5,12 @@
 >
   @if (open) {
     <div class="cd-dialog" [ngClass]="size">
-      <div class="cd-title">{{ title }}</div>
-      <div class="cd-helper">{{ helper }}</div>
+      @if (title) {
+        <div class="cd-title">{{ title }}</div>
+      }
+      @if (helper) {
+        <div class="cd-helper">{{ helper }}</div>
+      }
 
       <!-- Custom HTML goes here -->
       <div class="cd-content">

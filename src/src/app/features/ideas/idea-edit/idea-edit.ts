@@ -18,7 +18,7 @@ import { PopUp } from '../../../shared/components/popup/popup';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
-import { UpdateIdea } from '../../../store/idea.actions';
+import { UpdateIdea, AddIdea } from '../../../store/idea.actions';
 import { Franchise } from '../../../models/productsList.model';
 import { Dropdowns } from '../../../models/dropdown.model';
 import { DropdownOption } from '../../../models/DropDownOption';
@@ -303,11 +303,20 @@ export class IdeaEdit implements OnInit, OnDestroy {
     this.hasSubmitted = true;
 
     const payload = this.prepareIdeaPayload();
-    console.log('Update payload:', payload);
-    this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payload }));
+    const isDraft = this.currentIdea?.status?.status_name?.toLowerCase() === 'draft';
+    console.log('isDraft--->>>>', isDraft);
+    if (isDraft) {
+      // Draft: hit addIdea API with same payload + idea_id (do not call update API)
+      const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
+      console.log('Add idea payload (from draft):', addPayload);
+      this.store.dispatch(AddIdea({ idea: addPayload }));
+    } else {
+      // Non-draft: hit update API as usual
+      console.log('Update payload:', payload);
+      this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payload }));
+    }
     this.popup.open = false;
-    
-    // Navigate back to view page after successful update
+    // Navigate back to view page after submit
     if (this.ideaUid) {
       this.router.navigate(['/ideas/' + this.ideaUid]);
     } else {

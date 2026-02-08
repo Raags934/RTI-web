@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AppState } from '../../app.state';
 import { Store, select } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 import { LoadIdeas } from '../../store/idea.actions';
 import { Idea } from '../../models/idea.model';
@@ -47,15 +46,12 @@ export class Assessor implements OnInit {
   }
 
   ngOnInit(): void {
-    this.ideas$.pipe(take(1)).subscribe((ideas) => {
-      if (!ideas || ideas.length === 0) {
-        this.store.dispatch(LoadIdeas());
-      }
-    });
+    // On every load/redirect: refresh list and show All
+    this.store.dispatch(LoadIdeas());
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.filteredIdeas = [...this.ideas]; // Show all ideas for assessors
+      this.filteredIdeas = [...this.ideas];
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();

@@ -65,14 +65,12 @@ fdescribe('IdeaDashboard ', () => {
     fixture.detectChanges(); // triggers ngOnInit()
   });
 
-  it('should create and dispatch LoadIdeas when initial ideas are empty', () => {
+  it('should create and dispatch LoadIdeas on init', () => {
     expect(component).toBeTruthy();
-    expect(dispatchSpy).toHaveBeenCalledTimes(1);
     expect(dispatchSpy).toHaveBeenCalledWith(LoadIdeas());
   });
 
-  it('should react to ideas stream: set ideas, call taFilterChange(3), update totals & status counts', () => {
-    // Make some ideas across TA and status
+  it('should react to ideas stream: set ideas, applyAllFilters (All), update totals & status counts', () => {
     const ideas: Idea[] = [
       makeIdea({ idea_uid: 'A', ta_id: 3, status_id: 1, name: 'Alpha', details: { score: 2 } }),
       makeIdea({ idea_uid: 'B', ta_id: 3, status_id: 2, name: 'Beta', details: { score: 1 } }),
@@ -88,29 +86,17 @@ fdescribe('IdeaDashboard ', () => {
       }),
     ] as any;
 
-    // Spy on taFilterChange to ensure ngOnInit invokes it with 3
-    const taSpy = spyOn(component, 'taFilterChange').and.callThrough();
-
-    // Emit non-empty ideas
     store.setState({ ideas } as any);
 
-    // After non-empty emission, taFilterChange(3) is called
-    expect(taSpy).toHaveBeenCalledWith(3);
-
-    // Ideas are updated
     expect(component.ideas.length).toBe(4);
-
-    // taFilterChange(3) should have filtered to those with ta_id === 3
-    expect(component.filteredIdeas.map((i: any) => i.idea_uid).sort()).toEqual(['A', 'B', 'D'].sort());
-
-    // With default pageSize=6 and 3 items -> totalPages = 1, currentPage reset to 1
+    // With filters reset to All, filteredIdeas = all ideas
+    expect(component.filteredIdeas.map((i: any) => i.idea_uid).sort()).toEqual(['A', 'B', 'C', 'D'].sort());
     expect(component.totalPages).toBe(1);
     expect(component.currentPage).toBe(1);
-    expect(component.pagedIdeas.length).toBe(3);
+    expect(component.pagedIdeas.length).toBe(4);
 
-    // Update status counts using a deterministic tab set
     (component as any).statusTabs = [
-      { status_id: undefined, count: 0 }, // "All"
+      { status_id: undefined, count: 0 },
       { status_id: 1, count: 0 },
       { status_id: 2, count: 0 },
     ];

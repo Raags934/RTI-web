@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { IdeaService } from './idea.service';
 import * as ideaActions from './idea.actions';
-import { catchError, map, mergeMap } from 'rxjs/operators';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { IdeaEventsService } from '../events/ideaServiceEvents';
+import { AppState } from '../app.state';
 
 @Injectable()
 export class IdeaEffects {
@@ -15,11 +18,15 @@ export class IdeaEffects {
   submitPrioritization$;
   deleteIdea$;
   updateIdea$;
+  /** Redirect to idea-dashboard (all filter) and reload after add/update success */
+  redirectToDashboardOnSuccess$;
 
   constructor(
     private actions$: Actions,
     private service: IdeaService,
-    private ideaEvents: IdeaEventsService
+    private ideaEvents: IdeaEventsService,
+    private router: Router,
+    private store: Store<AppState>
   ) {
     this.loadIdeas$ = createEffect(() =>
       this.actions$.pipe(
@@ -171,6 +178,22 @@ export class IdeaEffects {
           )
         )
       )
+    );
+
+    this.redirectToDashboardOnSuccess$ = createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(
+            ideaActions.AddIdeaSuccess,
+            ideaActions.AddDraftIdeaSuccess,
+            ideaActions.UpdateIdeaSuccess
+          ),
+          tap(() => {
+            this.router.navigate(['/']);
+            this.store.dispatch(ideaActions.LoadIdeas());
+          })
+        ),
+      { dispatch: false }
     );
   }
 }
