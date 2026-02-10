@@ -30,9 +30,11 @@
     <!-- DATA CELL -->
     <td mat-cell [ngClass]="col.width" *matCellDef="let element">
       @if (col.key === 'status.status_name') {
-      <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
-        {{ getStatusDisplayValue(element) }}
-      </app-buttons>
+      <div class="status-cell-wrapper">
+        <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
+          {{ getStatusDisplayValue(element) }}
+        </app-buttons>
+      </div>
       }
       <!-- Options Column -->
       @else if (col.key === 'options') {

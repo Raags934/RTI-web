@@ -49,6 +49,10 @@ export class FormInput<T = any> implements OnInit {
   @Input() showSearchDropdown = true;
   @Input() showIconDropdown = true;
   @Input() autoSelectFirst = false;
+  /** Minimum selectable date for date type (e.g. to disallow past dates) */
+  @Input() minDate: Date | null = null;
+  /** Maximum selectable date for date type */
+  @Input() maxDate: Date | null = null;
 
   /** Reactive form control passed from parent */
   @Input() control!: AbstractControl | null;

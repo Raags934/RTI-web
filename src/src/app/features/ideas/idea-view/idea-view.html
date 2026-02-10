@@ -440,7 +440,8 @@
       <span class="card-headings">Pilot Study</span>
       <button type="button" class="pilot-toggle" [class.pilot-toggle--yes]="form.get('pilot')?.value === 'Yes'"
         (click)="onPilotToggle(form.get('pilot')?.value !== 'Yes')" role="switch"
-        [attr.aria-checked]="form.get('pilot')?.value === 'Yes'" aria-label="Pilot Study">
+        [attr.aria-checked]="form.get('pilot')?.value === 'Yes'" aria-label="Pilot Study"
+        [disabled]="form.get('recommended')?.value !== 'Yes'">
         <span class="pilot-toggle-knob"></span>
         <span class="pilot-toggle-text">{{ form.get('pilot')?.value === 'Yes' ? 'Yes' : 'No' }}</span>
       </button>
@@ -448,7 +449,8 @@
     <div class="form-section-separator"></div>
     <div class="study-details-form-accordion">
       <button type="button" class="study-details-form-accordion-header study-details-form-section-header"
-        (click)="toggleEnterStudyDetailsSection()" [attr.aria-expanded]="enterStudyDetailsSectionOpen">
+        (click)="toggleEnterStudyDetailsSection()" [attr.aria-expanded]="enterStudyDetailsSectionOpen"
+        [disabled]="form.get('recommended')?.value !== 'Yes'">
         <span class="card-headings">Study Details</span>
         <span class="study-details-form-accordion-icon"
           [class.accordion-icon--collapsed]="!enterStudyDetailsSectionOpen">
@@ -484,7 +486,8 @@
         <div class="date-fields-row">
           <div class="form-field">
             <app-form-input label="Estimated Start Date" type="date" [required]="true"
-              [control]="form.get('estimated_study_start_date')" placeholder="MM/DD/YYYY"></app-form-input>
+              [control]="form.get('estimated_study_start_date')" placeholder="MM/DD/YYYY"
+              [minDate]="minStartDate"></app-form-input>
           </div>
           <div class="form-field">
             <app-form-input label="Estimated End Date" type="date" [required]="true"

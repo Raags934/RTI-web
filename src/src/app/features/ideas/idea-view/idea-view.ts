@@ -99,6 +99,13 @@ export class IdeaView implements OnInit, OnDestroy {
   /** Accordion open state for Enter Study Details popup form (Study Details section). */
   enterStudyDetailsSectionOpen = true;
 
+  /** Minimum date for Estimated Start Date (today) - prevents selecting past dates. */
+  get minStartDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }
+
   /** When true, idea is driven by overlayIdeaUid (no route). */
   @Input() overlayMode = false;
   private _overlayIdeaUid: string | null = null;
@@ -364,6 +371,7 @@ export class IdeaView implements OnInit, OnDestroy {
       if (isRecommendedYes) {
         pilotControl.enable({ emitEvent: false });
       } else {
+        pilotControl.setValue('No', { emitEvent: false });
         pilotControl.disable({ emitEvent: false });
       }
     }
@@ -378,6 +386,11 @@ export class IdeaView implements OnInit, OnDestroy {
         }
       }
     });
+
+    // Collapse Study Details accordion when recommended is No (section is disabled).
+    if (!isRecommendedYes) {
+      this.enterStudyDetailsSectionOpen = false;
+    }
   }
 
   private setupStudyDetailsRecommendedListener() {
@@ -478,6 +491,7 @@ export class IdeaView implements OnInit, OnDestroy {
   onAssessIdea() {
     if (this.from === 'harmonizer') {
       this.enterStudyDetailsPopup.open = true;
+      this.applyStudyDetailsFieldsState();
     } else {
       this.assessIdeaPopup.open = true;
     }

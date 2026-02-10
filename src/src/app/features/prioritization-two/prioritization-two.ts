@@ -140,7 +140,10 @@ export class PrioritizationTwo implements OnInit {
           (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
         );
         const payload: PrioritizationPayload = {
-          ideas: rankedIdeas,
+          ideas: rankedIdeas.map((c) => ({
+            idea_id: c.idea_id,
+            ranking_franchise: c.ranking_franchise != null ? String(c.ranking_franchise) : null
+          })),
           locked: true,
           updated_by: 1
         };
@@ -201,10 +204,11 @@ export class PrioritizationTwo implements OnInit {
       this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
     }
 
-    // Populate rankingChanges with all filtered ideas; use existing rank from response so unchanged ranks are sent in payload
+    // Populate rankingChanges with all filtered ideas; use existing rank from response so unchanged ranks are sent in payload.
+    // Normalize ranking_franchise to string so payload is consistent (API may return number).
     this.rankingChanges = this.filteredIdeas.map(idea => ({
       idea_id: idea.idea_id,
-      ranking_franchise: idea.ranking_franchise ?? null
+      ranking_franchise: idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));
@@ -320,7 +324,10 @@ export class PrioritizationTwo implements OnInit {
       return;
     }
     const payload: PrioritizationPayload = {
-      ideas: rankedInView,
+      ideas: rankedInView.map((c) => ({
+        idea_id: c.idea_id,
+        ranking_franchise: c.ranking_franchise != null ? String(c.ranking_franchise) : null
+      })),
       locked: false,
       updated_by: 1
     };

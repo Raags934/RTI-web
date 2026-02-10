@@ -25,10 +25,20 @@
   td {
     position: relative;
     overflow: visible;
+    vertical-align: middle;
     mat-icon {
       font-size: var(--font-size-b2);
       font-weight: var(--font-weight-regular);
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
     }
+  }
+
+  /* Status + 3-dot alignment: keep status button and options icon on same row */
+  .status-cell-wrapper {
+    display: inline-flex;
+    align-items: center;
   }
 
   /* Header styling */
@@ -111,7 +121,8 @@
 /* Options menu styling */
 .options-container {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 
   mat-icon {
     cursor: pointer;
