@@ -14,10 +14,10 @@ export const environment: AppEnvironment = {
     remoteEnabled: false
   },
   okta: {
-    clientId: '0oa2n3ccmg9qkLhJs0h8',
-    clientSecret: 'FNQAx_r4gNPPTVjbH6jl-H7liria9StZpOhsrFaXp4glyfMk62gATWjBfwXROmPc',
+    clientId: '0oa3n4cdfdsfsdqkLhJs0h9',
+    clientSecret: 'FNQAx_r4gNPPTVjbH6jl-H7liria9StZpOhfdsfsdf4glyfMk62gATWjBfwXROmPc',
     issuer: 'https://alcon.oktapreview.com',
-    audience: '3oa1n2ccmg1qkLhJs8h8',
+    audience: '3oa1n2ccmg1dfdsfd8h8',
     authorizationEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/authorize',
     tokenEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/token',
     userinfoEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/userinfo',
