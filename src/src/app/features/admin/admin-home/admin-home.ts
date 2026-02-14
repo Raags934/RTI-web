@@ -18,6 +18,7 @@ import { ideaDisplayColumns } from '../../../shared/constants/tableColumns.js';
 import { Router } from '@angular/router';
 import { IdeaHistory } from '../../ideas/idea-history/idea-history';
 import { ViewIdeaOverlay } from '../../ideas/view-idea-overlay/view-idea-overlay';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-home',
@@ -61,7 +62,8 @@ export class AdminHome implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
     private ideaService: IdeaService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
@@ -149,7 +151,7 @@ export class AdminHome implements OnInit, OnDestroy {
     }
     const ideaId = this.resetConfirmIdeaId;
     if (ideaId == null) return;
-    const payload = { comment, updated_by: 3 };
+    const payload = { comment, updated_by: this.authService.getCurrentUserId() ?? 1 };
     this.ideaService.resetIdea(ideaId, payload).subscribe({
       next: () => {
         this.store.dispatch(LoadIdeas());

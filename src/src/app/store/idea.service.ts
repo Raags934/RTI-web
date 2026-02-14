@@ -4,27 +4,29 @@ import { Idea, IdeaPayload, ExportIdeasPayload, ResetIdeaPayload } from '../mode
 import { PrioritizationPayload } from '../models/prioritization.model';
 import { StudyDetailsPayload } from '../models/study-details.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
 import { MasterDataResponse } from '../models/api-response/masterData.model';
 import { AuditLog, AuditLogResponse } from '../models/audit-log.model';
+import { AuthService } from '../core/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IdeaService {
-  // private baseUrl = environment.apiUrl;
-  private baseUrl = 'http://localhost:5000';
-
+  private baseUrl = environment.apiUrl;
   private x_api_key = environment.x_api_key;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   // ----------------------------------------------------
-  // GET: Load ideas
+  // GET: Load ideas (uses authorized user email)
   // ----------------------------------------------------
   loadIdeas(): Observable<Idea[]> {
-    const userEmail = 'karthik@example.com';
+    const userEmail = this.authService.currentUser?.email ?? '';
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',

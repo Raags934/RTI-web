@@ -35,6 +35,7 @@ import { statusColor } from '../../../shared/constants/statusColor';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 import { Popup, PopupConfigs } from '../../../shared/constants/popUp';
 import { PopUp } from '../../../shared/components/popup/popup';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-idea-view',
@@ -130,7 +131,8 @@ export class IdeaView implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private ideaService: IdeaService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
 
@@ -584,7 +586,7 @@ export class IdeaView implements OnInit, OnDestroy {
         this.enterStudyDetailsPopup.open = false;
         this.store.dispatch(LoadIdeas());
         this.ideaService
-          .putHarmonization(this.viewIdea!.idea_id, { updated_by: 3 })
+          .putHarmonization(this.viewIdea!.idea_id, { updated_by: this.authService.getCurrentUserId() ?? 1 })
           .subscribe({
             next: (harmonizationRes) => {
               const message =
@@ -634,7 +636,7 @@ export class IdeaView implements OnInit, OnDestroy {
       estimated_spend_plus_3: toNum(raw.estimated_spend_plus_3),
       pos: toNum(raw.study_details_pos),
       regions_accepting_submissions: toStr(raw.regions_accepting_submissions),
-      created_by: 1, // TODO: replace with current user when auth is integrated
+      created_by: this.authService.getCurrentUserId() ?? 1,
     };
   }
 

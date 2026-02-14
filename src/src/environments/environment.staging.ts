@@ -12,5 +12,14 @@ export const environment: AppEnvironment = {
   logging: {
     level: 'info',
     remoteEnabled: true
+  },
+  okta: {
+    clientId: '',
+    clientSecret: '',
+    issuer: 'https://alcon.oktapreview.com',
+    audience: '',
+    authorizationEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/authorize',
+    tokenEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/token',
+    userinfoEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/userinfo'
   }
 };

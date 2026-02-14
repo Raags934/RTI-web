@@ -11,18 +11,25 @@ import { Harmonizer } from './features/harmonizer/harmonizer';
 import { AdminHome } from './features/admin/admin-home/admin-home';
 import { ManageUser } from './features/admin/manage-user/manage-user';
 import { AdminProduct } from './features/admin/admin-product/admin-product';
+import { LoginComponent } from './core/components/login/login.component';
+import { CallbackComponent } from './core/components/callback/callback.component';
+import { AccessDeniedComponent } from './core/components/access-denied/access-denied.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: IdeaDashboard },
-  { path: 'addidea', component: IdeaCreate },
-  { path: 'myideas', component: MyIdeas },
-  { path: 'help', component: ContactForHelp },
-  { path: 'ideas/:idea_uid', component: IdeaView },
-  { path: 'ideas/:idea_uid/edit', component: IdeaEdit },
-  { path: 'prioritization', component: PrioritizationOne },
-  { path: 'ta-prioritization', component: PrioritizationTwo },
-  { path: 'harmonizer', component: Harmonizer },
-  { path: 'admin', component: AdminHome },
-  { path: 'admin/users', component: ManageUser },
-  { path: 'admin/products', component: AdminProduct },
+  { path: 'login', component: LoginComponent },
+  { path: 'callback', component: CallbackComponent },
+  { path: 'access-denied', component: AccessDeniedComponent },
+  { path: '', component: IdeaDashboard, canActivate: [authGuard] },
+  { path: 'addidea', component: IdeaCreate, canActivate: [authGuard] },
+  { path: 'myideas', component: MyIdeas, canActivate: [authGuard] },
+  { path: 'help', component: ContactForHelp, canActivate: [authGuard] },
+  { path: 'ideas/:idea_uid', component: IdeaView, canActivate: [authGuard] },
+  { path: 'ideas/:idea_uid/edit', component: IdeaEdit, canActivate: [authGuard] },
+  { path: 'prioritization', component: PrioritizationOne, canActivate: [authGuard] },
+  { path: 'ta-prioritization', component: PrioritizationTwo, canActivate: [authGuard] },
+  { path: 'harmonizer', component: Harmonizer, canActivate: [authGuard] },
+  { path: 'admin', component: AdminHome, canActivate: [authGuard] },
+  { path: 'admin/users', component: ManageUser, canActivate: [authGuard] },
+  { path: 'admin/products', component: AdminProduct, canActivate: [authGuard] },
 ];

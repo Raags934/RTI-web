@@ -20,6 +20,7 @@ import { StatusTab } from '../../shared/constants/statusTabs';
 // import { ideaDisplayColumns } from '../../shared/constants/tableColumns';
 import { LoadIdeas, SavePrioritization, SubmitPrioritization } from '../../store/idea.actions';
 import { IdeaService } from '../../store/idea.service';
+import { AuthService } from '../../core/services/auth.service';
 
 export const ideaDisplayColumns: TableColumn[] = [
   { key: 'rti_unique_id', label: 'RTI UID', sortable: true, width: 'medium' },
@@ -82,7 +83,8 @@ export class PrioritizationTwo implements OnInit {
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
     private ideaService: IdeaService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
@@ -329,7 +331,7 @@ export class PrioritizationTwo implements OnInit {
         ranking_franchise: c.ranking_franchise != null ? String(c.ranking_franchise) : null
       })),
       locked: false,
-      updated_by: 1
+      updated_by: this.authService.getCurrentUserId() ?? 1
     };
 
     const url = 'ideas/ta-prioritization';

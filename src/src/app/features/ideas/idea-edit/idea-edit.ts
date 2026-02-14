@@ -35,6 +35,7 @@ import {
 import { IDEA_FORM_LABELS } from '../../../shared/constants/labels';
 import { User } from '../../../models/user.model';
 import { take } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-idea-edit',
@@ -80,7 +81,8 @@ export class IdeaEdit implements OnInit, OnDestroy {
     private ideaEvents: IdeaEventsService,
     private router: Router,
     private route: ActivatedRoute,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private authService: AuthService
   ) {
     this.user$ = this.store.select((state) => state.masterData?.data?.user);
     this.franchises$ = this.store.select((state) => state.masterData?.data?.franchises);
@@ -353,8 +355,8 @@ export class IdeaEdit implements OnInit, OnDestroy {
       strategic_rationale: raw.strategic_rationale,
       target_aspirational_claim: raw.target_aspirational_claim,
       research_proposal: '',
-      created_by: this.currentIdea?.created_by?.user_id ?? 2,
-      updated_by: 1,
+      created_by: this.authService.getCurrentUserId() ?? this.currentIdea?.created_by?.user_id ?? 2,
+      updated_by: this.authService.getCurrentUserId() ?? 1,
     };
   }
 }
