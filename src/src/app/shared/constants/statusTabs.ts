@@ -6,9 +6,9 @@ export interface StatusTab {
 
 export const creator: StatusTab[] = [
   { label: 'All', status_id: 0 },
-  { label: 'Revision Required', status_id: 3 },
   { label: 'Draft', status_id: 1 },
   { label: 'Submitted', status_id: 5 },
+  { label: 'Approved', status_id: 18 },
  
 ].map((item) => ({ ...item, count: 0 }));
 
@@ -20,7 +20,7 @@ export const assessor: StatusTab[] = [
 
 export const harmonizer: StatusTab[] = [
   { label: 'All', status_id: 0 },
-  { label: 'Harmonization Pending', status_id: 5 }, // Submitted ideas – status column shows "Harmonization pending"
+  { label: 'Harmonization Pending', status_id: 18 }, // Submitted ideas – status column shows "Harmonization pending"
   { label: 'Harmonized', status_id: 10 }
 ].map((item) => ({ ...item, count: 0 }));
 

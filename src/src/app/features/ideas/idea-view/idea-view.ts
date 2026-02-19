@@ -29,7 +29,7 @@ import { Idea } from '../../../models/idea.model';
 import { AppState } from '../../../app.state.js';
 import { LoadIdeas } from '../../../store/idea.actions';
 import { IdeaService } from '../../../store/idea.service';
-import { StudyDetailsPayload } from '../../../models/study-details.model';
+import { StudyDetailsPayload, StudyDetailsWithPilotPayload } from '../../../models/study-details.model';
 import { Buttons } from '../../../shared/components/buttons/buttons';
 import { statusColor } from '../../../shared/constants/statusColor';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
@@ -71,6 +71,14 @@ export class IdeaView implements OnInit, OnDestroy {
     { id: 'Japan', name: 'Japan' },
   ];
 
+  /** Options for Proposed Study Design dropdown. */
+  proposedStudyDesignOptions = [
+    { id: 'monadic', name: 'Monadic' },
+    { id: 'comparative', name: 'Comparative' },
+    { id: 'controlled', name: 'Controlled' },
+    { id: 'masked', name: 'Masked' },
+  ];
+
   /** Query param indicating assessor/harmonizer mode. */
   from = '';
 
@@ -91,13 +99,16 @@ export class IdeaView implements OnInit, OnDestroy {
   showProductRank = false;
   showTaRank = false;
 
-  /** Accordion open state for View Idea Details (Study Details, Prioritization 1 & 2). */
+  /** Accordion open state for View Idea Details (Study Details, Pilot Details, Prioritization 1 & 2). */
   accordionStudyDetailsOpen = false;
+  accordionPilotDetailsOpen = false;
   accordionPrioritizationOneOpen = false;
   accordionPrioritizationTwoOpen = false;
 
   /** Accordion open state for Enter Study Details popup form (Study Details section). */
   enterStudyDetailsSectionOpen = true;
+  /** Accordion open state for Pilot Details section. */
+  pilotDetailsSectionOpen = false;
 
   /** Minimum date for Estimated Start Date (today) - prevents selecting past dates. */
   get minStartDate(): Date {
@@ -181,6 +192,9 @@ export class IdeaView implements OnInit, OnDestroy {
               potential_claims: '',
               primary_endpoints: '',
               secondary_endpoints: '',
+              other_potential_endpoints: '',
+              proposed_study_design: null,
+              proposed_statistics: '',
               estimated_study_start_date: null,
               estimated_study_end_date: null,
               estimated_sample_size: '',
@@ -190,8 +204,26 @@ export class IdeaView implements OnInit, OnDestroy {
               estimated_spend_plus_2: '',
               estimated_spend_plus_3: '',
               study_details_pos: '',
+              study_details_pos_reasons: '',
               regions_accepting_submissions: null,
+              pilot_research_questions: '',
+              pilot_potential_claims: '',
+              pilot_primary_endpoints: '',
+              pilot_secondary_endpoints: '',
+              pilot_other_potential_endpoints: '',
+              pilot_proposed_study_design: null,
+              pilot_proposed_statistics: '',
+              pilot_estimated_study_start_date: null,
+              pilot_estimated_study_end_date: null,
+              pilot_estimated_sample_size: '',
+              pilot_total_estimated_budget: '',
+              pilot_budget_currency: '',
+              pilot_estimated_spend_plus_1: '',
+              pilot_estimated_spend_plus_2: '',
+              pilot_estimated_spend_plus_3: '',
+              pilot_regions_accepting_submissions: null,
             });
+            this.pilotDetailsSectionOpen = false;
             this.applyStudyDetailsFieldsState();
           }
         }
@@ -314,6 +346,9 @@ export class IdeaView implements OnInit, OnDestroy {
       potential_claims: new FormControl('', Validators.required),
       primary_endpoints: new FormControl('', Validators.required),
       secondary_endpoints: new FormControl('', Validators.required),
+      other_potential_endpoints: new FormControl('', Validators.required),
+      proposed_study_design: new FormControl(null, Validators.required),
+      proposed_statistics: new FormControl('', Validators.required),
       estimated_study_start_date: new FormControl(null, Validators.required),
       estimated_study_end_date: new FormControl(null, Validators.required),
       estimated_sample_size: new FormControl('', Validators.required),
@@ -338,7 +373,34 @@ export class IdeaView implements OnInit, OnDestroy {
         Validators.required,
         Validators.pattern(/^\d+(\.\d+)?$/),
       ]),
+      study_details_pos_reasons: new FormControl('', Validators.required),
       regions_accepting_submissions: new FormControl(null, Validators.required),
+      // Pilot Details fields (same as Study Details)
+      pilot_research_questions: new FormControl('', Validators.required),
+      pilot_potential_claims: new FormControl('', Validators.required),
+      pilot_primary_endpoints: new FormControl('', Validators.required),
+      pilot_secondary_endpoints: new FormControl('', Validators.required),
+      pilot_other_potential_endpoints: new FormControl('', Validators.required),
+      pilot_proposed_study_design: new FormControl(null, Validators.required),
+      pilot_proposed_statistics: new FormControl('', Validators.required),
+      pilot_estimated_study_start_date: new FormControl(null, Validators.required),
+      pilot_estimated_study_end_date: new FormControl(null, Validators.required),
+      pilot_estimated_sample_size: new FormControl('', Validators.required),
+      pilot_total_estimated_budget: new FormControl('', Validators.required),
+      pilot_budget_currency: new FormControl('', Validators.required),
+      pilot_estimated_spend_plus_1: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^\d+(\.\d+)?$/),
+      ]),
+      pilot_estimated_spend_plus_2: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^\d+(\.\d+)?$/),
+      ]),
+      pilot_estimated_spend_plus_3: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^\d+(\.\d+)?$/),
+      ]),
+      pilot_regions_accepting_submissions: new FormControl(null, Validators.required),
     });
     this.setupStudyDetailsRecommendedListener();
   }
@@ -349,6 +411,9 @@ export class IdeaView implements OnInit, OnDestroy {
     'potential_claims',
     'primary_endpoints',
     'secondary_endpoints',
+    'other_potential_endpoints',
+    'proposed_study_design',
+    'proposed_statistics',
     'estimated_study_start_date',
     'estimated_study_end_date',
     'estimated_sample_size',
@@ -358,12 +423,34 @@ export class IdeaView implements OnInit, OnDestroy {
     'estimated_spend_plus_2',
     'estimated_spend_plus_3',
     'study_details_pos',
+    'study_details_pos_reasons',
     'regions_accepting_submissions',
+  ] as const;
+
+  private pilotDetailsControlNames = [
+    'pilot_research_questions',
+    'pilot_potential_claims',
+    'pilot_primary_endpoints',
+    'pilot_secondary_endpoints',
+    'pilot_other_potential_endpoints',
+    'pilot_proposed_study_design',
+    'pilot_proposed_statistics',
+    'pilot_estimated_study_start_date',
+    'pilot_estimated_study_end_date',
+    'pilot_estimated_sample_size',
+    'pilot_total_estimated_budget',
+    'pilot_budget_currency',
+    'pilot_estimated_spend_plus_1',
+    'pilot_estimated_spend_plus_2',
+    'pilot_estimated_spend_plus_3',
+    'pilot_regions_accepting_submissions',
   ] as const;
 
   private applyStudyDetailsFieldsState() {
     const recommended = this.form.get('recommended')?.value ?? null;
     const isRecommendedYes = recommended === 'Yes';
+    const pilot = this.form.get('pilot')?.value ?? null;
+    const isPilotYes = pilot === 'Yes';
 
     // Recommended Yes → enable all fields (including Pilot). Recommended No → disable all (including Pilot).
     const pilotControl = this.form.get('pilot');
@@ -376,6 +463,7 @@ export class IdeaView implements OnInit, OnDestroy {
       }
     }
 
+    // Study Details fields: enabled when recommended is Yes
     this.studyDetailsControlNames.forEach((name) => {
       const control = this.form.get(name);
       if (control) {
@@ -387,14 +475,34 @@ export class IdeaView implements OnInit, OnDestroy {
       }
     });
 
+    // Pilot Details fields: enabled when recommended is Yes AND pilot is Yes
+    this.pilotDetailsControlNames.forEach((name) => {
+      const control = this.form.get(name);
+      if (control) {
+        if (isRecommendedYes && isPilotYes) {
+          control.enable({ emitEvent: false });
+        } else {
+          control.disable({ emitEvent: false });
+        }
+      }
+    });
+
     // Collapse Study Details accordion when recommended is No (section is disabled).
     if (!isRecommendedYes) {
       this.enterStudyDetailsSectionOpen = false;
+    }
+
+    // Collapse Pilot Details accordion when pilot is No or recommended is No
+    if (!isRecommendedYes || !isPilotYes) {
+      this.pilotDetailsSectionOpen = false;
     }
   }
 
   private setupStudyDetailsRecommendedListener() {
     this.form.get('recommended')?.valueChanges.subscribe(() => {
+      this.applyStudyDetailsFieldsState();
+    });
+    this.form.get('pilot')?.valueChanges.subscribe(() => {
       this.applyStudyDetailsFieldsState();
     });
     this.applyStudyDetailsFieldsState();
@@ -435,9 +543,9 @@ export class IdeaView implements OnInit, OnDestroy {
   getStatusColor(statusId: number | null | undefined): string {
     if (!statusId) return 'gray';
 
-    // Harmonizer only: Harmonization Pending (5) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
+    // Harmonizer only: Harmonization Pending (18) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
     if (this.from === 'harmonizer') {
-      if (statusId === 5) {
+      if (statusId === 18) {
         const match = this.statusColor.find((s) => s.status_id === 10);
         return match ? match.color : 'gray';
       }
@@ -555,6 +663,9 @@ export class IdeaView implements OnInit, OnDestroy {
       this.form.get('potential_claims'),
       this.form.get('primary_endpoints'),
       this.form.get('secondary_endpoints'),
+      this.form.get('other_potential_endpoints'),
+      this.form.get('proposed_study_design'),
+      this.form.get('proposed_statistics'),
       this.form.get('estimated_study_start_date'),
       this.form.get('estimated_study_end_date'),
       this.form.get('estimated_sample_size'),
@@ -566,11 +677,18 @@ export class IdeaView implements OnInit, OnDestroy {
       this.form.get('study_details_pos'),
       this.form.get('regions_accepting_submissions'),
     ];
-    const allValid = studyDetailControls.every((c) => c?.valid);
+    const isPilotYes = pilot.value === 'Yes';
+    const controlsToValidate = isPilotYes
+      ? [
+          ...studyDetailControls,
+          ...this.pilotDetailsControlNames.map((name) => this.form.get(name)),
+        ]
+      : studyDetailControls;
+    const allValid = controlsToValidate.every((c) => c?.valid);
     if (allValid) {
       this.submitStudyDetailsConfirmationPopup.open = true;
     } else {
-      studyDetailControls.forEach((c) => c?.markAsTouched());
+      controlsToValidate.forEach((c) => c?.markAsTouched());
     }
   }
 
@@ -603,8 +721,8 @@ export class IdeaView implements OnInit, OnDestroy {
     });
   }
 
-  /** Build payload for POST /study_details from form + current idea. */
-  private buildStudyDetailsPayload(): StudyDetailsPayload | null {
+  /** Build payload for POST /study_details from form + current idea. When Pilot Study is Yes, includes pilot details. */
+  private buildStudyDetailsPayload(): StudyDetailsPayload | StudyDetailsWithPilotPayload | null {
     if (!this.viewIdea?.idea_id) return null;
     const raw = this.form.getRawValue();
     const toNum = (v: unknown): number => (v === '' || v == null ? 0 : Number(v));
@@ -616,14 +734,59 @@ export class IdeaView implements OnInit, OnDestroy {
       if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
       return s;
     };
-    const studyType = raw.pilot === 'Yes' ? 'Pilot' : 'Study';
+    const isPilotYes = raw.pilot === 'Yes';
+
+    if (isPilotYes) {
+      return {
+        idea_id: this.viewIdea.idea_id,
+        pos_reasons: toStr(raw.study_details_pos_reasons),
+        research_question: toStr(raw.research_questions),
+        potential_claims: toStr(raw.potential_claims),
+        primary_endpoints: toStr(raw.primary_endpoints),
+        secondary_endpoints: toStr(raw.secondary_endpoints),
+        other_potential_endpoints: toStr(raw.other_potential_endpoints),
+        proposed_study_design: toStr(raw.proposed_study_design),
+        proposed_statistics: toStr(raw.proposed_statistics),
+        estimated_start_date: formatDate(raw.estimated_study_start_date),
+        estimated_end_date: formatDate(raw.estimated_study_end_date),
+        estimated_sample_size: toNum(raw.estimated_sample_size),
+        total_estimated_budget: toNum(raw.total_estimated_budget),
+        budget_currency: toStr(raw.budget_currency),
+        estimated_spend_plus_1: toNum(raw.estimated_spend_plus_1),
+        estimated_spend_plus_2: toNum(raw.estimated_spend_plus_2),
+        estimated_spend_plus_3: toNum(raw.estimated_spend_plus_3),
+        pos: toNum(raw.study_details_pos),
+        regions_accepting_submissions: toStr(raw.regions_accepting_submissions),
+        pilot_research_question: toStr(raw.pilot_research_questions),
+        pilot_potential_claims: toStr(raw.pilot_potential_claims),
+        pilot_primary_endpoints: toStr(raw.pilot_primary_endpoints),
+        pilot_secondary_endpoints: toStr(raw.pilot_secondary_endpoints),
+        pilot_other_potential_endpoints: toStr(raw.pilot_other_potential_endpoints),
+        pilot_proposed_study_design: toStr(raw.pilot_proposed_study_design),
+        pilot_proposed_statistics: toStr(raw.pilot_proposed_statistics),
+        pilot_estimated_start_date: formatDate(raw.pilot_estimated_study_start_date),
+        pilot_estimated_end_date: formatDate(raw.pilot_estimated_study_end_date),
+        pilot_estimated_sample_size: toNum(raw.pilot_estimated_sample_size),
+        pilot_total_estimated_budget: toNum(raw.pilot_total_estimated_budget),
+        pilot_budget_currency: toStr(raw.pilot_budget_currency),
+        pilot_estimated_spend_plus_1: toNum(raw.pilot_estimated_spend_plus_1),
+        pilot_estimated_spend_plus_2: toNum(raw.pilot_estimated_spend_plus_2),
+        pilot_estimated_spend_plus_3: toNum(raw.pilot_estimated_spend_plus_3),
+        pilot_regions_accepting_submissions: toStr(raw.pilot_regions_accepting_submissions),
+        created_by: 1, // TODO: replace with current user when auth is integrated
+        comment: '',
+      } as StudyDetailsWithPilotPayload;
+    }
+
     return {
       idea_id: this.viewIdea.idea_id,
-      study_type: studyType,
       research_question: toStr(raw.research_questions),
       potential_claims: toStr(raw.potential_claims),
       primary_endpoints: toStr(raw.primary_endpoints),
       secondary_endpoints: toStr(raw.secondary_endpoints),
+      other_potential_endpoints: toStr(raw.other_potential_endpoints),
+      proposed_study_design: toStr(raw.proposed_study_design),
+      proposed_statistics: toStr(raw.proposed_statistics),
       estimated_start_date: formatDate(raw.estimated_study_start_date),
       estimated_end_date: formatDate(raw.estimated_study_end_date),
       estimated_sample_size: toNum(raw.estimated_sample_size),
@@ -633,6 +796,7 @@ export class IdeaView implements OnInit, OnDestroy {
       estimated_spend_plus_2: toNum(raw.estimated_spend_plus_2),
       estimated_spend_plus_3: toNum(raw.estimated_spend_plus_3),
       pos: toNum(raw.study_details_pos),
+      pos_reasons: toStr(raw.study_details_pos_reasons),
       regions_accepting_submissions: toStr(raw.regions_accepting_submissions),
       created_by: 1, // TODO: replace with current user when auth is integrated
     };
@@ -655,8 +819,9 @@ export class IdeaView implements OnInit, OnDestroy {
     return v != null && String(v).trim() !== '';
   }
 
-  toggleAccordion(panel: 'studyDetails' | 'prioritizationOne' | 'prioritizationTwo') {
+  toggleAccordion(panel: 'studyDetails' | 'pilotDetails' | 'prioritizationOne' | 'prioritizationTwo') {
     if (panel === 'studyDetails') this.accordionStudyDetailsOpen = !this.accordionStudyDetailsOpen;
+    if (panel === 'pilotDetails') this.accordionPilotDetailsOpen = !this.accordionPilotDetailsOpen;
     if (panel === 'prioritizationOne') this.accordionPrioritizationOneOpen = !this.accordionPrioritizationOneOpen;
     if (panel === 'prioritizationTwo') this.accordionPrioritizationTwoOpen = !this.accordionPrioritizationTwoOpen;
   }
@@ -665,8 +830,68 @@ export class IdeaView implements OnInit, OnDestroy {
     this.enterStudyDetailsSectionOpen = !this.enterStudyDetailsSectionOpen;
   }
 
+  togglePilotDetailsSection(): void {
+    this.pilotDetailsSectionOpen = !this.pilotDetailsSectionOpen;
+  }
+
   onPilotToggle(checked: boolean): void {
     this.form.get('pilot')?.setValue(checked ? 'Yes' : 'No');
+    if (!checked) {
+      this.pilotDetailsSectionOpen = false;
+    }
+    // Update field states when pilot changes
+    this.applyStudyDetailsFieldsState();
+  }
+
+  cancelStudyDetails(): void {
+    this.enterStudyDetailsPopup.open = false;
+    // Reset form fields when cancelled
+    if (this.from === 'harmonizer') {
+      this.form.patchValue({
+        recommended: null,
+        pilot: null,
+        research_questions: '',
+        potential_claims: '',
+        primary_endpoints: '',
+        secondary_endpoints: '',
+        other_potential_endpoints: '',
+        proposed_study_design: null,
+        proposed_statistics: '',
+        estimated_study_start_date: null,
+        estimated_study_end_date: null,
+        estimated_sample_size: '',
+        total_estimated_budget: '',
+        budget_currency: '',
+        estimated_spend_plus_1: '',
+        estimated_spend_plus_2: '',
+        estimated_spend_plus_3: '',
+        study_details_pos: '',
+        study_details_pos_reasons: '',
+        regions_accepting_submissions: null,
+        pilot_research_questions: '',
+        pilot_potential_claims: '',
+        pilot_primary_endpoints: '',
+        pilot_secondary_endpoints: '',
+        pilot_other_potential_endpoints: '',
+        pilot_proposed_study_design: null,
+        pilot_proposed_statistics: '',
+        pilot_estimated_study_start_date: null,
+        pilot_estimated_study_end_date: null,
+        pilot_estimated_sample_size: '',
+        pilot_total_estimated_budget: '',
+        pilot_budget_currency: '',
+        pilot_estimated_spend_plus_1: '',
+        pilot_estimated_spend_plus_2: '',
+        pilot_estimated_spend_plus_3: '',
+        pilot_regions_accepting_submissions: null,
+      });
+    }
+  }
+
+  saveStudyDetailsDraft(): void {
+    // Save as draft functionality - same as submit but mark as draft
+    // For now, just close the popup (can be extended later if draft API is needed)
+    this.enterStudyDetailsPopup.open = false;
   }
 
   private studyDetailsLabelMap: Record<string, string> = {
@@ -676,6 +901,9 @@ export class IdeaView implements OnInit, OnDestroy {
     potential_claims: 'Potential Claims',
     primary_endpoints: 'Primary Endpoints',
     secondary_endpoints: 'Secondary Endpoints',
+    other_potential_endpoints: 'Other Potential Endpoints',
+    proposed_study_design: 'Proposed Study Design',
+    proposed_statistics: 'Proposed Statistics',
     estimated_start_date: 'Estimated Start Date',
     estimated_end_date: 'Estimated End Date',
     estimated_sample_size: 'Estimated Sample Size',
@@ -685,11 +913,102 @@ export class IdeaView implements OnInit, OnDestroy {
     estimated_spend_plus_2: 'Estimated Spend +2',
     estimated_spend_plus_3: 'Estimated Spend +3',
     pos: 'POS',
+    pos_reasons: 'Pos Reasons',
     regions_accepting_submissions: 'Regions Accepting Submissions',
     status_id: 'Status ID',
     created_at: 'Created At',
     created_by: 'Created By',
+    updated_at: 'Updated At',
+    updated_by: 'Updated By',
     flag_soft_lock: 'Flag Soft Lock',
+  };
+
+  /**
+   * Canonical display order for Study Details accordion (Budget Currency first).
+   * Pilot Details accordion uses the same order so positions match (Pilot Budget Currency first, etc.).
+   */
+  private studyDetailsDisplayOrder: string[] = [
+    'budget_currency',
+    'research_question',
+    'potential_claims',
+    'primary_endpoints',
+    'secondary_endpoints',
+    'other_potential_endpoints',
+    'proposed_study_design',
+    'proposed_statistics',
+    'estimated_start_date',
+    'estimated_end_date',
+    'estimated_sample_size',
+    'total_estimated_budget',
+    'estimated_spend_plus_1',
+    'estimated_spend_plus_2',
+    'estimated_spend_plus_3',
+    'pos',
+    'pos_reasons',
+    'regions_accepting_submissions',
+    'created_at',
+    'created_by',
+    'updated_at',
+    'updated_by',
+  ];
+
+  /** Study key -> pilot key for same-position display in Pilot Details accordion. */
+  private studyKeyToPilotKey: Record<string, string> = {
+    budget_currency: 'pilot_budget_currency',
+    research_question: 'pilot_research_question',
+    potential_claims: 'pilot_potential_claims',
+    primary_endpoints: 'pilot_primary_endpoints',
+    secondary_endpoints: 'pilot_secondary_endpoints',
+    other_potential_endpoints: 'pilot_other_potential_endpoints',
+    proposed_study_design: 'pilot_proposed_study_design',
+    proposed_statistics: 'pilot_proposed_statistics',
+    estimated_start_date: 'pilot_estimated_start_date',
+    estimated_end_date: 'pilot_estimated_end_date',
+    estimated_sample_size: 'pilot_estimated_sample_size',
+    total_estimated_budget: 'pilot_total_estimated_budget',
+    estimated_spend_plus_1: 'pilot_estimated_spend_plus_1',
+    estimated_spend_plus_2: 'pilot_estimated_spend_plus_2',
+    estimated_spend_plus_3: 'pilot_estimated_spend_plus_3',
+    regions_accepting_submissions: 'pilot_regions_accepting_submissions',
+  };
+
+  /** Pilot-only keys (study-details.model.ts); used for hasPilotDetails(). */
+  private pilotDetailKeys = [
+    'pilot_research_question',
+    'pilot_potential_claims',
+    'pilot_primary_endpoints',
+    'pilot_secondary_endpoints',
+    'pilot_other_potential_endpoints',
+    'pilot_proposed_study_design',
+    'pilot_proposed_statistics',
+    'pilot_estimated_start_date',
+    'pilot_estimated_end_date',
+    'pilot_estimated_sample_size',
+    'pilot_total_estimated_budget',
+    'pilot_budget_currency',
+    'pilot_estimated_spend_plus_1',
+    'pilot_estimated_spend_plus_2',
+    'pilot_estimated_spend_plus_3',
+    'pilot_regions_accepting_submissions',
+  ] as const;
+
+  private pilotDetailsLabelMap: Record<string, string> = {
+    pilot_research_question: 'Pilot Research Question',
+    pilot_potential_claims: 'Pilot Potential Claims',
+    pilot_primary_endpoints: 'Pilot Primary Endpoints',
+    pilot_secondary_endpoints: 'Pilot Secondary Endpoints',
+    pilot_other_potential_endpoints: 'Pilot Other Potential Endpoints',
+    pilot_proposed_study_design: 'Pilot Proposed Study Design',
+    pilot_proposed_statistics: 'Pilot Proposed Statistics',
+    pilot_estimated_start_date: 'Pilot Estimated Start Date',
+    pilot_estimated_end_date: 'Pilot Estimated End Date',
+    pilot_estimated_sample_size: 'Pilot Estimated Sample Size',
+    pilot_total_estimated_budget: 'Pilot Total Estimated Budget',
+    pilot_budget_currency: 'Pilot Budget Currency',
+    pilot_estimated_spend_plus_1: 'Pilot Estimated Spend +1',
+    pilot_estimated_spend_plus_2: 'Pilot Estimated Spend +2',
+    pilot_estimated_spend_plus_3: 'Pilot Estimated Spend +3',
+    pilot_regions_accepting_submissions: 'Pilot Regions Accepting Submissions',
   };
 
   /** Get first study_details object from API (study_details is an array). */
@@ -703,13 +1022,72 @@ export class IdeaView implements OnInit, OnDestroy {
     return null;
   }
 
+  /** Keys hidden from Study Details accordion (not shown to user). */
+  private studyDetailsHiddenKeys = new Set(['study_id', 'status_id', 'flag_soft_lock', 'study_type']);
+
   getStudyDetailsDisplayRows(): { label: string; value: string }[] {
     const record = this.getFirstStudyDetailsRecord();
     if (!record) return [];
-    return Object.entries(record).map(([key, val]) => ({
-      label: this.studyDetailsLabelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-      value: val != null ? String(val) : '.....',
-    }));
+    const rows: { label: string; value: string }[] = [];
+    const seen = new Set<string>();
+    for (const key of this.studyDetailsDisplayOrder) {
+      if (key.startsWith('pilot_') || this.studyDetailsHiddenKeys.has(key)) continue;
+      if (record[key] !== undefined) {
+        seen.add(key);
+        rows.push({
+          label: this.studyDetailsLabelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          value: record[key] != null ? String(record[key]) : '.....',
+        });
+      }
+    }
+    for (const key of Object.keys(record)) {
+      if (key.startsWith('pilot_') || seen.has(key) || this.studyDetailsHiddenKeys.has(key)) continue;
+      rows.push({
+        label: this.studyDetailsLabelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        value: record[key] != null ? String(record[key]) : '.....',
+      });
+    }
+    return rows;
+  }
+
+  /** True when study_details has any pilot_ field with a value. */
+  hasPilotDetails(): boolean {
+    const record = this.getFirstStudyDetailsRecord();
+    if (!record) return false;
+    return this.pilotDetailKeys.some((key) => {
+      const val = record[key];
+      return val != null && String(val).trim() !== '';
+    });
+  }
+
+  getPilotDetailsDisplayRows(): { label: string; value: string }[] {
+    const record = this.getFirstStudyDetailsRecord();
+    if (!record) return [];
+    const rows: { label: string; value: string }[] = [];
+    // Same order as Study Details: Pilot Budget Currency first, then same positions throughout
+    for (const studyKey of this.studyDetailsDisplayOrder) {
+      // Skip pilot_ prefixed keys and hidden keys
+      if (studyKey.startsWith('pilot_') || this.studyDetailsHiddenKeys.has(studyKey)) continue;
+      
+      const pilotKey = this.studyKeyToPilotKey[studyKey];
+      if (pilotKey !== undefined) {
+        // Show pilot field if it exists in record (even if null, show '.....')
+        rows.push({
+          label: this.pilotDetailsLabelMap[pilotKey] || pilotKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          value: record[pilotKey] != null ? String(record[pilotKey]) : '.....',
+        });
+      } else {
+        // For fields without pilot versions (pos, pos_reasons, created_at, created_by, updated_at, updated_by)
+        // Show the study version to maintain sync, but only if the field exists in the record
+        if (['pos', 'pos_reasons', 'created_at', 'created_by', 'updated_at', 'updated_by'].includes(studyKey)) {
+          rows.push({
+            label: this.studyDetailsLabelMap[studyKey] || studyKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+            value: record[studyKey] != null ? String(record[studyKey]) : '.....',
+          });
+        }
+      }
+    }
+    return rows;
   }
 
   navigateToEdit() {
@@ -724,6 +1102,47 @@ export class IdeaView implements OnInit, OnDestroy {
         },
       });
     }
+  }
+
+  onCancel() {
+    // Redirect to harmonizer landing page when Cancel is clicked
+    if (this.from === 'harmonizer') {
+      this.router.navigate(['/harmonizer']);
+    }
+  }
+
+  /**
+   * Check if Edit Details button should be hidden.
+   * Hide when idea is harmonized (status_id === 10 or statusLabel contains "Harmonized").
+   * Show when idea is harmonization pending (status_id === 18 or statusLabel === "Harmonization pending").
+   */
+  shouldHideEditDetails(): boolean {
+    // Only apply this logic when coming from harmonizer
+    if (this.from !== 'harmonizer') {
+      return false;
+    }
+
+    // Show if status_id is 18 (Harmonization Pending)
+    if (this.viewIdea?.status_id === 18) {
+      return false;
+    }
+
+    // Hide if status_id is 10 (Harmonized)
+    if (this.viewIdea?.status_id === 10) {
+      return true;
+    }
+
+    // Check statusLabel - show if it's "Harmonization pending"
+    if (this.statusLabel && this.statusLabel.toLowerCase().includes('harmonization pending')) {
+      return false;
+    }
+
+    // Hide if statusLabel contains "Harmonized" (e.g., "Harmonized Data")
+    if (this.statusLabel && this.statusLabel.toLowerCase().includes('harmonized')) {
+      return true;
+    }
+
+    return false;
   }
 }
 

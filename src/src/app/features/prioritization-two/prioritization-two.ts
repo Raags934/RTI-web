@@ -71,10 +71,26 @@ export class PrioritizationTwo implements OnInit {
   totalPages = 1;
   currentFilterStatusId: number = 0; // Track current filter status_id
 
+  // Status IDs where pagination is hidden (TA Prioritization Pending, TA Ranked)
+  private readonly noPaginationStatusIds = [12, 13];
+
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
+
+  /** Ideas to display: all filtered when in Pending/Ranked tab, else current page */
+  get displayedIdeas(): Idea[] {
+    return this.noPaginationStatusIds.includes(this.currentFilterStatusId)
+      ? this.filteredIdeas
+      : this.pagedIdeas;
+  }
+
+  get showPagination(): boolean {
+    return !this.noPaginationStatusIds.includes(this.currentFilterStatusId);
+  }
 
   // Array to store ranking changes
   rankingChanges: TARankingChange[] = [];
+  // Store original rankings when ideas are loaded to detect changes
+  originalRankings: Map<number, string | null> = new Map();
 
   private sub!: Subscription;
 
@@ -93,6 +109,14 @@ export class PrioritizationTwo implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
+      // Store original rankings when ideas are loaded
+      ideas.forEach(idea => {
+        this.originalRankings.set(
+          idea.idea_id,
+          idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
+        );
+      });
+      console.log('📋 Original rankings stored on ideas load:', Array.from(this.originalRankings.entries()));
       this.taFilterChange(null);
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
@@ -134,19 +158,40 @@ export class PrioritizationTwo implements OnInit {
         this.popup.open = false;
       } else if (event.type === 'confirmSubmitRanking') {
         this.popup.open = false;
-        // Only send ideas that appear on the current pagination page (same as what user sees)
-        const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
+        const displayedIds = new Set(this.displayedIdeas.map((i) => i.idea_id));
         const rankedIdeas = this.rankingChanges.filter(
-          (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
+          (c) => c.ranking_franchise != null && displayedIds.has(c.idea_id)
         );
-        const payload: PrioritizationPayload = {
-          ideas: rankedIdeas.map((c) => ({
-            idea_id: c.idea_id,
-            ranking_franchise: c.ranking_franchise != null ? String(c.ranking_franchise) : null
-          })),
+
+        console.log('🔍 Submit - Original rankings:', Array.from(this.originalRankings.entries()));
+        console.log('🔍 Submit - Current ranking changes:', rankedIdeas);
+
+        const basePayload: PrioritizationPayload = {
+          ideas: rankedIdeas.map((c) => {
+            const originalRank = this.originalRankings.get(c.idea_id);
+            const currentRank = c.ranking_franchise;
+            // Normalize both to strings for comparison
+            const originalRankStr = originalRank != null ? String(originalRank) : null;
+            const currentRankStr = currentRank != null ? String(currentRank) : null;
+            // lock: true if item had an original rank and was changed, false otherwise (new entry)
+            const lock = originalRankStr != null && originalRankStr !== currentRankStr;
+
+            console.log(`🔍 Submit - Idea ${c.idea_id}: original=${originalRankStr}, current=${currentRankStr}, lock=${lock}`);
+
+            return {
+              idea_id: c.idea_id,
+              ranking_franchise: currentRankStr,
+              lock: lock,
+            };
+          }),
           locked: true,
-          updated_by: 1
+          updated_by: 1,
         };
+
+        const payload = this.buildFinalPayload(basePayload);
+
+        console.log('📤 Submit - Final payload:', JSON.stringify(payload, null, 2));
+
         const url = 'ideas/ta-prioritization';
         this.store.dispatch(SubmitPrioritization({ payload, url }));
       } else if (event.type === 'savePrioritizationSuccess') {
@@ -157,6 +202,7 @@ export class PrioritizationTwo implements OnInit {
         this.updatePagedIdeas();
         this.updateStatusCounts();
         this.rankingChanges = [];
+        this.originalRankings.clear();
       } else if (event.type === 'submitPrioritizationSuccess') {
         // Close popup after successful submission
         this.popup.open = false;
@@ -165,6 +211,7 @@ export class PrioritizationTwo implements OnInit {
         this.updatePagedIdeas();
         this.updateStatusCounts();
         this.rankingChanges = [];
+        this.originalRankings.clear();
       } else if (event.type === 'prioritizationFailure') {
         alert(event.payload);
         console.error('Error saving ranking:', event.payload);
@@ -204,6 +251,17 @@ export class PrioritizationTwo implements OnInit {
       this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
     }
 
+    // Original rankings are already stored when ideas are loaded
+    // Only update if new ideas are added that weren't in originalRankings
+    this.ideas.forEach(idea => {
+      if (!this.originalRankings.has(idea.idea_id)) {
+        this.originalRankings.set(
+          idea.idea_id,
+          idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
+        );
+      }
+    });
+
     // Populate rankingChanges with all filtered ideas; use existing rank from response so unchanged ranks are sent in payload.
     // Normalize ranking_franchise to string so payload is consistent (API may return number).
     this.rankingChanges = this.filteredIdeas.map(idea => ({
@@ -212,6 +270,7 @@ export class PrioritizationTwo implements OnInit {
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));
+    console.log('📋 Original rankings stored:', Array.from(this.originalRankings.entries()));
 
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
@@ -314,39 +373,146 @@ export class PrioritizationTwo implements OnInit {
   }
 
   saveRanking() {
-    const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
+    const displayedIds = new Set(this.displayedIdeas.map((i) => i.idea_id));
     const rankedInView = this.rankingChanges.filter(
-      (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
+      (c) => c.ranking_franchise != null && displayedIds.has(c.idea_id)
     );
-    if (rankedInView.length < 10) {
-      this.popup = PopupConfigs.rankAtLeast10Ideas;
-      this.popup.open = true;
-      return;
-    }
-    const payload: PrioritizationPayload = {
-      ideas: rankedInView.map((c) => ({
-        idea_id: c.idea_id,
-        ranking_franchise: c.ranking_franchise != null ? String(c.ranking_franchise) : null
-      })),
+
+    console.log('🔍 Original rankings:', Array.from(this.originalRankings.entries()));
+    console.log('🔍 Current ranking changes:', rankedInView);
+
+    const basePayload: PrioritizationPayload = {
+      ideas: rankedInView.map((c) => {
+        const originalRank = this.originalRankings.get(c.idea_id);
+        const currentRank = c.ranking_franchise;
+        // Normalize both to strings for comparison
+        const originalRankStr = originalRank != null ? String(originalRank) : null;
+        const currentRankStr = currentRank != null ? String(currentRank) : null;
+        // lock: true if item had an original rank and was changed, false otherwise (new entry)
+        const lock = originalRankStr != null && originalRankStr !== currentRankStr;
+
+        console.log(`🔍 Idea ${c.idea_id}: original=${originalRankStr}, current=${currentRankStr}, lock=${lock}`);
+
+        return {
+          idea_id: c.idea_id,
+          ranking_franchise: currentRankStr,
+          lock: lock,
+        };
+      }),
       locked: false,
-      updated_by: 1
+      updated_by: 1,
     };
+
+    const payload = this.buildFinalPayload(basePayload);
+
+    console.log('📤 Final payload:', JSON.stringify(payload, null, 2));
 
     const url = 'ideas/ta-prioritization';
 
     this.store.dispatch(SavePrioritization({ payload, url }));
   }
 
-  submitRanking() {
-    const pageIds = new Set(this.pagedIdeas.map((i) => i.idea_id));
-    const rankedCount = this.rankingChanges.filter(
-      (c) => c.ranking_franchise != null && pageIds.has(c.idea_id)
-    ).length;
-    if (rankedCount < 10) {
-      this.popup = PopupConfigs.rankAtLeast10Ideas;
-      this.popup.open = true;
-      return;
+  /**
+   * Build final payload for API.
+   * Case 1 (new ranks, no duplicates): Pass through user-selected ranks as-is [1, 5, 6, 8, 9].
+   * Case 2 (re-rank with conflicts): Run reorder to resolve duplicates via shifting; output unique ranks.
+   */
+  private buildFinalPayload(basePayload: PrioritizationPayload): PrioritizationPayload {
+    if (!basePayload.ideas?.length) {
+      return basePayload;
     }
+    const ideas = basePayload.ideas as TARankingChange[];
+    const rankValues = ideas
+      .map((i) => (i.ranking_franchise != null ? String(i.ranking_franchise).trim() : null))
+      .filter((r): r is string => r != null && r !== '');
+    const hasDuplicates =
+      rankValues.length > 0 &&
+      rankValues.length !== new Set(rankValues).size;
+
+    if (!hasDuplicates) {
+      // Case 1: All unique ranks – pass through
+      return basePayload;
+    }
+    // Case 2: Duplicate ranks – resolve via reorder/shifting
+    return this.reorderPayloadWithLockedRanks(basePayload);
+  }
+
+  /** Reorder payload so locked ranks are preserved and others are shifted around them. */
+  private reorderPayloadWithLockedRanks(payload: PrioritizationPayload): PrioritizationPayload {
+    const ideas = (payload.ideas as TARankingChange[]).map((item, index) => {
+      const parsedRank = Number(item.ranking_franchise);
+      return {
+        idea_id: item.idea_id,
+        oldRank: index + 1, // current position in array
+        userRank: Number.isFinite(parsedRank) ? parsedRank : index + 1, // fallback to current position
+        locked: item.lock === true,
+      };
+    });
+
+    const maxUserRank = Math.max(
+  ideas.length,
+  ...ideas.map(i => i.userRank)
+);
+
+const N = maxUserRank
+
+    // STEP 1: Clamp ranks to [1, N]
+    ideas.forEach((item) => {
+      item.userRank = Math.max(1, Math.min(N, item.userRank));
+    });
+
+    // STEP 2: Create empty slots
+    const slots: Array<{
+      idea_id: number;
+      oldRank: number;
+      userRank: number;
+      locked: boolean;
+    } | null> = new Array(N).fill(null);
+
+    // STEP 3: Place locked items
+    const lockedItems = ideas
+      .filter((i) => i.locked)
+      .sort((a, b) => a.userRank - b.userRank);
+
+    for (const item of lockedItems) {
+      let pos = item.userRank - 1;
+      while (pos < N && slots[pos] !== null) {
+        pos++;
+      }
+      if (pos < N) {
+        slots[pos] = item;
+      }
+    }
+
+    // STEP 4: Place unlocked items at their user-selected rank (shift right on collision, same as locked)
+    const unlockedItems = ideas
+      .filter((i) => !i.locked)
+      .sort((a, b) => a.oldRank - b.oldRank);
+
+    for (const item of unlockedItems) {
+      let pos = item.userRank - 1;
+      while (pos < N && slots[pos] !== null) {
+        pos++;
+      }
+      if (pos < N) {
+        slots[pos] = item;
+      }
+    }
+
+    // STEP 5: Output unique ranks (slot position) after shifting; skip null slots
+    const reorderedIdeas: TARankingChange[] = slots
+      .flatMap((item, index) =>
+        item === null ? [] : [{ idea_id: item.idea_id, ranking_franchise: String(index + 1), lock: item.locked }]
+      );
+
+    return {
+      ideas: reorderedIdeas,
+      locked: payload.locked,
+      updated_by: payload.updated_by,
+    };
+  }
+
+  submitRanking() {
     // Show confirmation popup before submission
     this.popup = PopupConfigs.submitRankingConfirmTwo;
     this.popup.open = true;

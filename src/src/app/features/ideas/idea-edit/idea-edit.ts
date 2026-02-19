@@ -18,7 +18,7 @@ import { PopUp } from '../../../shared/components/popup/popup';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
-import { UpdateIdea, AddIdea } from '../../../store/idea.actions';
+import { UpdateIdea, AddIdea, LoadIdeas } from '../../../store/idea.actions';
 import { Franchise } from '../../../models/productsList.model';
 import { Dropdowns } from '../../../models/dropdown.model';
 import { DropdownOption } from '../../../models/DropDownOption';
@@ -63,24 +63,39 @@ export class IdeaEdit implements OnInit, OnDestroy {
 
   private eventsSub!: Subscription;
   private hasSubmitted: boolean = false;
+  private hasApproved: boolean = false;
 
   popup: Popup = PopupConfigs.cancelIdea;
+
+  /** Show Approve button only for Submitted ideas and when user is Creator + Franchise (Business Function). */
+  get showApproveButton(): boolean {
+    if (!this.currentUser?.roles?.length || !this.currentUser?.functions?.length) return false;
+    if (this.currentIdea?.status_id !== 5) return false; // 5 = Submitted
+    const hasCreatorRole = this.currentUser.roles.some((r) => r.role_name === 'Creator');
+    const hasFranchiseBusinessFunction = this.currentUser.functions.some(
+      (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
+    );
+    return hasCreatorRole && hasFranchiseBusinessFunction;
+  }
 
   user$: Observable<User | undefined>;
   franchises$: Observable<Franchise[] | undefined>;
   dropdowns$: Observable<Dropdowns | undefined>;
   ideas$: Observable<Idea[]>;
+  currentUser: User | undefined;
 
   ideaId: number | null = null;
   ideaUid: string | null = null;
   currentIdea: Idea | null = null;
+  from: string = ''; // Track where user came from (e.g., 'harmonizer')
 
   constructor(
     private fb: FormBuilder,
     private ideaEvents: IdeaEventsService,
     private router: Router,
     private route: ActivatedRoute,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private ideaService: IdeaService
   ) {
     this.user$ = this.store.select((state) => state.masterData?.data?.user);
     this.franchises$ = this.store.select((state) => state.masterData?.data?.franchises);
@@ -93,9 +108,16 @@ export class IdeaEdit implements OnInit, OnDestroy {
     this.setupAutoAssign();
     this.listenToEvents();
 
-    // Get idea_uid from route
+    // Get idea_uid from route and query params
     this.route.paramMap.pipe(take(1)).subscribe((params) => {
       this.ideaUid = params.get('idea_uid');
+    });
+
+    // Get query params (e.g., 'from' parameter)
+    this.route.queryParamMap.pipe(take(1)).subscribe((queryParams) => {
+      const fromParam = queryParams.get('from');
+      // Normalize so both '/harmonizer' and 'harmonizer' work
+      this.from = (fromParam || '').replace(/^\//, '') || '';
     });
 
     // Load dropdowns and then populate form
@@ -105,6 +127,8 @@ export class IdeaEdit implements OnInit, OnDestroy {
       this.dropdowns$.pipe(take(1)),
       this.ideas$.pipe(take(1)),
     ]).subscribe(([user, franchises, dropdowns, ideas]) => {
+      // Store current user for later use
+      this.currentUser = user;
       // Set up research pathway options
       if (user) {
         this.researchPathwayOptions = mapResearchPathwayToDropdown(user.research_pathways);
@@ -203,6 +227,8 @@ export class IdeaEdit implements OnInit, OnDestroy {
     this.eventsSub = this.ideaEvents.events$.subscribe((event) => {
       if (event.type === 'submitIdea') {
         this.submitIdea();
+      } else if (event.type === 'approveIdea') {
+        this.approveIdea();
       } else if (event.type === 'cancelIdea') {
         this.cancelIdea();
       } else if (event.type === 'closePopUp') {
@@ -304,24 +330,105 @@ export class IdeaEdit implements OnInit, OnDestroy {
 
     const payload = this.prepareIdeaPayload();
     const isDraft = this.currentIdea?.status?.status_name?.toLowerCase() === 'draft';
-    console.log('isDraft--->>>>', isDraft);
-    if (isDraft) {
-      // Draft: hit addIdea API with same payload + idea_id (do not call update API)
-      const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
-      console.log('Add idea payload (from draft):', addPayload);
-      this.store.dispatch(AddIdea({ idea: addPayload }));
-    } else {
-      // Non-draft: hit update API as usual
-      console.log('Update payload:', payload);
-      this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payload }));
-    }
+    const isApproved = this.currentIdea?.status_id === 18; // Approved filter
+    const isHarmonizationPending = this.from === 'harmonizer' && this.currentIdea?.status_id === 18; // Harmonization pending
+    const isCreatorAndFranchise =
+      this.currentUser?.roles?.some((r) => r.role_name === 'Creator') &&
+      this.currentUser?.functions?.some(
+        (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
+      );
+
     this.popup.open = false;
-    // Navigate back to view page after submit
+
+    // If coming from harmonizer, use service directly to avoid effect redirect override
+    if (this.from === 'harmonizer') {
+      if (isDraft) {
+        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
+        this.ideaService.addIdea(addPayload).subscribe({
+          next: () => {
+            this.store.dispatch(LoadIdeas());
+            this.router.navigate(['/harmonizer']);
+          },
+          error: () => {},
+        });
+      } else {
+        // For harmonizer flow: Creator+Franchise -> PUT, else -> POST with approved: false
+        if (isCreatorAndFranchise) {
+          const { approved, ...payloadWithoutApproved } = payload;
+          this.ideaService.updateIdea(this.ideaId!, payloadWithoutApproved as IdeaPayload).subscribe({
+            next: () => {
+              this.store.dispatch(LoadIdeas());
+              this.router.navigate(['/harmonizer']);
+            },
+            error: () => {},
+          });
+        } else {
+          // Non-Creator+Franchise: call addIdea API with approved: false
+          const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId!, approved: false };
+          this.ideaService.addIdea(addPayload).subscribe({
+            next: () => {
+              this.store.dispatch(LoadIdeas());
+              this.router.navigate(['/harmonizer']);
+            },
+            error: () => {},
+          });
+        }
+      }
+      return; // Exit early to prevent other redirects
+    }
+
+    // For non-harmonizer flows, use actions (existing behavior)
+    if (isDraft) {
+      const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
+      this.store.dispatch(AddIdea({ idea: addPayload }));
+    } else if (isApproved) {
+      // Approved filter -> Edit idea: Creator+Franchise -> PUT, else -> AddIdea
+      if (isCreatorAndFranchise) {
+        const { approved, ...payloadWithoutApproved } = payload;
+        this.store.dispatch(UpdateIdea({ ideaId: this.ideaId!, idea: payloadWithoutApproved as IdeaPayload }));
+      } else {
+        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
+        this.store.dispatch(AddIdea({ idea: addPayload }));
+      }
+    } else if (isHarmonizationPending) {
+      // Harmonization pending filter -> Edit idea: Creator+Franchise -> existing behavior (PUT), else -> AddIdea with approve: false
+      if (isCreatorAndFranchise) {
+        const { approved, ...payloadWithoutApproved } = payload;
+        this.store.dispatch(UpdateIdea({ ideaId: this.ideaId!, idea: payloadWithoutApproved as IdeaPayload }));
+      } else {
+        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId!, approved: false };
+        this.store.dispatch(AddIdea({ idea: addPayload }));
+      }
+    } else {
+      const { approved, ...payloadWithoutApproved } = payload;
+      this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payloadWithoutApproved as IdeaPayload }));
+    }
+
+    // Navigate back to view page after submit (for non-harmonizer flows)
     if (this.ideaUid) {
       this.router.navigate(['/ideas/' + this.ideaUid]);
     } else {
       this.router.navigate(['/']);
     }
+  }
+
+  approveIdea(): void {
+    if (this.hasApproved || !this.ideaId) {
+      this.popup.open = false;
+      return;
+    }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.popup.open = false;
+      return;
+    }
+    this.hasApproved = true;
+    const payload = this.prepareIdeaPayload();
+    // Same API as draft-edit Submit (AddIdea) but with approved: true
+    const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId, approved: true };
+    this.store.dispatch(AddIdea({ idea: addPayload }));
+    this.popup.open = false;
+    this.router.navigate(['/ideas/' + this.ideaUid]);
   }
 
   prepareIdeaPayload(): IdeaPayload {
@@ -339,6 +446,19 @@ export class IdeaEdit implements OnInit, OnDestroy {
       this.launchClaimOptions.find((x) => x.id === raw.launch_claim)?.name === 'Yes'
     );
 
+    // Calculate approved based on user roles and functions
+    // approved is true if user has role_name = "Creator" AND function_type = "Business Function" AND function_name = "Franchise"
+    let approved = false;
+    if (this.currentUser?.roles && this.currentUser?.functions) {
+      const hasCreatorRole = this.currentUser.roles.some(
+        (role) => role.role_name === 'Creator'
+      );
+      const hasFranchiseBusinessFunction = this.currentUser.functions.some(
+        (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'
+      );
+      approved = hasCreatorRole && hasFranchiseBusinessFunction;
+    }
+
     return {
       pathway_id: raw.pathway_id,
       rti_year: rtiYear,
@@ -355,6 +475,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
       research_proposal: '',
       created_by: this.currentIdea?.created_by?.user_id ?? 2,
       updated_by: 1,
+      approved: approved,
     };
   }
 }

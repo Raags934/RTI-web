@@ -193,12 +193,12 @@
   </div>
 
   <!-- Confirmation -->
-  <div class="confirmation-row" *ngIf="from === 'assessor' || from === 'harmonizer'">
+  <div class="confirmation-row" *ngIf="from === 'assessor'">
     Confirmation
   </div>
 
   <!-- Confirmer Comment section -->
-  <div class="confirmer-comment" *ngIf="from === 'assessor' || from === 'harmonizer'">
+  <div class="confirmer-comment" *ngIf="from === 'assessor'">
     <app-form-input
       label="Confirmer Comment"
       type="textarea"
@@ -210,7 +210,7 @@
 </form>
 
 <!-- Accordion: Study Details & Prioritization (when data exists) -->
-@if (hasStudyDetails() || hasPrioritizationOne() || hasPrioritizationTwo()) {
+@if (hasStudyDetails() || hasPilotDetails() || hasPrioritizationOne() || hasPrioritizationTwo()) {
   <div class="view-accordions">
     @if (hasStudyDetails()) {
       <div class="accordion-item">
@@ -227,6 +227,31 @@
           <div class="accordion-content">
             <div class="study-details-grid">
               @for (row of getStudyDetailsDisplayRows(); track row.label) {
+                <div class="study-details-grid-item">
+                  <span class="accordion-label">{{ row.label }}</span>
+                  <span class="accordion-value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (hasPilotDetails()) {
+      <div class="accordion-item">
+        <button type="button" class="accordion-header" (click)="toggleAccordion('pilotDetails')" [attr.aria-expanded]="accordionPilotDetailsOpen">
+          <span class="accordion-title">Pilot Details</span>
+          <span class="accordion-icon-circle" [class.accordion-icon--collapsed]="!accordionPilotDetailsOpen">
+            <svg class="accordion-chevron" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M 2 9 L 6 4 L 10 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+        @if (accordionPilotDetailsOpen) {
+          <div class="accordion-content">
+            <div class="study-details-grid">
+              @for (row of getPilotDetailsDisplayRows(); track row.label) {
                 <div class="study-details-grid-item">
                   <span class="accordion-label">{{ row.label }}</span>
                   <span class="accordion-value">{{ row.value }}</span>
@@ -282,10 +307,19 @@
   </div>
 }
 
-<!-- Action buttons row: Enter Study Details / Assess Idea + Edit Details -->
+<!-- Action buttons row: Cancel + Enter Study Details / Assess Idea + Edit Details -->
 <div class="action-buttons-row">
   <app-buttons
-    *ngIf="from === 'assessor' || from === 'harmonizer'"
+    *ngIf="from === 'harmonizer'"
+    (click)="onCancel()"
+    variant="type2"
+    color="var(--primary-400)"
+    size="medium"
+  >
+    Cancel
+  </app-buttons>
+  <app-buttons
+    *ngIf="from === 'assessor' || (from === 'harmonizer' && !hasStudyDetails())"
     variant="type1"
     color="var(--primary-400)"
     size="medium"
@@ -294,6 +328,7 @@
     {{ from === 'assessor' ? 'Assess Idea' : 'Enter Study Details' }}
   </app-buttons>
   <app-buttons
+    *ngIf="!shouldHideEditDetails()"
     (click)="navigateToEdit()"
     variant="type1"
     color="var(--primary-400)"
@@ -418,6 +453,7 @@
   [size]="enterStudyDetailsPopup.size"
   [confirmPopupAction]="enterStudyDetailsPopup.confirmPopupAction"
   [showCancelButton]="enterStudyDetailsPopup.showCancelButton ?? true"
+  [showConfirmButton]="enterStudyDetailsPopup.showConfirmButton ?? true"
 >
   @if (enterStudyDetailsPopup.confirmPopupAction === 'enterStudyDetails') {
     <div class="study-details-form">
@@ -436,17 +472,13 @@
           placeholder="Number only (0-100)"></app-form-input>
       </div>
     </div>
-    <div class="pilot-study-row study-details-form-section-header">
-      <span class="card-headings">Pilot Study</span>
-      <button type="button" class="pilot-toggle" [class.pilot-toggle--yes]="form.get('pilot')?.value === 'Yes'"
-        (click)="onPilotToggle(form.get('pilot')?.value !== 'Yes')" role="switch"
-        [attr.aria-checked]="form.get('pilot')?.value === 'Yes'" aria-label="Pilot Study"
-        [disabled]="form.get('recommended')?.value !== 'Yes'">
-        <span class="pilot-toggle-knob"></span>
-        <span class="pilot-toggle-text">{{ form.get('pilot')?.value === 'Yes' ? 'Yes' : 'No' }}</span>
-      </button>
+    <div class="study-details-pos-reasons-row">
+      <div class="form-field">
+        <app-form-input label="POS Reasons" type="textarea" [required]="true"
+          [control]="form.get('study_details_pos_reasons')" rows="3"></app-form-input>
+      </div>
     </div>
-    <div class="form-section-separator"></div>
+    <!-- Study Details Accordion (moved before Pilot Study toggle) -->
     <div class="study-details-form-accordion">
       <button type="button" class="study-details-form-accordion-header study-details-form-section-header"
         (click)="toggleEnterStudyDetailsSection()" [attr.aria-expanded]="enterStudyDetailsSectionOpen"
@@ -482,6 +514,23 @@
         <div class="form-field">
           <app-form-input label="Secondary Endpoints" type="textarea" [required]="true"
             [control]="form.get('secondary_endpoints')" rows="3"></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input label="Other Potential Endpoints" type="textarea" [required]="true"
+            [control]="form.get('other_potential_endpoints')" rows="3"></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input
+            label="Proposed Study Design"
+            type="select"
+            [required]="true"
+            [control]="form.get('proposed_study_design')"
+            [options]="proposedStudyDesignOptions"
+          ></app-form-input>
+        </div>
+        <div class="form-field">
+          <app-form-input label="Proposed Statistics" type="textarea" [required]="true"
+            [control]="form.get('proposed_statistics')" rows="3"></app-form-input>
         </div>
         <div class="date-fields-row">
           <div class="form-field">
@@ -532,6 +581,152 @@
       </div>
       }
       </div>
+    </div>
+    <!-- Pilot Study Toggle -->
+    <div class="pilot-study-row study-details-form-section-header">
+      <span class="card-headings">Pilot Study</span>
+      <button type="button" class="pilot-toggle" [class.pilot-toggle--yes]="form.get('pilot')?.value === 'Yes'"
+        (click)="onPilotToggle(form.get('pilot')?.value !== 'Yes')" role="switch"
+        [attr.aria-checked]="form.get('pilot')?.value === 'Yes'" aria-label="Pilot Study"
+        [disabled]="form.get('recommended')?.value !== 'Yes'">
+        <span class="pilot-toggle-knob"></span>
+        <span class="pilot-toggle-text">{{ form.get('pilot')?.value === 'Yes' ? 'Yes' : 'No' }}</span>
+      </button>
+    </div>
+    <div class="form-section-separator"></div>
+    <!-- Pilot Details Accordion (only shown when pilot === 'Yes') -->
+    @if (form.get('pilot')?.value === 'Yes') {
+      <div class="study-details-form-accordion">
+        <button type="button" class="study-details-form-accordion-header study-details-form-section-header"
+          (click)="togglePilotDetailsSection()" [attr.aria-expanded]="pilotDetailsSectionOpen"
+          [disabled]="form.get('recommended')?.value !== 'Yes' || form.get('pilot')?.value !== 'Yes'">
+          <span class="card-headings">Pilot Details</span>
+          <span class="study-details-form-accordion-icon"
+            [class.accordion-icon--collapsed]="!pilotDetailsSectionOpen">
+            <svg class="accordion-chevron" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M 2 9 L 6 4 L 10 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+        @if (pilotDetailsSectionOpen) {
+          <div class="study-details-form-accordion-content">
+            <div class="study-details-accordion-intro">
+              <h3 class="study-details-accordion-title-text">Enter Pilot Details</h3>
+              <p class="study-details-accordion-helper-text">Please verify that all the information is correct before
+                submitting.</p>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Research Questions" type="textarea" [required]="true"
+                [control]="form.get('pilot_research_questions')" rows="2"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Potential Claims" type="textarea" [required]="true"
+                [control]="form.get('pilot_potential_claims')" rows="4"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Primary Endpoints" type="textarea" [required]="true"
+                [control]="form.get('pilot_primary_endpoints')" rows="1"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Secondary Endpoints" type="textarea" [required]="true"
+                [control]="form.get('pilot_secondary_endpoints')" rows="3"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Other Potential Endpoints" type="textarea" [required]="true"
+                [control]="form.get('pilot_other_potential_endpoints')" rows="3"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input
+                label="Proposed Study Design"
+                type="select"
+                [required]="true"
+                [control]="form.get('pilot_proposed_study_design')"
+                [options]="proposedStudyDesignOptions"
+              ></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Proposed Statistics" type="textarea" [required]="true"
+                [control]="form.get('pilot_proposed_statistics')" rows="3"></app-form-input>
+            </div>
+            <div class="date-fields-row">
+              <div class="form-field">
+                <app-form-input label="Estimated Start Date" type="date" [required]="true"
+                  [control]="form.get('pilot_estimated_study_start_date')" placeholder="MM/DD/YYYY"
+                  [minDate]="minStartDate"></app-form-input>
+              </div>
+              <div class="form-field">
+                <app-form-input label="Estimated End Date" type="date" [required]="true"
+                  [control]="form.get('pilot_estimated_study_end_date')" placeholder="MM/DD/YYYY"></app-form-input>
+              </div>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Estimated Sample Size" type="text" [required]="true"
+                [control]="form.get('pilot_estimated_sample_size')"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Total Estimated Budget" type="text" [required]="true"
+                [control]="form.get('pilot_total_estimated_budget')"></app-form-input>
+            </div>
+            <div class="form-field">
+              <app-form-input label="Budget Currency" type="text" [required]="true" [control]="form.get('pilot_budget_currency')"
+                placeholder="e.g. USD"></app-form-input>
+            </div>
+            <div class="study-details-number-fields">
+              <div class="form-field">
+                <app-form-input label="Estimated Spend +1" type="text" [required]="true"
+                  [control]="form.get('pilot_estimated_spend_plus_1')" placeholder="Number only"></app-form-input>
+              </div>
+              <div class="form-field">
+                <app-form-input label="Estimated Spend +2" type="text" [required]="true"
+                  [control]="form.get('pilot_estimated_spend_plus_2')" placeholder="Number only"></app-form-input>
+              </div>
+              <div class="form-field">
+                <app-form-input label="Estimated Spend +3" type="text" [required]="true"
+                  [control]="form.get('pilot_estimated_spend_plus_3')" placeholder="Number only"></app-form-input>
+              </div>
+            </div>
+            <div class="form-field">
+              <app-form-input
+                label="Regions Accepting Submissions"
+                type="select"
+                [required]="true"
+                [control]="form.get('pilot_regions_accepting_submissions')"
+                [options]="regionsAcceptingSubmissionsOptions"
+              ></app-form-input>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    <!-- Save, Cancel, and Submit Study Details buttons in single row -->
+    <div class="study-details-form-actions">
+      <app-buttons
+        (click)="cancelStudyDetails()"
+        variant="type2"
+        color="var(--primary-400)"
+        size="large"
+      >
+        Cancel
+      </app-buttons>
+      <!-- Save button - commented for future use
+      <app-buttons
+        (click)="saveStudyDetailsDraft()"
+        variant="type2"
+        color="var(--primary-400)"
+        size="large"
+      >
+        Save
+      </app-buttons>
+      -->
+      <app-buttons
+        actionType="enterStudyDetails"
+        variant="type1"
+        color="var(--primary-400)"
+        size="large"
+      >
+        Submit Study Details
+      </app-buttons>
     </div>
   }
 </app-popup>

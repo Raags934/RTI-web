@@ -1,0 +1,23 @@
+.material-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0px 15px;
+  width: 100%;
+  border-top: 1.5px solid var(--neutral-200);
+  padding: 20px 0px;
+  grid-auto-rows: minmax(70px, auto);
+
+  .form-field {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-actions {
+    grid-column: span 3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+  }
+}

@@ -5,6 +5,7 @@ import { MyIdeas } from './features/ideas/my-ideas/my-ideas';
 import { ContactForHelp } from './features/contact-for-help/contact-for-help';
 import { IdeaView } from './features/ideas/idea-view/idea-view';
 import { IdeaEdit } from './features/ideas/idea-edit/idea-edit';
+import { IdeaDraftEdit } from './features/ideas/idea-draft-edit/idea-draft-edit';
 import { PrioritizationOne } from './features/prioritization-one/prioritization-one';
 import { PrioritizationTwo } from './features/prioritization-two/prioritization-two';
 import { Harmonizer } from './features/harmonizer/harmonizer';
@@ -19,8 +20,9 @@ export const routes: Routes = [
   { path: 'help', component: ContactForHelp },
   { path: 'ideas/:idea_uid', component: IdeaView },
   { path: 'ideas/:idea_uid/edit', component: IdeaEdit },
-  { path: 'prioritization', component: PrioritizationOne },
-  { path: 'ta-prioritization', component: PrioritizationTwo },
+  { path: 'ideas/:idea_uid/edit-draft', component: IdeaDraftEdit },
+  { path: 'productprioritization', component: PrioritizationOne },
+  { path: 'taprioritization', component: PrioritizationTwo },
   { path: 'harmonizer', component: Harmonizer },
   { path: 'admin', component: AdminHome },
   { path: 'admin/users', component: ManageUser },

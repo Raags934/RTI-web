@@ -77,8 +77,9 @@
 }
 
 .dropdown-options {
-  max-height: auto;
-
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dropdown-option {

@@ -47,7 +47,7 @@
           
           <!-- Idea Dashboard Menu Items -->
           @if (isIdeaDashboardRoute()) {
-            <div class="menu-item" (click)="editIdea(element.idea_uid)">
+            <div class="menu-item" (click)="editIdea(element)">
               <mat-icon>edit</mat-icon>
               <span>Edit Idea</span>
             </div>
@@ -114,11 +114,12 @@
         }
       </div>
       } @else if (col.key === 'ranking_brand') {
-      <app-ranking-dropdown [value]="getRankingValue(element)" [disabled]="isTaPrioritizationRoute()"
+      <app-ranking-dropdown [value]="getRankingValue(element)" [maxRank]="dataSource.length || 10"
+        [disabled]="isTaPrioritizationRoute()"
         (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
       }
       @else if (col.key === 'ranking_franchise') {
-      <app-ranking-dropdown [value]="getTARankingValue(element)"
+      <app-ranking-dropdown [value]="getTARankingValue(element)" [maxRank]="dataSource.length || 10"
         (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
       }
       @else {

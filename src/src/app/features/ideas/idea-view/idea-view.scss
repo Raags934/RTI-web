@@ -158,12 +158,23 @@
    padding-right: 16px;
  }
 
- .study-details-top-row .form-field {
-   flex: 1 1 140px;
-   min-width: 0;
- }
+.study-details-top-row .form-field {
+  flex: 1 1 140px;
+  min-width: 0;
+}
 
- /* Shared section header: Pilot Study & Study Details (light greyish-white #F8F8F8) – complete form */
+/* POS Reasons row: full width below top row */
+.study-details-pos-reasons-row {
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 16px;
+}
+
+.study-details-pos-reasons-row .form-field {
+  width: 100%;
+}
+
+/* Shared section header: Pilot Study & Study Details (light greyish-white #F8F8F8) – complete form */
  .study-details-form-section-header {
    width: 100%;
    display: flex;
@@ -307,12 +318,22 @@
    margin-right: auto;
  }
 
- /* Separator line (grey) between Pilot Study and Study Details */
- .form-section-separator {
-   height: 1px;
-   background: var(--neutral-200, #e0e0e0);
-   margin: 0;
- }
+/* Separator line (grey) between Pilot Study and Study Details */
+.form-section-separator {
+  height: 1px;
+  background: var(--neutral-200, #e0e0e0);
+  margin: 0;
+}
+
+/* Save, Cancel, and Submit Study Details buttons for Enter Study Details popup */
+.study-details-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 0 16px 16px;
+  align-items: center;
+}
 
  /* Enter Study Details popup: Study Details accordion */
  .study-details-form-accordion {

@@ -26,6 +26,13 @@ export const viewIdeaHeader: headerTitle = {
     expected: 'ideas'
 };
 
+export const editDraftHeader: headerTitle = {
+    title: "Edit Draft",
+    breadcrumbParts: ['Home', 'Ideas List', 'Edit Draft'],
+    backIconVisible: true,
+    expected: 'ideas'
+};
+
 export const myIdeasHeader: headerTitle = {
     title: "My Ideas",
     breadcrumbParts: ['Home', 'My Ideas'],
@@ -58,6 +65,7 @@ export const headerConfigs = {
     homeHeader,
     addIdeaHeader,
     viewIdeaHeader,
+    editDraftHeader,
     myIdeasHeader,
     contactForHelpHeader,
     adminHomeHeader,
