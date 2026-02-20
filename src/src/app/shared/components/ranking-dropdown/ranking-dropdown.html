@@ -1,20 +1,20 @@
 <div class="ranking-dropdown-container" #container (click)="toggleDropdown($event)" [class.disabled]="disabled">
-  <div class="ranking-value" #rankingValue [class.empty]="!value">
-    {{ displayValue || '.....' }}
-  </div>
-  <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
-
-  <div class="dropdown-menu" #dropdownMenu *ngIf="isOpen" [style.top]="dropdownPosition.top"
-    [style.left]="dropdownPosition.left" (click)="$event.stopPropagation()">
-    <div class="dropdown-header">
-      <span class="header-text">Select Rank</span>
-      <mat-icon class="close-icon" (click)="closeDropdown($event)">close</mat-icon>
+    <div class="ranking-value" #rankingValue [class.empty]="!value">
+      {{ displayValue || '.....' }}
     </div>
-    <div class="dropdown-options">
-      <div *ngFor="let rank of ranks" class="dropdown-option" [class.selected]="value === rank"
-        (click)="selectRank(rank, $event)">
-        {{ rank }}
+    <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+ 
+    <div class="dropdown-menu" #dropdownMenu *ngIf="isOpen" [style.top]="dropdownPosition.top"
+      [style.left]="dropdownPosition.left" (click)="$event.stopPropagation()">
+      <div class="dropdown-header">
+        <span class="header-text">Select Rank</span>
+        <mat-icon class="close-icon" (click)="closeDropdown($event)">close</mat-icon>
+      </div>
+      <div class="dropdown-options">
+        <div *ngFor="let rank of ranks" class="dropdown-option" [class.selected]="value === rank"
+          (click)="selectRank(rank, $event)">
+          {{ rank }}
+        </div>
       </div>
     </div>
   </div>
-</div>

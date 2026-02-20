@@ -1,60 +1,72 @@
 <div class="ideas-toolbar">
-  <!-- Left side: heading + caption -->
-  <div class="left">
-    <div class="title">{{ title }}</div>
-<div class="caption" *ngIf="caption">{{ caption }}</div>
-
+    <!-- Left side: heading + caption -->
+    <div class="left">
+      <div class="title">{{ title }}</div>
+  <div class="caption" *ngIf="caption">{{ caption }}</div>
+ 
+    </div>
+ 
+    <div class="search" *ngIf="showSearch">
+      <input
+        type="text"
+        placeholder="Search ideas..."
+        [(ngModel)]="searchValue"
+        (input)="onSearch()"
+      />
+ 
+      <button *ngIf="searchValue" class="clear-btn" (click)="onReset()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+ 
+    <!-- Right side: buttons -->
+    <div class="right">
+      <app-buttons
+        *ngIf="showFreezeButton"
+        [variant]="exportVariant"
+        [color]="exportColor"
+        [size]="exportSize"
+        icon="lock"
+        class="freeze-btn"
+        (click)="onFreezeClick()"
+      >
+        Freeze Data
+      </app-buttons>
+      <app-buttons
+        *ngIf="!showNewIdea"
+        [variant]="exportVariant"
+        [color]="exportColor"
+        [size]="exportSize"
+        [icon]="exportIcon"
+        class="export-btn"
+        (click)="onExportClick()"
+      >
+        Export Data
+      </app-buttons>
+      <app-buttons
+        *ngIf="showNewIdea"
+        [routerLink]="'/addidea'"
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        icon="add_circle_outline"
+      >
+        New Idea
+      </app-buttons>
+      <app-buttons
+        *ngIf="showNewIdea"
+        variant="type2"
+        color="var(--primary-300)"
+        size="medium"
+        icon="ios_share"
+        class="export-btn"
+        (click)="onExportClick()"
+      >
+        Export Data
+      </app-buttons>
+    </div>
   </div>
-
-  <div class="search" *ngIf="showSearch">
-    <input
-      type="text"
-      placeholder="Search ideas..."
-      [(ngModel)]="searchValue"
-      (input)="onSearch()"
-    />
-
-    <button *ngIf="searchValue" class="clear-btn" (click)="onReset()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <!-- Right side: buttons -->
-  <div class="right">
-    <app-buttons
-      *ngIf="!showNewIdea"
-      [variant]="exportVariant"
-      [color]="exportColor"
-      [size]="exportSize"
-      [icon]="exportIcon"
-      class="export-btn"
-      (click)="onExportClick()"
-    >
-      Export Data
-    </app-buttons>
-    <app-buttons
-      *ngIf="showNewIdea"
-      [routerLink]="'/addidea'"
-      variant="type1"
-      color="var(--primary-400)"
-      size="medium"
-      icon="add_circle_outline"
-    >
-      New Idea
-    </app-buttons>
-    <app-buttons
-      *ngIf="showNewIdea"
-      variant="type2"
-      color="var(--primary-300)"
-      size="medium"
-      icon="ios_share"
-      class="export-btn"
-      (click)="onExportClick()"
-    >
-      Export Data
-    </app-buttons>
-  </div>
-</div>
-
-
-
+ 
+ 
+ 
+ 

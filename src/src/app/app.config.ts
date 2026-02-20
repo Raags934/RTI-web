@@ -4,13 +4,11 @@ import { OktaAuth } from '@okta/okta-auth-js';
 import { OKTA_AUTH, OKTA_CONFIG } from '@okta/okta-angular';
 
 import { routes } from './app.routes';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment.development';
 import { AuthService } from './core/services/auth.service';
 
 function getOktaProviders(): { provide: unknown; useValue: unknown }[] {
-  debugger
   const okta = environment.okta;
-  debugger
   if (!okta?.clientId || !okta?.issuer) return [];
   const redirectUri =
     typeof window !== 'undefined'

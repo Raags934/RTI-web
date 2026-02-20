@@ -15,7 +15,8 @@ export interface UserByEmailResponse {
  */
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl = environment.oktaapiurl;
+  private okta_api_key = environment.okta_api_key;
 
   constructor(private http: HttpClient) {}
 
@@ -26,6 +27,9 @@ export class UserService {
     return this.http
       .get<UserByEmailResponse>(`${this.baseUrl}/users/by_email`, {
         params: { email: email.trim() },
+        headers: {
+          'x-api-key': this.okta_api_key,
+        },
       })
       .pipe(
         map((res) => res?.user ?? null),

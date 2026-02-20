@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
-import { MasterDataService } from './masterData.service.js';
-import * as masterDataActions from './masterData.actions.js';
+import { MasterDataService } from './masterData.service';
+import * as masterDataActions from './masterData.actions';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 

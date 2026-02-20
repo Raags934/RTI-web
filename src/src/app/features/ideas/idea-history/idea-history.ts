@@ -22,7 +22,7 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
   private _open: boolean = false;
   private _ideaId: number = 0;
 
-  @Input() 
+  @Input()
   set open(value: boolean) {
     const wasOpen = this._open;
     this._open = value;
@@ -40,7 +40,7 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
     return this._open;
   }
 
-  @Input() 
+  @Input()
   set ideaId(value: number) {
     const previousId = this._ideaId;
     this._ideaId = value;
@@ -96,9 +96,9 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
 
   loadHistory() {
     if (!this.ideaId || this.ideaId === 0) {
-      console.warn('⚠️ Cannot load history: ideaId is not set or is 0', { 
-        ideaId: this.ideaId, 
-        open: this.open 
+      console.warn('⚠️ Cannot load history: ideaId is not set or is 0', {
+        ideaId: this.ideaId,
+        open: this.open
       });
       return;
     }
@@ -113,12 +113,12 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
     this.loading = true;
     this.historyList = []; // Clear previous data
     this.lastLoadedIdeaId = this.ideaId;
-    
+   
     // Cancel any previous subscription
     if (this.apiSubscription) {
       this.apiSubscription.unsubscribe();
     }
-    
+   
     this.apiSubscription = this.ideaService.getAuditLogs(this.ideaId).subscribe({
       next: (auditLogs: AuditLog[]) => {
         console.log('✅ Received audit logs:', auditLogs);
@@ -157,7 +157,7 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
 
   formatDate(dateString: string): string {
     if (!dateString) return '';
-    
+   
     try {
       const date = new Date(dateString);
       const day = date.getDate();
@@ -165,7 +165,7 @@ export class IdeaHistory implements OnInit, OnChanges, OnDestroy {
       const year = date.getFullYear();
       const hours = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
-      
+     
       return `${day} ${month}, ${year} | ${hours}:${minutes}`;
     } catch (error) {
       return dateString;

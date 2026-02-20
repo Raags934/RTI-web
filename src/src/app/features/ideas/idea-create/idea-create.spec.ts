@@ -320,4 +320,38 @@ fdescribe('IdeaCreate Component (unit)', () => {
   expect(component.popup.open).toBeFalse();
 
   });
+
+  // it('should dispatch AddIdea on submit when form is valid', () => {
+  //   const fixture = TestBed.createComponent(IdeaCreate);
+  //   const component = fixture.componentInstance;
+  //   fixture.detectChanges();
+
+  //   // Fill the form with valid values using the component’s data sources
+  //   component.form.patchValue({
+  //     pathway_id: component.pathways[0]?.id,
+  //     rti_year: component.rtiYears[0]?.id,
+  //     product_type: component.productTypes[0]?.id,
+  //     product_id: component.products[0]?.id,
+  //     origin_request: component.originRequests[0]?.id,
+  //     strategic_rationale: 'Valid rationale text',
+  //     monadic_or_comparative: component.monadicComparative[0]?.id,
+  //     target_aspirational_claim: 'Some claim',
+  //     launch_claim: component.launchClaims[0]?.id,
+  //     comment: ''
+  //   });
+
+  //   const dispatchSpy = spyOn(store, 'dispatch');
+
+  //   component.submitIdea();
+
+  //   expect(dispatchSpy).toHaveBeenCalledTimes(1);
+
+  //   // Assert action shape instead of calling AddIdea(...) with jasmine.any()
+  //   const dispatched = dispatchSpy.calls.mostRecent().args[0] as any;
+  //   expect(dispatched.type).toBe(AddIdea.type);
+  //   expect(dispatched.idea).toEqual(jasmine.any(Object));
+
+  //   // Optional: verify navigation after submit
+  //   expect(routerStub.navigate).toHaveBeenCalledWith(['/']);
+  // });
 });

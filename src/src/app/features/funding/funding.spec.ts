@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RTILogo } from './rti-logo';
+import { Funding } from './funding';
 
-fdescribe('RTILogo', () => {
-  let component: RTILogo;
-  let fixture: ComponentFixture<RTILogo>;
+describe('Funding', () => {
+  let component: Funding;
+  let fixture: ComponentFixture<Funding>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RTILogo]
+      imports: [Funding]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RTILogo);
+    fixture = TestBed.createComponent(Funding);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

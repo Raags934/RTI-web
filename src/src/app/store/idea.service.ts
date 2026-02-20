@@ -15,6 +15,8 @@ import { AuthService } from '../core/services/auth.service';
 })
 export class IdeaService {
   private baseUrl = environment.apiUrl;
+  // private baseUrl = 'http://localhost:5000';
+
   private x_api_key = environment.x_api_key;
 
   constructor(
@@ -30,7 +32,7 @@ export class IdeaService {
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -52,7 +54,7 @@ export class IdeaService {
   addIdea(payload: IdeaPayload): Observable<Idea> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -64,7 +66,7 @@ export class IdeaService {
  addDraftIdea(payload: IdeaPayload): Observable<Idea> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -78,7 +80,7 @@ export class IdeaService {
   updateIdea(ideaId: number, payload: IdeaPayload): Observable<{ idea_id: number; message: string; status: number }> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -93,6 +95,7 @@ export class IdeaService {
   submitStudyDetails(payload: StudyDetailsPayload): Observable<unknown> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
+      'x-api-key': this.x_api_key,
     });
     return this.http.post<unknown>(`${this.baseUrl}/study_details`, payload, { headers });
   }
@@ -103,6 +106,7 @@ export class IdeaService {
   putHarmonization(ideaId: number, payload: { updated_by: number }): Observable<{ idea_id?: string; message?: string; status?: number }> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
+      'x-api-key': this.x_api_key,
     });
     return this.http.put<{ idea_id?: string; message?: string; status?: number }>(
       `${this.baseUrl}/ideas/${ideaId}/harmonization`,
@@ -117,7 +121,7 @@ export class IdeaService {
   addPrioritization(payload: PrioritizationPayload, url: string): Observable<Idea> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -133,7 +137,7 @@ export class IdeaService {
   exportIdeas(payload: ExportIdeasPayload): Observable<Blob> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http
@@ -212,6 +216,7 @@ export class IdeaService {
   resetIdea(ideaId: number, payload: ResetIdeaPayload): Observable<unknown> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
+      'x-api-key': this.x_api_key,
     });
     return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/reset`, payload, { headers });
   }
@@ -222,7 +227,7 @@ export class IdeaService {
   deleteIdea(ideaId: number): Observable<void> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     return this.http.delete<void>(`${this.baseUrl}/ideas/${ideaId}`, { headers });
@@ -234,7 +239,7 @@ export class IdeaService {
   getAuditLogs(ideaId: number): Observable<AuditLog[]> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // 'x-api-key': this.x_api_key,
+      'x-api-key': this.x_api_key,
     });
 
     const url = `${this.baseUrl}/audit_logs/${ideaId}`;

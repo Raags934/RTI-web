@@ -1,0 +1,209 @@
+import { Component, OnInit, NO_ERRORS_SCHEMA } from '@angular/core';
+
+import { AppState } from '../../app.state';
+import { Store, select } from '@ngrx/store';
+import { Subscription, Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+
+import { LoadIdeas } from '../../store/idea.actions';
+import { Idea } from '../../models/idea.model';
+import { IdeaEventsService } from '../../events/ideaServiceEvents';
+import { TableHeader } from '../../shared/components/table-header/table-header';
+import { Table, TableColumn } from '../../shared/components/table/table';
+import { HeaderFilter } from '../../shared/components/header-filter/header-filter';
+import { TableFilter } from '../../shared/components/table-filter/table-filter';
+import { Pagination } from '../../shared/components/pagination/pagination';
+import { PopUp } from '../../shared/components/popup/popup';
+import { StatusTab, funding } from '../../shared/constants/statusTabs';
+import { ideaDisplayColumns, fundingDisplayColumns } from '../../shared/constants/tableColumns';
+import { loadMasterData } from '../../store/masterData/masterData.actions';
+
+@Component({
+  selector: 'app-funding',
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, PopUp],
+  templateUrl: './funding.html',
+  styleUrl: './funding.scss',
+})
+export class Funding implements OnInit {
+  userName: string = 'Karthik Perisetti';
+
+  ideaDisplayColumns: TableColumn[] = fundingDisplayColumns;
+  statusTabs: StatusTab[] = funding;
+  ideas$: Observable<Idea[]>;
+  ideas: Idea[] = [];
+  filteredIdeas: Idea[] = [];
+  pagedIdeas: Idea[] = [];
+  currentPage = 1;
+  pageSize = 6;
+  totalPages = 1;
+
+  searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
+
+  showFreezePopup = false;
+  freezePopupTitle = 'Are you sure you want to freeze/baseline this list for the current year ?';
+  freezePopupHelper = 'if you select yes you cannot reverse this step.';
+  freezePopupCancelText = 'No';
+  freezePopupConfirmText = 'Yes';
+  freezePopupConfirmAction: 'confirmFreezeData' = 'confirmFreezeData';
+
+  private sub!: Subscription;
+
+  constructor(private store: Store<AppState>, private ideaEvents: IdeaEventsService) {
+    this.ideas$ = this.store.select((state) => state.ideas);
+  }
+
+  ngOnInit(): void {
+    this.ideas$.pipe(take(1)).subscribe((ideas) => {
+      if (!ideas || ideas.length === 0) {
+        this.store.dispatch(LoadIdeas());
+      }
+    });
+
+    this.ideas$.subscribe((ideas) => {
+      this.ideas = ideas;
+      this.filteredIdeas = [...this.ideas]; // Show all ideas
+      this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+      this.updatePagedIdeas();
+      this.updateStatusCounts();
+    });
+
+    this.sub = this.ideaEvents.events$.subscribe((event) => {
+      if (event.type === 'applyFilter') {
+        this.applyFilter(event.payload);
+      } else if (event.type === 'changePage') {
+        this.changePage(event.payload);
+      } else if (event.type === 'sortByColumn') {
+        this.sortBy(event.payload.column as keyof Idea, event.payload.direction);
+      } else if (event.type === 'applyFilterByStatus') {
+        this.filterByStatus(event.payload.status_id);
+      } else if (event.type === 'searchByText') {
+        this.filterBySearchText(event.payload.searchText);
+      } else if (event.type === 'freezeData') {
+        this.onFreezeData();
+      } else if (event.type === 'closePopUp') {
+        this.closeFreezePopup();
+      } else if (event.type === 'taFilterChange') {
+        this.taFilterChange(event.payload || 3);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.sub) this.sub.unsubscribe();
+  }
+
+  taFilterChange(ta_id: number) {
+    this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+
+    this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+    this.currentPage = 1;
+    this.updatePagedIdeas();
+  }
+
+
+  updatePagedIdeas(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.pagedIdeas = this.filteredIdeas.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  updateStatusCounts(): void {
+    this.statusTabs.forEach((tab) => {
+      if (tab.status_id) {
+        tab.count = this.ideas.filter((i) => i.status_id === tab.status_id).length;
+      } else {
+        tab.count = this.ideas.length;
+      }
+    });
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagedIdeas();
+    }
+  }
+
+  applyFilter(criteria: string) {
+    this.filteredIdeas = this.ideas.filter((idea) =>
+      Object.values(idea).some((val) =>
+        val?.toString().toLowerCase().includes(criteria.toLowerCase())
+      )
+    );
+    this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+    this.currentPage = 1; // reset to first page
+    this.updatePagedIdeas();
+  }
+
+  filterByStatus(status_id: number) {
+    console.log('status :' + status_id);
+    if (status_id === 0) {
+      this.filteredIdeas = [...this.ideas];
+    } else {
+      this.filteredIdeas = this.ideas.filter((i) => i.status_id === status_id);
+    }
+    this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+    this.currentPage = 1;
+    this.updatePagedIdeas();
+  }
+
+  filterBySearchText(searchText: string) {
+    const search = searchText.toLowerCase().trim();
+    if (!search) {
+      this.filteredIdeas = [...this.ideas];
+    } else {
+      this.filteredIdeas = this.ideas.filter((idea) => {
+        return this.searchableKeys.some((key) => {
+          if (key === 'TAC_or_RP') {
+            const tac = idea.target_aspirational_claim ?? '';
+            const rp = idea.research_proposal ?? '';
+            return (
+              String(tac).toLowerCase().includes(search) ||
+              String(rp).toLowerCase().includes(search)
+            );
+          }
+          const value = this.getValue(idea, key);
+          return String(value ?? '')
+            .toLowerCase()
+            .includes(search);
+        });
+      });
+    }
+    this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+    this.currentPage = 1;
+    this.updatePagedIdeas();
+  }
+
+  private getValue(obj: any, path: string): any {
+    return path.split('.').reduce((acc, part) => acc?.[part], obj);
+  }
+
+  sortBy(column: string, direction: 'asc' | 'desc') {
+    const dir = direction === 'asc' ? 1 : -1;
+
+    this.filteredIdeas = [...this.filteredIdeas].sort((a, b) => {
+      const av = this.getValue(a, column);
+      const bv = this.getValue(b, column);
+
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+
+    this.updatePagedIdeas();
+  }
+
+  onFreezeData() {
+    console.log('Freeze data clicked');
+    this.showFreezePopup = true;
+  }
+
+  confirmFreezeData() {
+    console.log('Freeze data confirmed');
+    // Add your freeze logic here
+    this.showFreezePopup = false;
+  }
+
+  closeFreezePopup() {
+    this.showFreezePopup = false;
+  }
+}

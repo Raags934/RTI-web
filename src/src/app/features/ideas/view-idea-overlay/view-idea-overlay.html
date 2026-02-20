@@ -1,41 +1,42 @@
 @if (open) {
-  <div class="overlay-backdrop" (mousedown)="onBackdrop($event)">
-    <div class="view-idea-panel">
-      <div class="header">
-        <div class="header-left">
-          <button type="button" class="icon-btn" (click)="close()" aria-label="Close">←</button>
-          <div class="title-block">
-            <h2>View Idea Details</h2>
+      <div class="overlay-backdrop" (mousedown)="onBackdrop($event)">
+        <div class="view-idea-panel">
+          <div class="header">
+            <div class="header-left">
+              <button type="button" class="icon-btn" (click)="close()" aria-label="Close">←</button>
+              <div class="title-block">
+                <h2>View Idea Details</h2>
+              </div>
+            </div>
+            <div class="header-actions">
+              <app-buttons
+                variant="type2"
+                color="var(--primary-400)"
+                size="small"
+                (click)="goPrev()"
+              >
+                Previous
+              </app-buttons>
+              <app-buttons
+                variant="type2"
+                color="var(--primary-400)"
+                size="small"
+                (click)="goNext()"
+              >
+                Next
+              </app-buttons>
+            </div>
+          </div>
+          <div class="content">
+            <app-idea-view
+              [overlayMode]="true"
+              [overlayIdeaUid]="currentIdeaUid"
+              [overlayReferrer]="referrer"
+              [overlayStatusLabel]="statusLabel"
+              (editDetails)="onEdit($event)"
+            />
           </div>
         </div>
-        <div class="header-actions">
-          <app-buttons
-            variant="type2"
-            color="var(--primary-400)"
-            size="small"
-            (click)="goPrev()"
-          >
-            Previous
-          </app-buttons>
-          <app-buttons
-            variant="type2"
-            color="var(--primary-400)"
-            size="small"
-            (click)="goNext()"
-          >
-            Next
-          </app-buttons>
-        </div>
       </div>
-      <div class="content">
-        <app-idea-view
-          [overlayMode]="true"
-          [overlayIdeaUid]="currentIdeaUid"
-          [overlayReferrer]="referrer"
-          [overlayStatusLabel]="statusLabel"
-          (editDetails)="onEdit($event)"
-        />
-      </div>
-    </div>
-  </div>
-}
+    }
+   

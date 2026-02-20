@@ -4,7 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
-
+ 
 import { Idea, IdeaPayload } from '../../../models/idea.model';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 import { HighlightPipe } from '../../pipes/highlight.pipe.js';
@@ -15,16 +15,16 @@ import { RankingDropdown } from '../ranking-dropdown/ranking-dropdown';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state.js';
 import { DeleteIdea, AddDraftIdea } from '../../../store/idea.actions.js';
-
+ 
 export interface TableColumn {
   key: string; // property name in data
   label: string; // header label
   sortable?: boolean; // enable sorting
   width?: ColumnWidth;
 }
-
+ 
 export type ColumnWidth = 'xsmall' | 'small' | 'medium' | 'large';
-
+ 
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -41,21 +41,23 @@ export class Table {
   /** When true, "View Idea Details" opens overlay instead of navigating to full page. */
   @Input() useViewIdeaOverlay = false;
   statusColor = statusColor;
-
+  @Input() showFreezeButton: boolean = false;
+  @Input() dropdownStyle: string = '';
+ 
   private sub!: Subscription;
-
+ 
   displayedColumns: string[] = [];
-
+ 
   searchText = '';
   // No column sorted initially
   private currentSortColumn: string | null = null;
-
+ 
   // No direction until the first click
   private currentDirection: 'asc' | 'desc' | null = null;
-
+ 
   // Options menu state
   openOptionsMenuId: string | null = null;
-
+ 
   constructor(
     private ideaEvents: IdeaEventsService,
     private router: Router,
@@ -67,7 +69,7 @@ export class Table {
       }
     });
   }
-
+ 
   ngOnInit() {
     this.displayedColumns = this.columns.map((c) => c.key);
   }
@@ -81,16 +83,16 @@ export class Table {
       this.currentSortColumn = column;
       this.currentDirection = 'asc';
     }
-
+ 
     // Raise global sort event
     this.ideaEvents.sortByColumn(this.currentSortColumn, this.currentDirection || 'asc');
   }
-
+ 
   getDirection(column: string): 'asc' | 'desc' | null {
     // Only show icon for the active column
     return this.currentSortColumn === column ? this.currentDirection : null;
   }
-
+ 
   getValue(obj: any, path: string): any {
     // Special merged TAC/RP column
     if (path === 'TAC_or_RP') {
@@ -118,23 +120,23 @@ export class Table {
   toggleOptionsMenu(event: Event, ideaUid: string) {
     event.stopPropagation();
 
-    // Allow dropdown on prioritization, idea-dashboard, harmonizer, and admin routes
-    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute() && !this.isAdminRoute() && !this.isHarmonizerRoute()) {
+    // Allow dropdown on prioritization, idea-dashboard, harmonizer, admin, and funding routes
+    if (!this.isPrioritizationRoute() && !this.isIdeaDashboardRoute() && !this.isAdminRoute() && !this.isHarmonizerRoute() && !this.isFunderRoute()) {
       this.viewIdea(ideaUid);
       return;
     }
-
+ 
     if (this.openOptionsMenuId === ideaUid) {
       this.openOptionsMenuId = null;
     } else {
       this.openOptionsMenuId = ideaUid;
     }
   }
-
+ 
   closeOptionsMenu() {
     this.openOptionsMenuId = null;
   }
-
+ 
   isOptionsMenuOpen(ideaUid: string): boolean {
     return this.openOptionsMenuId === ideaUid;
   }
@@ -164,7 +166,7 @@ export class Table {
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray'; // fallback color
   }
-
+ 
   // Check if current filter is a pending status based on the component/route
   // Prioritization One: status_id 10 = Product Prioritization Pending (display "Product ranking")
   // Prioritization Two: status_id 12 = TA Prioritization Pending
@@ -238,7 +240,7 @@ export class Table {
   viewIdea(arg: any) {
     let ideaUid: string;
     let statusLabel: string | null = null;
-
+ 
     if (typeof arg === 'string') {
       ideaUid = arg;
     } else {
@@ -283,14 +285,14 @@ export class Table {
     });
     this.closeOptionsMenu();
   }
-
+ 
   duplicateIdea(idea: Idea) {
     if (!idea) {
       console.error('Idea not found');
       this.closeOptionsMenu();
       return;
     }
-
+ 
     // Get user from store to set created_by
     this.store
       .select((state) => state.masterData?.data?.user)
@@ -320,7 +322,7 @@ export class Table {
         this.closeOptionsMenu();
       });
   }
-
+ 
   deleteIdea(element: Idea) {
     if (confirm(`Are you sure you want to delete idea ${element.idea_uid}?`)) {
       this.store.dispatch(DeleteIdea({ ideaId: element.idea_id }));
@@ -334,7 +336,7 @@ export class Table {
     this.ideaEvents.rankingChanged(element.idea_id, rank?.toString() || null);
     element.ranking_brand = rank?.toString() || null;
   }
-
+ 
   getRankingValue(element: Idea): number | null {
     if (!element.ranking_brand) {
       return null;
@@ -347,7 +349,7 @@ export class Table {
     this.ideaEvents.rankingTaChanged(element.idea_id, rank?.toString() || null);
     element.ranking_franchise = rank?.toString() || null;
   }
-
+ 
   getTARankingValue(element: Idea): number | null {
     if (!element.ranking_franchise) {
       return null;
@@ -361,7 +363,7 @@ export class Table {
     const index = this.dataSource.indexOf(element);
     return index >= this.dataSource.length - 3;
   }
-
+ 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     // Close options menu when clicking outside
@@ -369,7 +371,12 @@ export class Table {
       this.closeOptionsMenu();
     }
   }
-
+ 
+  // Check if current route is funding page
+  isFunderRoute(): boolean {
+    return this.router.url.includes('/funding');
+  }
+ 
   ngOnDestroy() {
     if (this.sub) {
       this.sub.unsubscribe();

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IdeaEventsService } from '../../../events/ideaServiceEvents.js'
+import { IdeaEventsService } from '../../../events/ideaServiceEvents'
 import { CommonModule } from '@angular/common';
 
 @Component({

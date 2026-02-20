@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { IdeaView } from './idea-view';
 
-describe('IdeaView', () => {
+fdescribe('IdeaView', () => {
   let component: IdeaView;
   let fixture: ComponentFixture<IdeaView>;
 

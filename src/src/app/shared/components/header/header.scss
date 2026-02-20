@@ -1,18 +1,19 @@
 .app-header {
-  position: relative;        /* allows absolute positioning inside */
-  padding: 4px 0 0 0;
-}
-
-/* Left content flows normally */
-.header-left {
-  padding: 4px 0px;
-  width: 100%;
-}
-
-/* Right logo stays fixed at top-right */
-.header-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 12px 8px;
-}
+    position: relative;        /* allows absolute positioning inside */
+    padding: 4px 0 0 0;
+  }
+ 
+  /* Left content flows normally */
+  .header-left {
+    padding: 4px 0px;
+    width: 100%;
+  }
+ 
+  /* Right logo stays fixed at top-right */
+  .header-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 12px 8px;
+  }
+ 

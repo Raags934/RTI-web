@@ -5,7 +5,7 @@ import { OKTA_AUTH } from '@okta/okta-angular';
 import type { OktaAuth } from '@okta/okta-auth-js';
 import { User } from '../../models/user.model';
 import { UserService } from './user.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.development';
 
 /**
  * Handles Okta login and app authorization:
@@ -72,7 +72,15 @@ export class AuthService {
         return 'access-denied';
       }
 
-      const user = await firstValueFrom(this.userService.getByEmail(email));
+      //const user = await firstValueFrom(this.userService.getByEmail(email));
+      const user = {
+        email: userInfo?.email,
+      } as User
+     
+      console.log('Email value:', user);
+      // console.log('Email value1:', userInfo?.email);
+      // console.log('Email value2:', userInfo);
+     
       if (!user) {
         this.router.navigate(['/access-denied']);
         return 'access-denied';

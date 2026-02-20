@@ -1,16 +1,16 @@
 .table-scroll-container {
-  max-height: calc(7 * 60px + 56px); // 7 rows * ~60px per row + header height
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin: 0 16px;
-  border: 1px solid var(--neutral-200, #e0e0e0);
-  border-radius: 8px;
-}
-
-.ranking-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding: 0 16px;
-}
+    max-height: calc(7 * 60px + 56px); // 7 rows * ~60px per row + header height
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0 16px;
+    border: 1px solid var(--neutral-200, #e0e0e0);
+    border-radius: 8px;
+  }
+ 
+  .ranking-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 0 16px;
+  }

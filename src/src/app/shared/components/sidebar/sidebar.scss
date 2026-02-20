@@ -1,122 +1,123 @@
 /* Brand section (logo + chevron) */
 .brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px 8px;
-}
-
-.brand img {
-  height: 50px;
-  width: auto;
-}
-
-.brand .chevron {
-  background: none;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: var(--neutral-400);
-  padding: 4px;
-  border-radius: 6px;
-  transition: background 120ms ease;
-}
-
-.brand .chevron:hover {
-  background: var(--primary-100);
-}
-
-
-/* Navigation container */
-.nav {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-  transition: width 200ms ease;
-}
-
-
-/* Navigation items (default: used for idea-dashboard and all non-admin routes) */
-.nav-item {
-  display: flex;
-  font-size: 13px;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 12px;
-  margin: 2px 4px;
-  border-radius: var(--radius-md);
-  color: var(--neutral-400);
-  text-decoration: none;
-  transition: background 140ms ease, color 140ms ease, padding 200ms ease;
-}
-
-.nav-item mat-icon {
-  font-size: 20px;
-  min-width: 22px;
-  text-align: center;
-}
-
-
-.nav-item.active {
-  background: var(--brand-primary);
-  color: var(--neutral-100);
-}
-
-.nav-item:not(.active):hover {
-  background: var(--primary-100);
-}
-
-/* ===== Admin sidebar only (when host has .sidebar-admin); does not affect idea or other routes ===== */
-:host.sidebar-admin {
-  display: block;
-  background: var(--neutral-100);
-  min-height: 100%;
-}
-
-:host.sidebar-admin .brand .chevron {
-  color: var(--neutral-400);
-}
-
-:host.sidebar-admin .brand .chevron:hover {
-  background: var(--neutral-200);
-}
-
-:host.sidebar-admin .nav {
-  border-top-color: var(--neutral-200);
-}
-
-:host.sidebar-admin .nav-item {
-  color: var(--neutral-400);
-}
-
-:host.sidebar-admin .nav-item.active {
-  background: var(--brand-primary);
-  color: var(--neutral-100);
-}
-
-:host.sidebar-admin .nav-item:not(.active):hover {
-  background: var(--neutral-200);
-}
-
-
-/* Collapsed Sidebar */
-.nav.closed {
-  width: 60px;
-  overflow: hidden;
-  padding-top: 12px;
-}
-
-.nav.closed .nav-item {
-  justify-content: center;
-  padding: 12px 0;
-}
-
-.nav.closed .nav-item span {
-  display: none; /* hide labels */
-}
-
-.nav.closed .nav-item mat-icon {
-  margin: 0 auto;
-}
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 8px;
+  }
+ 
+  .brand img {
+    height: 50px;
+    width: auto;
+  }
+ 
+  .brand .chevron {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--neutral-400);
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 120ms ease;
+  }
+ 
+  .brand .chevron:hover {
+    background: var(--primary-100);
+  }
+ 
+ 
+  /* Navigation container */
+  .nav {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    transition: width 200ms ease;
+  }
+ 
+ 
+  /* Navigation items (default: used for idea-dashboard and all non-admin routes) */
+  .nav-item {
+    display: flex;
+    font-size: 13px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px;
+    margin: 2px 4px;
+    border-radius: var(--radius-md);
+    color: var(--neutral-400);
+    text-decoration: none;
+    transition: background 140ms ease, color 140ms ease, padding 200ms ease;
+  }
+ 
+  .nav-item mat-icon {
+    font-size: 20px;
+    min-width: 22px;
+    text-align: center;
+  }
+ 
+ 
+  .nav-item.active {
+    background: var(--brand-primary);
+    color: var(--neutral-100);
+  }
+ 
+  .nav-item:not(.active):hover {
+    background: var(--primary-100);
+  }
+ 
+  /* ===== Admin sidebar only (when host has .sidebar-admin); does not affect idea or other routes ===== */
+  :host.sidebar-admin {
+    display: block;
+    background: var(--neutral-100);
+    min-height: 100%;
+  }
+ 
+  :host.sidebar-admin .brand .chevron {
+    color: var(--neutral-400);
+  }
+ 
+  :host.sidebar-admin .brand .chevron:hover {
+    background: var(--neutral-200);
+  }
+ 
+  :host.sidebar-admin .nav {
+    border-top-color: var(--neutral-200);
+  }
+ 
+  :host.sidebar-admin .nav-item {
+    color: var(--neutral-400);
+  }
+ 
+  :host.sidebar-admin .nav-item.active {
+    background: var(--brand-primary);
+    color: var(--neutral-100);
+  }
+ 
+  :host.sidebar-admin .nav-item:not(.active):hover {
+    background: var(--neutral-200);
+  }
+ 
+ 
+  /* Collapsed Sidebar */
+  .nav.closed {
+    width: 60px;
+    overflow: hidden;
+    padding-top: 12px;
+  }
+ 
+  .nav.closed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+ 
+  .nav.closed .nav-item span {
+    display: none; /* hide labels */
+  }
+ 
+  .nav.closed .nav-item mat-icon {
+    margin: 0 auto;
+  }
+ 

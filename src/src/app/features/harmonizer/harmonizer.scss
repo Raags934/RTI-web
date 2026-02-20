@@ -1,27 +1,27 @@
 
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .header .left {
-    display: flex;
-    flex-direction: column;
-    gap: 4px; /* space between title and sub */
-  }
- 
-  .header .right {
-    display: flex;
-    align-items: center;
-  }
- 
-  .title { margin: 0; font-size: 22px; font-weight: 700; }
-  .sub { color: var(--text-secondary); font-size: 13px; }
- 
-  .rti-logo{
-    margin: 12px;
-  }
-  .header-filter{
-    padding-bottom: 8px;
-    border-bottom: 2px solid red;
-  }
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header .left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px; /* space between title and sub */
+      }
+     
+      .header .right {
+        display: flex;
+        align-items: center;
+      }
+     
+      .title { margin: 0; font-size: 22px; font-weight: 700; }
+      .sub { color: var(--text-secondary); font-size: 13px; }
+     
+      .rti-logo{
+        margin: 12px;
+      }
+      .header-filter{
+        padding-bottom: 8px;
+        border-bottom: 2px solid red;
+      }

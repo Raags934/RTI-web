@@ -36,7 +36,9 @@ export type IdeaEvent =
   | { type: 'viewIdeaHistory'; payload: { idea_id: number; idea_uid: string } }
   | { type: 'closeIdeaHistory' }
   | { type: 'resetIdea'; payload: { idea_id: number; idea_uid: string } }
-  | { type: 'viewIdeaOverlay'; payload: { idea_uid: string; statusLabel?: string } };
+  | { type: 'freezeData' }
+  | { type: 'confirmFreezeData' }
+  | { type: 'viewIdeaOverlay'; payload: { idea_uid: string; statusLabel?: string } }
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -181,5 +183,13 @@ export class IdeaEventsService {
 
   submitStudyDetailsConfirmation() {
     this.eventsSubject.next({ type: 'submitStudyDetailsConfirmation'} );
+  }
+ 
+  freezeData() {
+    this.eventsSubject.next({ type: 'freezeData' });
+  }
+
+  confirmFreezeData() {
+    this.eventsSubject.next({ type: 'confirmFreezeData' });
   }
 }

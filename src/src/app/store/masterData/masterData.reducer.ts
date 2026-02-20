@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import * as MasterDataActions from './masterData.actions.js'
+import * as MasterDataActions from './masterData.actions'
 import { MasterDataResponse } from '../../models/api-response/masterData.model';
 
 export interface MasterDataState {

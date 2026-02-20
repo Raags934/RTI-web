@@ -44,6 +44,7 @@ export class TableHeader {
   @Input() exportColor: string = 'var(--primary-300)';
   @Input() exportSize: 'xsmall' | 'small' | 'medium' | 'large' = 'medium';
   @Input() exportIcon: string = 'ios_share';
+  @Input() showFreezeButton: boolean = false;
 
   constructor(private ideaEvent: IdeaEventsService) {
   }
@@ -59,5 +60,9 @@ export class TableHeader {
 
   onExportClick() {
     this.ideaEvent.exportData();
+  }
+
+  onFreezeClick() {
+    this.ideaEvent.freezeData();
   }
 }

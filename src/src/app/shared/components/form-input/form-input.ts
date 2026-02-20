@@ -49,6 +49,7 @@ export class FormInput<T = any> implements OnInit {
   @Input() showSearchDropdown = true;
   @Input() showIconDropdown = true;
   @Input() autoSelectFirst = false;
+  @Input() dropdownHeader?: string;
   /** Minimum selectable date for date type (e.g. to disallow past dates) */
   @Input() minDate: Date | null = null;
   /** Maximum selectable date for date type */
@@ -128,6 +129,13 @@ export class FormInput<T = any> implements OnInit {
   ------------------------------ */
   onSelectionChange(value: T | null): void {
     this.valueChange.emit(value as T);
+  }
+
+  clearSelection(): void {
+    if (this.control) {
+      this.control.setValue(null);
+      this.control.markAsTouched();
+    }
   }
 
   /* ------------------------------
