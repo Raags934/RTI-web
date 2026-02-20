@@ -78,7 +78,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
   user$: Observable<User | undefined>;
   franchises$: Observable<Franchise[] | undefined>;
   dropdowns$: Observable<Dropdowns | undefined>;
- 
+  currentUser: User | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -95,6 +95,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.user$.subscribe((list) => {
       if (!list) return;
+      this.currentUser = list;
       this.researchPathwayOptions = mapResearchPathwayToDropdown(list.research_pathways)
     });
     this.franchises$.subscribe((list) => {
@@ -271,6 +272,19 @@ export class IdeaCreate implements OnInit, OnDestroy {
       this.launchClaimOptions.find((x) => x.id === raw.launch_claim)?.name ?? ''
     );
 
+    // Calculate approved based on user roles and functions
+    // approved is true if user has role_name = "Creator" AND function_type = "Business Function" AND function_name = "Franchise"
+    let approved = false;
+    if (this.currentUser?.roles && this.currentUser?.functions) {
+      const hasCreatorRole = this.currentUser.roles.some(
+        (role) => role.role_name === 'Creator'
+      );
+      const hasFranchiseBusinessFunction = this.currentUser.functions.some(
+        (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'
+      );
+      approved = hasCreatorRole && hasFranchiseBusinessFunction;
+    }
+
     return {
       pathway_id: raw.pathway_id,
       rti_year: rtiYear,
@@ -287,6 +301,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
       research_proposal: '',
       created_by: this.authService.getCurrentUserId() ?? 1,
       updated_by: this.authService.getCurrentUserId() ?? 1,
+      approved: approved,
     };
   }
 }

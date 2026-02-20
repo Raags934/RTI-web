@@ -35,6 +35,10 @@ export class Buttons {
         this.ideaEvents.saveDraft();
         break;
 
+      case 'approveIdea':
+        this.ideaEvents.approveIdea();
+        break;
+
       case 'cancelIdea':
         this.ideaEvents.cancelIdea();
         break;

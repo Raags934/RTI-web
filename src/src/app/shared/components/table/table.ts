@@ -151,9 +151,9 @@ export class Table {
     }
 
     // Harmonizer route only: use same colors as prioritization (no change to prioritization one)
-    // Harmonization Pending (5) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
+    // Harmonization Pending (18) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
     if (this.isHarmonizerRoute()) {
-      if (statusId === 5) {
+      if (statusId === 18) {
         const match = this.statusColor.find((s) => s.status_id === 10);
         return match ? match.color : 'gray';
       }
@@ -170,10 +170,10 @@ export class Table {
   // Check if current filter is a pending status based on the component/route
   // Prioritization One: status_id 10 = Product Prioritization Pending (display "Product ranking")
   // Prioritization Two: status_id 12 = TA Prioritization Pending
-  // Harmonizer: status_id 5 = Harmonization Pending (Submitted ideas, show "Harmonization pending")
+  // Harmonizer: status_id 18 = Harmonization Pending (Approved ideas, show "Harmonization pending")
   isPendingFilter(): boolean {
     if (this.isHarmonizerRoute()) {
-      return this.currentFilterStatusId === 5;
+      return this.currentFilterStatusId === 18;
     }
     if (this.isPrioritizationOneRoute()) {
       return this.currentFilterStatusId === 10;
@@ -186,7 +186,7 @@ export class Table {
 
   // Get status display value - show pending label if in pending filter mode, otherwise show status_name
   getStatusDisplayValue(element: any): string {
-    if (this.isHarmonizerRoute() && this.currentFilterStatusId === 5) {
+    if (this.isHarmonizerRoute() && this.currentFilterStatusId === 18) {
       return 'Harmonization pending';
     }
     if (this.isPendingFilter() && element?.status?.pending_with) {
@@ -207,14 +207,15 @@ export class Table {
 
   // Check if current route is TA prioritization page
   isTaPrioritizationRoute(): boolean {
-    return this.router.url.includes('/ta-prioritization');
+    const url = this.router.url;
+    // Support both historical '/ta-prioritization' and current '/taprioritization' paths
+    return url.includes('/ta-prioritization') || url.includes('/taprioritization');
   }
 
   // Check if current route is any prioritization page
   isPrioritizationRoute(): boolean {
-    return (
-      this.router.url.includes('/prioritization') || this.router.url.includes('/ta-prioritization')
-    );
+    const url = this.router.url;
+    return url.includes('/prioritization') || url.includes('/taprioritization');
   }
 
   // Check if current route is idea-dashboard page
@@ -278,9 +279,13 @@ export class Table {
     }
   }
 
-  editIdea(ideaUid: string) {
+  editIdea(idea: Idea) {
+    if (!idea?.idea_uid) return;
     const currentPath = this.router.url.split('?')[0];
-    this.router.navigate(['/ideas/' + ideaUid + '/edit'], {
+    // Draft ideas (status_id === 1) open draft-specific edit page with Cancel, Save as Draft, Submit
+    const isDraft = idea.status_id === 1;
+    const editPath = isDraft ? '/ideas/' + idea.idea_uid + '/edit-draft' : '/ideas/' + idea.idea_uid + '/edit';
+    this.router.navigate([editPath], {
       queryParams: { from: currentPath },
     });
     this.closeOptionsMenu();
@@ -298,6 +303,19 @@ export class Table {
       .select((state) => state.masterData?.data?.user)
       .pipe(take(1))
       .subscribe((user) => {
+        // Calculate approved based on user roles and functions
+        // approved is true if user has role_name = "Creator" AND function_type = "Business Function" AND function_name = "Franchise"
+        let approved = false;
+        if (user?.roles && user?.functions) {
+          const hasCreatorRole = user.roles.some(
+            (role) => role.role_name === 'Creator'
+          );
+          const hasFranchiseBusinessFunction = user.functions.some(
+            (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'
+          );
+          approved = hasCreatorRole && hasFranchiseBusinessFunction;
+        }
+
         // Convert Idea to IdeaPayload
         const payload: IdeaPayload = {
           pathway_id: idea.pathway_id,
@@ -315,6 +333,7 @@ export class Table {
           launch_claim: idea.launch_claim,
           created_by: user?.user_id || idea.created_by?.user_id || 1,
           updated_by: user?.user_id || idea.updated_by?.user_id || 1,
+          approved: approved,
         };
 
         // Dispatch AddDraftIdea action

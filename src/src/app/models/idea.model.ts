@@ -60,6 +60,7 @@ export interface IdeaPayload {
   launch_claim: boolean;
   created_by: number;
   updated_by: number;
+  approved: boolean;
   /** Optional: when submitting a draft from edit, send idea_id so addIdea API can treat it as promote draft */
   idea_id?: number;
 }

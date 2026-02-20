@@ -10,15 +10,14 @@ import { Buttons } from '../../../shared/components/buttons/buttons';
 import { FormInput } from '../../../shared/components/form-input/form-input';
 import { MatCardModule } from '@angular/material/card';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
-import { IdeaService } from '../../../store/idea.service';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { IdeaPayload, Idea } from '../../../models/idea.model';
 import { Popup, PopupConfigs } from '../../../shared/constants/popUp';
 import { PopUp } from '../../../shared/components/popup/popup';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
-import { UpdateIdea, AddIdea, LoadIdeas } from '../../../store/idea.actions';
+import { AddIdea, UpdateIdea } from '../../../store/idea.actions';
 import { Franchise } from '../../../models/productsList.model';
 import { Dropdowns } from '../../../models/dropdown.model';
 import { DropdownOption } from '../../../models/DropDownOption';
@@ -35,15 +34,14 @@ import {
 import { IDEA_FORM_LABELS } from '../../../shared/constants/labels';
 import { User } from '../../../models/user.model';
 import { take } from 'rxjs/operators';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-idea-edit',
+  selector: 'app-idea-draft-edit',
   imports: [MatCardModule, Buttons, FormInput, ReactiveFormsModule, PopUp],
-  templateUrl: './idea-edit.html',
-  styleUrl: './idea-edit.scss',
+  templateUrl: './idea-draft-edit.html',
+  styleUrl: './idea-draft-edit.scss',
 })
-export class IdeaEdit implements OnInit, OnDestroy {
+export class IdeaDraftEdit implements OnInit, OnDestroy {
   form!: FormGroup;
 
   labels = IDEA_FORM_LABELS;
@@ -63,21 +61,10 @@ export class IdeaEdit implements OnInit, OnDestroy {
   productMap: Record<string | number, { brand_id: any; ta_id: any; franchise_id: any }> = {};
 
   private eventsSub!: Subscription;
-  private hasSubmitted: boolean = false;
-  private hasApproved: boolean = false;
+  private hasSubmitted = false;
+  private hasSavedDraft = false;
 
   popup: Popup = PopupConfigs.cancelIdea;
-
-  /** Show Approve button only for Submitted ideas and when user is Creator + Franchise (Business Function). */
-  get showApproveButton(): boolean {
-    if (!this.currentUser?.roles?.length || !this.currentUser?.functions?.length) return false;
-    if (this.currentIdea?.status_id !== 5) return false; // 5 = Submitted
-    const hasCreatorRole = this.currentUser.roles.some((r) => r.role_name === 'Creator');
-    const hasFranchiseBusinessFunction = this.currentUser.functions.some(
-      (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
-    );
-    return hasCreatorRole && hasFranchiseBusinessFunction;
-  }
 
   user$: Observable<User | undefined>;
   franchises$: Observable<Franchise[] | undefined>;
@@ -88,16 +75,13 @@ export class IdeaEdit implements OnInit, OnDestroy {
   ideaId: number | null = null;
   ideaUid: string | null = null;
   currentIdea: Idea | null = null;
-  from: string = ''; // Track where user came from (e.g., 'harmonizer')
 
   constructor(
     private fb: FormBuilder,
     private ideaEvents: IdeaEventsService,
     private router: Router,
     private route: ActivatedRoute,
-    private store: Store<AppState>,
-    private authService: AuthService,
-    private ideaService: IdeaService
+    private store: Store<AppState>
   ) {
     this.user$ = this.store.select((state) => state.masterData?.data?.user);
     this.franchises$ = this.store.select((state) => state.masterData?.data?.franchises);
@@ -110,33 +94,20 @@ export class IdeaEdit implements OnInit, OnDestroy {
     this.setupAutoAssign();
     this.listenToEvents();
 
-    // Get idea_uid from route and query params
     this.route.paramMap.pipe(take(1)).subscribe((params) => {
       this.ideaUid = params.get('idea_uid');
     });
 
-    // Get query params (e.g., 'from' parameter)
-    this.route.queryParamMap.pipe(take(1)).subscribe((queryParams) => {
-      const fromParam = queryParams.get('from');
-      // Normalize so both '/harmonizer' and 'harmonizer' work
-      this.from = (fromParam || '').replace(/^\//, '') || '';
-    });
-
-    // Load dropdowns and then populate form
     combineLatest([
       this.user$.pipe(take(1)),
       this.franchises$.pipe(take(1)),
       this.dropdowns$.pipe(take(1)),
       this.ideas$.pipe(take(1)),
     ]).subscribe(([user, franchises, dropdowns, ideas]) => {
-      // Store current user for later use
       this.currentUser = user;
-      // Set up research pathway options
       if (user) {
         this.researchPathwayOptions = mapResearchPathwayToDropdown(user.research_pathways);
       }
-
-      // Set up franchise/product options
       if (franchises) {
         this.franchiseOptions = mapFranchisesToDropdown(franchises);
         this.taOptions = mapTAsToDropdown(franchises);
@@ -144,22 +115,17 @@ export class IdeaEdit implements OnInit, OnDestroy {
         this.productOptions = mapProductsToDropdown(franchises);
         this.buildLookupMap();
       }
-
-      // Set up dropdown options
       if (dropdowns) {
         const mapped: Record<string, DropdownOption[]> = {};
         Object.keys(dropdowns).forEach((key) => {
           mapped[key] = mapValueListToDropdown((dropdowns as any)[key]);
         });
-
         this.originRequestOptions = [{ id: 1, name: 'Franchise' }];
         this.productTypeOptions = mapped['Product Type'] ?? [];
         this.monadicComparativeOptions = mapped['Monadic or Comparative'] ?? [];
         this.launchClaimOptions = getLaunchClaimDropdown();
         this.rtiYearOptions = getRtiYearDropdown();
       }
-
-      // Load and populate idea data after dropdowns are ready
       if (this.ideaUid) {
         const idea = ideas.find((i) => i.idea_uid === this.ideaUid);
         if (idea) {
@@ -177,37 +143,20 @@ export class IdeaEdit implements OnInit, OnDestroy {
     }
   }
 
-  populateForm(idea: Idea) {
-    // Map pathway_id
+  populateForm(idea: Idea): void {
     const pathwayId = idea.pathway_id;
-
-    // Map rti_year - find matching year in dropdown
     const rtiYearOption = this.rtiYearOptions.find((opt) => Number(opt.name) === idea.rti_year);
     const rtiYearId = rtiYearOption?.id ?? idea.rti_year;
-
-    // Map product_type (find by name)
-    const productTypeOption = this.productTypeOptions.find(
-      (opt) => opt.name === idea.product_type
-    );
+    const productTypeOption = this.productTypeOptions.find((opt) => opt.name === idea.product_type);
     const productTypeId = productTypeOption?.id ?? null;
-
-    // Map product_id
     const productId = idea.product_id;
-
-    // Map monadic_or_comparative (find by name)
     const monadicOption = this.monadicComparativeOptions.find(
       (opt) => opt.name === idea.monadic_or_comparative
     );
     const monadicId = monadicOption?.id ?? null;
-
-    // Map launch_claim (boolean to dropdown ID: true -> 1, false -> 2)
     const launchClaimId = idea.launch_claim ? 1 : 2;
-
-    // Map origin_request (find by name)
-    const originOption = this.originRequestOptions.find(
-      (opt) => opt.name === idea.origin_request
-    );
-    const originId = originOption?.id ?? 1; // Default to 1 if not found
+    const originOption = this.originRequestOptions.find((opt) => opt.name === idea.origin_request);
+    const originId = originOption?.id ?? 1;
 
     this.form.patchValue({
       pathway_id: pathwayId,
@@ -225,12 +174,12 @@ export class IdeaEdit implements OnInit, OnDestroy {
     });
   }
 
-  listenToEvents() {
+  listenToEvents(): void {
     this.eventsSub = this.ideaEvents.events$.subscribe((event) => {
       if (event.type === 'submitIdea') {
         this.submitIdea();
-      } else if (event.type === 'approveIdea') {
-        this.approveIdea();
+      } else if (event.type === 'saveDraft') {
+        this.saveDraft();
       } else if (event.type === 'cancelIdea') {
         this.cancelIdea();
       } else if (event.type === 'closePopUp') {
@@ -239,14 +188,12 @@ export class IdeaEdit implements OnInit, OnDestroy {
     });
   }
 
-  buildLookupMap() {
+  buildLookupMap(): void {
     this.productMap = {};
-
     for (const product of this.productOptions as any[]) {
       const brand = this.brandOptions.find((b: any) => b.id === product.brand_id);
       const ta = this.taOptions.find((t: any) => t.id === brand?.ta_id);
       const franchise = this.franchiseOptions.find((f: any) => f.id === ta?.franchise_id);
-
       this.productMap[product.id] = {
         brand_id: brand?.id ?? null,
         ta_id: ta?.id ?? null,
@@ -255,21 +202,17 @@ export class IdeaEdit implements OnInit, OnDestroy {
     }
   }
 
-  buildForm() {
+  buildForm(): void {
     this.form = this.fb.group({
       pathway_id: new FormControl(null, Validators.required),
       rti_year: new FormControl(null, Validators.required),
       product_type: new FormControl(null, Validators.required),
       product_id: new FormControl(null, Validators.required),
-
       brand_id: new FormControl({ value: null, disabled: true }, Validators.required),
       ta_id: new FormControl({ value: null, disabled: true }, Validators.required),
       franchise_id: new FormControl({ value: null, disabled: true }, Validators.required),
-
       origin_request: new FormControl(null, Validators.required),
-
       strategic_rationale: new FormControl('', [Validators.required, Validators.minLength(10)]),
-
       monadic_or_comparative: new FormControl(null, Validators.required),
       target_aspirational_claim: new FormControl('', Validators.required),
       launch_claim: new FormControl(null, Validators.required),
@@ -277,13 +220,11 @@ export class IdeaEdit implements OnInit, OnDestroy {
     });
   }
 
-  setupAutoAssign() {
+  setupAutoAssign(): void {
     this.form.get('product_id')?.valueChanges.subscribe((productId) => {
       if (!productId) return;
-
       const data = this.productMap[productId];
       if (!data) return;
-
       this.form.patchValue({
         brand_id: data.brand_id,
         ta_id: data.ta_id,
@@ -292,7 +233,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
     });
   }
 
-  openPopUp(type: keyof typeof PopupConfigs) {
+  openPopUp(type: keyof typeof PopupConfigs): void {
     if (type === 'submitIdea') {
       if (this.form.invalid) {
         this.form.markAllAsTouched();
@@ -305,129 +246,45 @@ export class IdeaEdit implements OnInit, OnDestroy {
 
   cancelIdea(): void {
     this.popup.open = false;
-    if (this.ideaUid) {
-      this.router.navigate(['/ideas/' + this.ideaUid]);
-    } else {
-      this.router.navigate(['/']);
-    }
+    this.router.navigate(['/']);
   }
 
-  submitIdea() {
-    if (this.hasSubmitted) {
+  saveDraft(): void {
+    if (this.hasSavedDraft) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.popup.open = false;
       return;
     }
+    if (!this.ideaId) {
+      this.popup.open = false;
+      return;
+    }
+    this.hasSavedDraft = true;
+    const payload = this.prepareIdeaPayload();
+    // PUT api does not manage approved; omit it from payload for Save as Draft
+    const { approved, ...payloadWithoutApproved } = payload;
+    this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payloadWithoutApproved as IdeaPayload }));
+    this.popup.open = false;
+    this.router.navigate(['/']);
+  }
 
+  submitIdea(): void {
+    if (this.hasSubmitted) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.hasSubmitted = false;
+      this.popup.open = false;
       return;
     }
-
     if (!this.ideaId) {
-      console.error('Idea ID is missing');
+      this.popup.open = false;
       return;
     }
-
     this.hasSubmitted = true;
-
     const payload = this.prepareIdeaPayload();
-    const isDraft = this.currentIdea?.status?.status_name?.toLowerCase() === 'draft';
-    const isApproved = this.currentIdea?.status_id === 18; // Approved filter
-    const isHarmonizationPending = this.from === 'harmonizer' && this.currentIdea?.status_id === 18; // Harmonization pending
-    const isCreatorAndFranchise =
-      this.currentUser?.roles?.some((r) => r.role_name === 'Creator') &&
-      this.currentUser?.functions?.some(
-        (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
-      );
-
-    this.popup.open = false;
-
-    // If coming from harmonizer, use service directly to avoid effect redirect override
-    if (this.from === 'harmonizer') {
-      if (isDraft) {
-        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
-        this.ideaService.addIdea(addPayload).subscribe({
-          next: () => {
-            this.store.dispatch(LoadIdeas());
-            this.router.navigate(['/harmonizer']);
-          },
-          error: () => {},
-        });
-      } else {
-        // For harmonizer flow: Creator+Franchise -> PUT, else -> POST with approved: false
-        if (isCreatorAndFranchise) {
-          const { approved, ...payloadWithoutApproved } = payload;
-          this.ideaService.updateIdea(this.ideaId!, payloadWithoutApproved as IdeaPayload).subscribe({
-            next: () => {
-              this.store.dispatch(LoadIdeas());
-              this.router.navigate(['/harmonizer']);
-            },
-            error: () => {},
-          });
-        } else {
-          // Non-Creator+Franchise: call addIdea API with approved: false
-          const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId!, approved: false };
-          this.ideaService.addIdea(addPayload).subscribe({
-            next: () => {
-              this.store.dispatch(LoadIdeas());
-              this.router.navigate(['/harmonizer']);
-            },
-            error: () => {},
-          });
-        }
-      }
-      return; // Exit early to prevent other redirects
-    }
-
-    // For non-harmonizer flows, use actions (existing behavior)
-    if (isDraft) {
-      const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
-      this.store.dispatch(AddIdea({ idea: addPayload }));
-    } else if (isApproved) {
-      // Approved filter -> Edit idea: Creator+Franchise -> PUT, else -> AddIdea
-      if (isCreatorAndFranchise) {
-        const { approved, ...payloadWithoutApproved } = payload;
-        this.store.dispatch(UpdateIdea({ ideaId: this.ideaId!, idea: payloadWithoutApproved as IdeaPayload }));
-      } else {
-        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId! };
-        this.store.dispatch(AddIdea({ idea: addPayload }));
-      }
-    } else if (isHarmonizationPending) {
-      // Harmonization pending filter -> Edit idea: Creator+Franchise -> existing behavior (PUT), else -> AddIdea with approve: false
-      if (isCreatorAndFranchise) {
-        const { approved, ...payloadWithoutApproved } = payload;
-        this.store.dispatch(UpdateIdea({ ideaId: this.ideaId!, idea: payloadWithoutApproved as IdeaPayload }));
-      } else {
-        const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId!, approved: false };
-        this.store.dispatch(AddIdea({ idea: addPayload }));
-      }
-    } else {
-      const { approved, ...payloadWithoutApproved } = payload;
-      this.store.dispatch(UpdateIdea({ ideaId: this.ideaId, idea: payloadWithoutApproved as IdeaPayload }));
-    }
-
-    // Navigate back to view page after submit (for non-harmonizer flows)
-    if (this.ideaUid) {
-      this.router.navigate(['/ideas/' + this.ideaUid]);
-    } else {
-      this.router.navigate(['/']);
-    }
-  }
-
-  approveIdea(): void {
-    if (this.hasApproved || !this.ideaId) {
-      this.popup.open = false;
-      return;
-    }
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      this.popup.open = false;
-      return;
-    }
-    this.hasApproved = true;
-    const payload = this.prepareIdeaPayload();
-    // Same API as draft-edit Submit (AddIdea) but with approved: true
-    const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId, approved: true };
+    // Draft-only edit page Submit: always send approved false (only for this page/submit)
+    const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId, approved: false };
     this.store.dispatch(AddIdea({ idea: addPayload }));
     this.popup.open = false;
     this.router.navigate(['/ideas/' + this.ideaUid]);
@@ -435,9 +292,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
 
   prepareIdeaPayload(): IdeaPayload {
     const raw = this.form.getRawValue();
-
     const rtiYear = Number(this.rtiYearOptions.find((y) => y.id === raw.rti_year)?.name);
-
     const productType =
       this.productTypeOptions.find((x) => x.id === raw.product_type)?.name ?? '';
     const originRequest =
@@ -448,8 +303,6 @@ export class IdeaEdit implements OnInit, OnDestroy {
       this.launchClaimOptions.find((x) => x.id === raw.launch_claim)?.name === 'Yes'
     );
 
-    // Calculate approved based on user roles and functions
-    // approved is true if user has role_name = "Creator" AND function_type = "Business Function" AND function_name = "Franchise"
     let approved = false;
     if (this.currentUser?.roles && this.currentUser?.functions) {
       const hasCreatorRole = this.currentUser.roles.some(
@@ -475,9 +328,9 @@ export class IdeaEdit implements OnInit, OnDestroy {
       strategic_rationale: raw.strategic_rationale,
       target_aspirational_claim: raw.target_aspirational_claim,
       research_proposal: '',
-      created_by: this.authService.getCurrentUserId() ?? this.currentIdea?.created_by?.user_id ?? 2,
-      updated_by: this.authService.getCurrentUserId() ?? 1,
-      approved: approved,
+      created_by: this.currentIdea?.created_by?.user_id ?? 2,
+      updated_by: 1,
+      approved,
     };
   }
 }

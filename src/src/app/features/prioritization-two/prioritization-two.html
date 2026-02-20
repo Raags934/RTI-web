@@ -2,9 +2,11 @@
 <app-table-header [showSearch]="false" [showNewIdea]="false" exportVariant="type1"
     exportColor="var(--primary-400)"></app-table-header>
 <app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [currentFilterStatusId]="currentFilterStatusId"
+<app-table [columns]="ideaDisplayColumns" [dataSource]="displayedIdeas" [currentFilterStatusId]="currentFilterStatusId"
     [useViewIdeaOverlay]="true"></app-table>
-<app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
+@if (showPagination) {
+  <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
+}
 <div class="ranking-actions">
     <app-buttons variant="type2" color="var(--primary-400)" size="medium" (click)="saveRanking()">
         Save Ranking

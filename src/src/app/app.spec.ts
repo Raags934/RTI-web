@@ -50,7 +50,7 @@ fdescribe('App', () => {
   it('should dispatch masterdata on init',()=>{
     component.ngOnInit();
     expect(storeSpy.dispatch).toHaveBeenCalledWith(
-      loadMasterData({email:'karthik@example.com'})
+      loadMasterData({email:'sahil@example.com'})
     );
   });
   //toastEvent->showToast

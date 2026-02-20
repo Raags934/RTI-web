@@ -1,117 +1,116 @@
 <table mat-table [dataSource]="dataSource" class="custom-table">
-    <!-- Dynamic column generation -->
-    <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
-      <!-- HEADER CELL -->
-      <th
-        mat-header-cell
-        *matHeaderCellDef
-        [ngClass]="col.width"
-        class="header-cell"
-        (click)="col.sortable && onSort(col.key)"
-      >
-        <div class="header-content">
-          <span class="header-text">{{ col.label }}</span>
- 
-          <!-- Sorting Icons -->
-          <mat-icon *ngIf="col.sortable && getDirection(col.key) === null" class="sort-icon">
-            unfold_more
-          </mat-icon>
- 
-          <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'asc'" class="sort-icon">
-            arrow_upward
-          </mat-icon>
- 
-          <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'desc'" class="sort-icon">
-            arrow_downward
-          </mat-icon>
-        </div>
-      </th>
- 
-      <!-- DATA CELL -->
-      <td mat-cell [ngClass]="col.width" *matCellDef="let element">
-        @if (col.key === 'status.status_name') {
-        <div class="status-cell-wrapper">
-          <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
-            {{ getStatusDisplayValue(element) }}
-          </app-buttons>
-        </div>
-        }
-        <!-- Options Column -->
-        @else if (col.key === 'options') {
-        <div class="options-container">
-          <mat-icon (click)="toggleOptionsMenu($event, element.idea_uid)">more_vert</mat-icon>
- 
-          @if (isOptionsMenuOpen(element.idea_uid)) {
-          <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
-            <div class="menu-header">More Options</div>
-           
-            <!-- Idea Dashboard Menu Items -->
-            @if (isIdeaDashboardRoute()) {
-              <div class="menu-item" (click)="editIdea(element.idea_uid)">
-                <mat-icon>edit</mat-icon>
-                <span>Edit Idea</span>
-              </div>
-              <div class="menu-item" (click)="viewIdea(element)">
-                <mat-icon>info</mat-icon>
-                <span>View Idea Details</span>
-              </div>
-              <div class="menu-separator"></div>
-              <div class="menu-item" (click)="viewIdeaHistory(element)">
-                <mat-icon>history</mat-icon>
-                <span>View Idea History</span>
-              </div>
-              <div class="menu-separator"></div>
-              <div class="menu-item" (click)="duplicateIdea(element)">
-                <mat-icon>content_copy</mat-icon>
-                <span>Duplicate</span>
-              </div>
-              <div class="menu-item" (click)="deleteIdea(element)">
-                <mat-icon>delete</mat-icon>
-                <span>Delete</span>
-              </div>
-            }
- 
-            <!-- Admin Home Menu Items: only 3 options (no impact on idea-dashboard or other pages) -->
-            @else if (isAdminRoute()) {
-              <div class="menu-item" (click)="viewIdea(element)">
-                <mat-icon>info</mat-icon>
-                <span>View Idea Details</span>
-              </div>
-              <div class="menu-item" (click)="viewIdeaHistory(element)">
-                <mat-icon>history</mat-icon>
-                <span>View Idea History</span>
-              </div>
-              <div class="menu-item" (click)="resetIdea(element)">
-                <mat-icon>refresh</mat-icon>
-                <span>Reset Idea</span>
-              </div>
-            }
-           
-            <!-- Prioritization Routes Menu Items -->
-            @else if (isPrioritizationRoute()) {
-              <div class="menu-item" (click)="viewIdea(element)">
-                <mat-icon>info</mat-icon>
-                <span>View Idea Details</span>
-              </div>
-              <div class="menu-item" (click)="viewIdeaHistory(element)">
-                <mat-icon>history</mat-icon>
-                <span>View Idea History</span>
-              </div>
-            }
- 
-            <!-- Harmonizer Menu Items -->
-            @else if (isHarmonizerRoute()) {
-              <div class="menu-item" (click)="viewIdea(element)">
-                <mat-icon>info</mat-icon>
-                <span>View Idea Details</span>
-              </div>
-              <div class="menu-item" (click)="viewIdeaHistory(element)">
-                <mat-icon>history</mat-icon>
-                <span>View Idea History</span>
-              </div>
-            }
+  <!-- Dynamic column generation -->
+  <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
+    <!-- HEADER CELL -->
+    <th
+      mat-header-cell
+      *matHeaderCellDef
+      [ngClass]="col.width"
+      class="header-cell"
+      (click)="col.sortable && onSort(col.key)"
+    >
+      <div class="header-content">
+        <span class="header-text">{{ col.label }}</span>
 
-            <!-- Funding Menu Items -->
+        <!-- Sorting Icons -->
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === null" class="sort-icon">
+          unfold_more
+        </mat-icon>
+
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'asc'" class="sort-icon">
+          arrow_upward
+        </mat-icon>
+
+        <mat-icon *ngIf="col.sortable && getDirection(col.key) === 'desc'" class="sort-icon">
+          arrow_downward
+        </mat-icon>
+      </div>
+    </th>
+
+    <!-- DATA CELL -->
+    <td mat-cell [ngClass]="col.width" *matCellDef="let element">
+      @if (col.key === 'status.status_name') {
+      <div class="status-cell-wrapper">
+        <app-buttons variant="type2" [color]="getStatusColor(element.status?.status_id)" size="small" [isStatus]="true">
+          {{ getStatusDisplayValue(element) }}
+        </app-buttons>
+      </div>
+      }
+      <!-- Options Column -->
+      @else if (col.key === 'options') {
+      <div class="options-container">
+        <mat-icon (click)="toggleOptionsMenu($event, element.idea_uid)">more_vert</mat-icon>
+
+        @if (isOptionsMenuOpen(element.idea_uid)) {
+        <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
+          <div class="menu-header">More Options</div>
+          
+          <!-- Idea Dashboard Menu Items -->
+          @if (isIdeaDashboardRoute()) {
+            <div class="menu-item" (click)="editIdea(element)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Idea</span>
+            </div>
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" (click)="duplicateIdea(element)">
+              <mat-icon>content_copy</mat-icon>
+              <span>Duplicate</span>
+            </div>
+            <div class="menu-item" (click)="deleteIdea(element)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </div>
+          }
+
+          <!-- Admin Home Menu Items: only 3 options (no impact on idea-dashboard or other pages) -->
+          @else if (isAdminRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+            <div class="menu-item" (click)="resetIdea(element)">
+              <mat-icon>refresh</mat-icon>
+              <span>Reset Idea</span>
+            </div>
+          }
+          
+          <!-- Prioritization Routes Menu Items -->
+          @else if (isPrioritizationRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+          }
+
+          <!-- Harmonizer Menu Items -->
+          @else if (isHarmonizerRoute()) {
+            <div class="menu-item" (click)="viewIdea(element)">
+              <mat-icon>info</mat-icon>
+              <span>View Idea Details</span>
+            </div>
+            <div class="menu-item" (click)="viewIdeaHistory(element)">
+              <mat-icon>history</mat-icon>
+              <span>View Idea History</span>
+            </div>
+          }
+           <!-- Funding Menu Items -->
             @else if (isFunderRoute()) {
               <div class="menu-item" (click)="viewIdea(element)">
                 <mat-icon>info</mat-icon>
@@ -122,23 +121,23 @@
                 <span>View Idea History</span>
               </div>
             }
-          </div>
-          }
         </div>
-        } @else if (col.key === 'ranking_brand') {
-        <app-ranking-dropdown [value]="getRankingValue(element)" [disabled]="isTaPrioritizationRoute()"
-          (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
         }
-        @else if (col.key === 'ranking_franchise') {
-        <app-ranking-dropdown [value]="getTARankingValue(element)"
-          (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
-        }
-        @else {
-        <span [innerHTML]="getValue(element, col.key) | highlight : searchText"></span>
-        }
-      </td>
-    </ng-container>
- 
+      </div>
+      } @else if (col.key === 'ranking_brand') {
+      <app-ranking-dropdown [value]="getRankingValue(element)" [maxRank]="dataSource.length || 10"
+        [disabled]="isTaPrioritizationRoute()"
+        (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else if (col.key === 'ranking_franchise') {
+      <app-ranking-dropdown [value]="getTARankingValue(element)" [maxRank]="dataSource.length || 10"
+        (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
+      }
+      @else {
+      <span [innerHTML]="getValue(element, col.key) | highlight : searchText"></span>
+      }
+    </td>
+  </ng-container>
     <!-- HEADER ROW -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
  

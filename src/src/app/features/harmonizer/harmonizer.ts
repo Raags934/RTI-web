@@ -39,7 +39,7 @@ export class Harmonizer implements OnInit {
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
-  currentFilterStatusId: number = 0; // For status column display (e.g. "Harmonization pending" when tab is 5)
+  currentFilterStatusId: number = 0; // For status column display (e.g. "Harmonization pending" when tab is 18)
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 

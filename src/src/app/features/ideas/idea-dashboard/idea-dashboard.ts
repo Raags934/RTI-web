@@ -120,7 +120,10 @@ export class IdeaDashboard implements OnInit {
     this.showViewIdeaOverlay = false;
     this.overlayIdeaUid = null;
     this.overlayStatusLabel = null;
-    this.router.navigate(['/ideas/', idea.idea_uid, 'edit']);
+    // Draft ideas (status_id === 1) go to draft-specific edit page; others to normal edit
+    const isDraft = idea?.status_id === 1;
+    const editPath = isDraft ? '/ideas/' + idea.idea_uid + '/edit-draft' : '/ideas/' + idea.idea_uid + '/edit';
+    this.router.navigate([editPath]);
   }
 
   ngOnDestroy() {

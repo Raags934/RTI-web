@@ -14,6 +14,7 @@ export type IdeaEvent =
   | { type: 'resetSearch' }
   | { type: 'submitIdea' }
   | { type: 'saveDraft' }
+  | { type: 'approveIdea' }
   | { type: 'closePopUp' }
   | { type: 'cancelIdea' }
   | { type: 'confirmPopUp' }
@@ -74,6 +75,9 @@ export class IdeaEventsService {
   }
   saveDraft() {
     this.eventsSubject.next({ type: 'saveDraft' });
+  }
+  approveIdea() {
+    this.eventsSubject.next({ type: 'approveIdea' });
   }
   cancelIdea() {
     this.eventsSubject.next({ type: 'cancelIdea' });

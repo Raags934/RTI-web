@@ -46,6 +46,10 @@ export class HeaderWelcome implements OnInit {
     const path = this.currentRoute.replace(/^\/+/, '').split('/')[0];
     const fullPath = this.currentRoute.split('?')[0].replace(/^\/+/, '');
     this.prevNextBtnsVisible = false
+    if (fullPath.includes('ideas') && fullPath.includes('edit-draft')) {
+      this.pageHeader = headerConfigs.editDraftHeader;
+      return;
+    }
     if (fullPath.includes('admin/users')) {
       this.pageHeader = headerConfigs.adminManageUsersHeader;
       return;

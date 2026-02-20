@@ -1,5 +1,4 @@
 <form class="material-form" [formGroup]="form">
-  <!-- Product -->
   <div class="form-field">
     <app-form-input
       [label]="labels[0].text"
@@ -10,11 +9,9 @@
     >
     </app-form-input>
   </div>
-
-  <!-- TA (auto-filled) -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[1].text"
+      [label]="labels[1].text"
       type="select"
       [options]="taOptions"
       [isDisabled]="true"
@@ -23,11 +20,9 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Product Type -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[2].text"
+      [label]="labels[2].text"
       type="select"
       [options]="productTypeOptions"
       [required]="true"
@@ -35,11 +30,9 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Research Pathway -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[3].text"
+      [label]="labels[3].text"
       type="select"
       [options]="researchPathwayOptions"
       [required]="true"
@@ -47,11 +40,9 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Brand (auto-filled) -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[4].text"
+      [label]="labels[4].text"
       type="select"
       [options]="brandOptions"
       [isDisabled]="true"
@@ -60,8 +51,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- RTI Year -->
   <div class="form-field">
     <app-form-input
       [label]="labels[5].text"
@@ -73,8 +62,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Franchise (auto-filled) -->
   <div class="form-field">
     <app-form-input
       [label]="labels[6].text"
@@ -86,8 +73,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Monadic or Comparative -->
   <div class="form-field">
     <app-form-input
       [label]="labels[7].text"
@@ -98,8 +83,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Origin Request -->
   <div class="form-field">
     <app-form-input
       [label]="labels[8].text"
@@ -112,8 +95,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Strategic Rationale -->
   <div class="form-field">
     <app-form-input
       [label]="labels[9].text"
@@ -123,8 +104,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Target Aspirational Claim -->
   <div class="form-field">
     <app-form-input
       [label]="labels[10].text"
@@ -134,8 +113,6 @@
     >
     </app-form-input>
   </div>
-
-  <!-- Launch Claim -->
   <div class="form-field">
     <app-form-input
       [label]="labels[11].text"
@@ -147,7 +124,6 @@
     </app-form-input>
   </div>
 
-  <!-- Buttons -->
   <div class="form-actions">
     <app-buttons
       (click)="openPopUp('cancelIdea')"
@@ -157,25 +133,22 @@
     >
       Cancel
     </app-buttons>
-
+    <app-buttons
+      (click)="openPopUp('draftIdea')"
+      variant="type2"
+      color="var(--primary-400)"
+      size="large"
+    >
+      Save as Draft
+    </app-buttons>
     <app-buttons
       (click)="openPopUp('submitIdea')"
       variant="type1"
       color="var(--primary-400)"
       size="large"
     >
-      Save
+      Submit
     </app-buttons>
-    @if (showApproveButton) {
-      <app-buttons
-        (click)="openPopUp('approveIdea')"
-        variant="type1"
-        color="var(--primary-400)"
-        size="large"
-      >
-        Approve
-      </app-buttons>
-    }
   </div>
 </form>
 
@@ -188,7 +161,14 @@
   [size]="popup.size"
   [confirmPopupAction]="popup.confirmPopupAction"
 >
-  @if (popup.confirmPopupAction === "submitIdea" || popup.confirmPopupAction === "approveIdea") {
-    <div class="form-field"><app-form-input label="Comment (Optional)" type="text" placeholder="Enter your comment here" [control]="form.get('comment')" ></app-form-input></div>
+  @if (popup.confirmPopupAction === "saveDraft" || popup.confirmPopupAction === "submitIdea") {
+    <div class="form-field">
+      <app-form-input
+        label="Comment (Optional)"
+        type="text"
+        placeholder="Enter your comment here"
+        [control]="form.get('comment')"
+      ></app-form-input>
+    </div>
   }
 </app-popup>

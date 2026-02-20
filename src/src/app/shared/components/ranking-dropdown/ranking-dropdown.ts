@@ -12,6 +12,8 @@ import { Subscription } from 'rxjs';
 })
 export class RankingDropdown implements OnInit, OnDestroy {
   @Input() value: number | null = null;
+  /** Maximum rank shown in dropdown (options 1 to maxRank). Driven by pending filter count. */
+  @Input() maxRank: number = 10;
   @Input() disabled: boolean = false;
   @Output() valueChange = new EventEmitter<number | null>();
 
@@ -20,7 +22,11 @@ export class RankingDropdown implements OnInit, OnDestroy {
   @ViewChild('dropdownMenu', { static: false }) dropdownMenuRef!: ElementRef;
 
   isOpen = false;
-  ranks = Array.from({ length: 10 }, (_, i) => i + 1);
+  /** Options from 1 to maxRank (at least 1). */
+  get ranks(): number[] {
+    const n = Math.max(1, this.maxRank);
+    return Array.from({ length: n }, (_, i) => i + 1);
+  }
   dropdownPosition = { top: '0px', left: '0px' };
   private dropdownId: string;
   private subscription?: Subscription;

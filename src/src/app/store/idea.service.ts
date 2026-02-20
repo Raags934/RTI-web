@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 import { Idea, IdeaPayload, ExportIdeasPayload, ResetIdeaPayload } from '../models/idea.model';
 import { PrioritizationPayload } from '../models/prioritization.model';
-import { StudyDetailsPayload } from '../models/study-details.model';
+import { StudyDetailsPayload, StudyDetailsWithPilotPayload } from '../models/study-details.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
@@ -69,8 +69,11 @@ export class IdeaService {
       'x-api-key': this.x_api_key,
     });
 
+    // Do not send approved key in draft API
+    const { approved, ...draftPayload } = payload;
+
     return this.http
-      .post<GetIdeasResponse<Idea>>(`${this.baseUrl}/ideas/draft`, payload, { headers })
+      .post<GetIdeasResponse<Idea>>(`${this.baseUrl}/ideas/draft`, draftPayload, { headers })
       .pipe(map((res) => res.data));
   }
 
@@ -92,7 +95,7 @@ export class IdeaService {
   // ----------------------------------------------------
   // POST: Submit study details (Enter Study Details form)
   // ----------------------------------------------------
-  submitStudyDetails(payload: StudyDetailsPayload): Observable<unknown> {
+  submitStudyDetails(payload: StudyDetailsPayload | StudyDetailsWithPilotPayload): Observable<unknown> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'x-api-key': this.x_api_key,

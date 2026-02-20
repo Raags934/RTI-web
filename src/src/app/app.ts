@@ -69,6 +69,6 @@ export class App implements OnInit {
     this.createIdeaToast.visible = true;
     setTimeout(() => {
       this.createIdeaToast.visible = false;
-    }, 7000);
+    }, 9000);
   }
 }

@@ -9,6 +9,7 @@ export interface Popup {
   size: 'small' | 'medium' | 'large';
   confirmPopupAction: IdeaEvent['type'];
   showCancelButton?: boolean;
+  showConfirmButton?: boolean;
 }
 
 
@@ -83,6 +84,17 @@ export const rankAtLeast10Ideas: Popup = {
   showCancelButton: false
 };
 
+export const completeAllRanking: Popup = {
+  open: false,
+  title: 'Cannot submit',
+  helper: 'Complete all ranking before submission.',
+  cancelText: '',
+  confirmText: 'Close',
+  size: 'small',
+  confirmPopupAction: 'closePopUp',
+  showCancelButton: false
+};
+
 export const abandonIdea: Popup = {
   open: false,
   title: 'Abandon this idea',
@@ -127,11 +139,12 @@ export const enterStudyDetails: Popup = {
   open: false,
   title: '',
   helper: '',
-  cancelText: 'Save as a Study Draft',
+  cancelText: '',
   confirmText: 'Submit Study Details',
   size: 'large',
   confirmPopupAction: 'enterStudyDetails',
-  showCancelButton: false
+  showCancelButton: false,
+  showConfirmButton: false
 };
 
 export const submitStudyDetailsConfirmation: Popup = {
@@ -144,14 +157,26 @@ export const submitStudyDetailsConfirmation: Popup = {
   confirmPopupAction: 'submitStudyDetailsConfirmation'
 };
 
+export const approveIdea: Popup = {
+  open: false,
+  title: 'Approve this idea?',
+  helper: 'Confirm to approve the idea.',
+  cancelText: 'No',
+  confirmText: 'Yes',
+  size: 'medium',
+  confirmPopupAction: 'approveIdea'
+};
+
 export const PopupConfigs = {
   submitIdea,
   cancelIdea,
   draftIdea,
+  approveIdea,
   rankingSaved,
   submitRankingConfirm,
   submitRankingConfirmTwo,
   rankAtLeast10Ideas,
+  completeAllRanking,
   abandonIdea,
   needMoreInfo,
   assessIdea,
