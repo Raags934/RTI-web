@@ -1,18 +1,15 @@
 <app-header-filter class="header-filter"></app-header-filter>
 <app-table-header [showFreezeButton]="true" [showSearch]="false" [showNewIdea]="false"></app-table-header>
 <app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns"
-[dataSource]="pagedIdeas" [showFreezeButton]="true" [dropdownStyle]="'nested'" [from]="'funding'"></app-table>
+<app-table
+  [columns]="ideaDisplayColumns"
+  [dataSource]="pagedIdeas"
+  [currentFilterStatusId]="currentFilterStatusId"
+  [showFreezeButton]="true"
+  [showCheckboxColumn]="currentFilterStatusId === 13"
+  [selectedIdeaIds]="selectedIdeaIds"
+  (selectedIdeaIdsChange)="selectedIdeaIds = $event"
+  [dropdownStyle]="'nested'"
+  [from]="'funding'"
+></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
-
-<!-- Freeze Data Confirmation Popup -->
-<app-popup
-  [open]="showFreezePopup"
-  [title]="freezePopupTitle"
-  [helper]="freezePopupHelper"
-  [confirmText]="freezePopupConfirmText"
-  [cancelText]="freezePopupCancelText"
-  (confirmPopupAction)="confirmFreezeData()"
-  (closePopUp)="closeFreezePopup()"
->
-</app-popup>

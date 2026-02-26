@@ -334,11 +334,13 @@ export class IdeaEdit implements OnInit, OnDestroy {
     const isDraft = this.currentIdea?.status?.status_name?.toLowerCase() === 'draft';
     const isApproved = this.currentIdea?.status_id === 18; // Approved filter
     const isHarmonizationPending = this.from === 'harmonizer' && this.currentIdea?.status_id === 18; // Harmonization pending
+    const hasFranchiseFunction = this.currentUser?.functions?.some(
+      (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
+    );
     const isCreatorAndFranchise =
-      this.currentUser?.roles?.some((r) => r.role_name === 'Creator') &&
-      this.currentUser?.functions?.some(
-        (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
-      );
+      this.currentUser?.roles?.some((r) => r.role_name === 'Creator') && hasFranchiseFunction;
+    const isHarmonizerAndFranchise =
+      this.currentUser?.roles?.some((r) => r.role_name === 'Harmonizer') && hasFranchiseFunction;
 
     this.popup.open = false;
 
@@ -354,8 +356,9 @@ export class IdeaEdit implements OnInit, OnDestroy {
           error: () => {},
         });
       } else {
-        // For harmonizer flow: Creator+Franchise -> PUT, else -> POST with approved: false
-        if (isCreatorAndFranchise) {
+        // Pending harmonizer -> view idea detail -> edit -> Save: Creator+Franchise OR Harmonizer+Franchise -> PUT, else -> POST with approved: false
+        const useUpdateApi = isCreatorAndFranchise || isHarmonizerAndFranchise;
+        if (useUpdateApi) {
           const { approved, ...payloadWithoutApproved } = payload;
           this.ideaService.updateIdea(this.ideaId!, payloadWithoutApproved as IdeaPayload).subscribe({
             next: () => {
@@ -365,7 +368,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
             error: () => {},
           });
         } else {
-          // Non-Creator+Franchise: call addIdea API with approved: false
+          // Else: call addIdea API with approved: false
           const addPayload: IdeaPayload = { ...payload, idea_id: this.ideaId!, approved: false };
           this.ideaService.addIdea(addPayload).subscribe({
             next: () => {

@@ -1,7 +1,8 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
  
@@ -28,7 +29,7 @@ export type ColumnWidth = 'xsmall' | 'small' | 'medium' | 'large';
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatIconModule, HighlightPipe, Buttons, RankingDropdown],
+  imports: [CommonModule, MatTableModule, MatIconModule, MatCheckboxModule, HighlightPipe, Buttons, RankingDropdown],
   templateUrl: './table.html',
   styleUrl: './table.scss',
 })
@@ -43,10 +44,17 @@ export class Table {
   statusColor = statusColor;
   @Input() showFreezeButton: boolean = false;
   @Input() dropdownStyle: string = '';
- 
+  @Input() showCheckboxColumn = false;
+  @Input() selectedIdeaIds: number[] = [];
+  @Output() selectedIdeaIdsChange = new EventEmitter<number[]>();
+
   private sub!: Subscription;
- 
-  displayedColumns: string[] = [];
+
+  get displayedColumns(): string[] {
+    return this.showCheckboxColumn
+      ? ['checkbox', ...this.columns.map((c) => c.key)]
+      : this.columns.map((c) => c.key);
+  }
  
   searchText = '';
   // No column sorted initially
@@ -70,9 +78,7 @@ export class Table {
     });
   }
  
-  ngOnInit() {
-    this.displayedColumns = this.columns.map((c) => c.key);
-  }
+  ngOnInit() {}
 
   onSort(column: string) {
     if (this.currentSortColumn === column) {
@@ -168,9 +174,10 @@ export class Table {
   }
  
   // Check if current filter is a pending status based on the component/route
-  // Prioritization One: status_id 10 = Product Prioritization Pending (display "Product ranking")
+  // Prioritization One: status_id 10 = Product Prioritization Pending
   // Prioritization Two: status_id 12 = TA Prioritization Pending
-  // Harmonizer: status_id 18 = Harmonization Pending (Approved ideas, show "Harmonization pending")
+  // Harmonizer: status_id 18 = Harmonization Pending
+  // Funding: status_id 13 = Funding Pending (show pending_with)
   isPendingFilter(): boolean {
     if (this.isHarmonizerRoute()) {
       return this.currentFilterStatusId === 18;
@@ -181,6 +188,9 @@ export class Table {
     if (this.isTaPrioritizationRoute()) {
       return this.currentFilterStatusId === 12;
     }
+    if (this.isFunderRoute()) {
+      return this.currentFilterStatusId === 13;
+    }
     return false;
   }
 
@@ -189,6 +199,15 @@ export class Table {
     if (this.isHarmonizerRoute() && this.currentFilterStatusId === 18) {
       return 'Harmonization pending';
     }
+    // Product Prioritization Pending tab (prioritization-one, status_id 10): show pending_with, fallback to "Product Ranking"
+    if (this.isPrioritizationOneRoute() && this.currentFilterStatusId === 10) {
+      return element?.status?.pending_with || 'Product Ranking';
+    }
+    // Funding Pending tab (funding, status_id 13): show pending_with, fallback to "Funding pending"
+    if (this.isFunderRoute() && this.currentFilterStatusId === 13) {
+      return element?.status?.pending_with || 'Funding pending';
+    }
+    // TA Prioritization Pending and other pending filters: show pending_with when present
     if (this.isPendingFilter() && element?.status?.pending_with) {
       return element.status.pending_with;
     }
@@ -197,12 +216,11 @@ export class Table {
 
   // ----- Route helpers -----
 
-  // Check if current route is Prioritization One page
+  // Check if current route is Prioritization One (Product Prioritization) page
+  // Route path is 'productprioritization' so url is e.g. /productprioritization
   isPrioritizationOneRoute(): boolean {
-    return (
-      this.router.url.includes('/prioritization') &&
-      !this.router.url.includes('/ta-prioritization')
-    );
+    const url = this.router.url;
+    return url.includes('productprioritization') || (url.includes('/prioritization') && !url.includes('ta-prioritization') && !url.includes('taprioritization'));
   }
 
   // Check if current route is TA prioritization page
@@ -234,6 +252,38 @@ export class Table {
   isHarmonizerRoute(): boolean {
     const path = this.router.url.split('?')[0];
     return path === '/harmonizer';
+  }
+
+  // ----- Checkbox selection (for funding Freeze Data) -----
+
+  isSelected(ideaId: number): boolean {
+    return this.selectedIdeaIds.indexOf(ideaId) !== -1;
+  }
+
+  toggleSelection(ideaId: number) {
+    const set = new Set(this.selectedIdeaIds);
+    if (set.has(ideaId)) {
+      set.delete(ideaId);
+    } else {
+      set.add(ideaId);
+    }
+    this.selectedIdeaIdsChange.emit(Array.from(set));
+  }
+
+  isAllSelected(): boolean {
+    if (!this.dataSource?.length) return false;
+    return this.dataSource.every((row: Idea) => this.selectedIdeaIds.indexOf(row.idea_id) !== -1);
+  }
+
+  toggleSelectAll() {
+    if (this.isAllSelected()) {
+      const onPage = new Set(this.dataSource.map((row: Idea) => row.idea_id));
+      this.selectedIdeaIdsChange.emit(this.selectedIdeaIds.filter((id: number) => !onPage.has(id)));
+    } else {
+      const onPage = this.dataSource.map((row: Idea) => row.idea_id);
+      const merged = new Set([...this.selectedIdeaIds, ...onPage]);
+      this.selectedIdeaIdsChange.emit(Array.from(merged));
+    }
   }
 
   // ----- Idea actions -----

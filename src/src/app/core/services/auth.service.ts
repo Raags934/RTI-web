@@ -6,12 +6,24 @@ import type { OktaAuth } from '@okta/okta-auth-js';
 import { User } from '../../models/user.model';
 import { UserService } from './user.service';
 import { environment } from '../../../environments/environment.development';
+import { isLocalHost } from '../utils/environment.util';
+
+/** Stub user for local dev when running on localhost (no Okta). */
+const LOCAL_DEV_USER: User = {
+  user_id: 1,
+  name: 'Local Dev',
+  email: 'karthik@example.com',
+  active: true,
+  roles: [],
+  functions: [],
+  therapeutic_areas: [],
+  research_pathways: [],
+};
 
 /**
  * Handles Okta login and app authorization:
- * 1. Okta login (authorize → token → userinfo).
- * 2. Check user exists via GET /users/by_email?email= (authorization).
- * 3. If exists → store user, redirect to home; if not → redirect to access-denied.
+ * 1. On localhost: no Okta; use stub user so app and local API work as before.
+ * 2. On dev/staging: Okta login → user table check → store user or access-denied.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,7 +33,7 @@ export class AuthService {
 
   private readonly currentUser$ = new BehaviorSubject<User | null>(null);
 
-  /** Current app user (from our user table) after Okta + authorization check. */
+  /** Current app user (from our user table) after Okta + authorization check; or stub on localhost. */
   get currentUser(): User | null {
     return this.currentUser$.getValue();
   }
@@ -36,8 +48,9 @@ export class AuthService {
     return user?.user_id ?? null;
   }
 
-  /** Whether Okta is configured (we use it for login). */
+  /** Whether Okta is configured and should be used (false on localhost so no redirect). */
   get isOktaConfigured(): boolean {
+    if (isLocalHost()) return false;
     return !!(
       environment.okta?.clientId &&
       environment.okta?.issuer
@@ -108,9 +121,14 @@ export class AuthService {
   /**
    * If the URL has an authorization code (Okta redirected here), handle it first.
    * Otherwise try to restore session from existing tokens.
+   * On localhost: set stub user and skip Okta.
    * Call from APP_INITIALIZER so callback is handled before routing.
    */
   async ensureInitialAuth(): Promise<void> {
+    if (isLocalHost()) {
+      this.currentUser$.next(LOCAL_DEV_USER);
+      return;
+    }
     const hasCode =
       typeof window !== 'undefined' &&
       typeof URLSearchParams !== 'undefined' &&
@@ -122,8 +140,12 @@ export class AuthService {
     await this.restoreSession();
   }
 
-  /** Sync auth state from existing Okta session (e.g. page refresh). */
+  /** Sync auth state from existing Okta session (e.g. page refresh). On localhost, use stub user. */
   async restoreSession(): Promise<boolean> {
+    if (isLocalHost()) {
+      this.currentUser$.next(LOCAL_DEV_USER);
+      return true;
+    }
     if (!this.oktaAuth || this.currentUser$.getValue()) {
       return !!this.currentUser$.getValue();
     }

@@ -167,6 +167,16 @@ export const approveIdea: Popup = {
   confirmPopupAction: 'approveIdea'
 };
 
+export const updateFundingStatus: Popup = {
+  open: false,
+  title: 'Funding',
+  helper: 'Please verify that all the information is correct before saving.',
+  cancelText: 'Cancel',
+  confirmText: 'Save',
+  size: 'medium',
+  confirmPopupAction: 'saveUpdateFundingStatus'
+};
+
 export const PopupConfigs = {
   submitIdea,
   cancelIdea,
@@ -183,5 +193,6 @@ export const PopupConfigs = {
   submitToHarmonization,
   enterStudyDetails,
   submitStudyDetailsConfirmation,
+  updateFundingStatus,
 } as const;
 

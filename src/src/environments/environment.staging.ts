@@ -5,7 +5,7 @@ export const environment: AppEnvironment = {
   production: false,
   name: 'qa',
   apiUrl: 'https://qa.api.myapp.com',
-  oktaapiurl: 'https://rti-admin.dev.aws.alcon.net',
+  oktaapiurl: 'https://rti-admin.dev.aws.rags.net',
   x_api_key: API_KEY.QA,
   okta_api_key: API_KEY.OKTA_QA,
   featureFlags: {
@@ -17,13 +17,13 @@ export const environment: AppEnvironment = {
     remoteEnabled: true
   },
   okta: {
-    clientId: '0oz1n4bdfdg9qkLhJs0z231',
-    clientSecret: 'SDFBx_r2gNSPTVjbH6jl-T0lidfh0StZpOfsrFfXp4glywMk23gATWjBfwXROmPc',
-    issuer: 'https://alcon.oktapreview.com',
-    audience: '0oa2ngykartyujhmM0h8',
-    authorizationEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/authorize',
-    tokenEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/token',
-    userinfoEndpoint: 'https://alcon.oktapreview.com/oauth2/v1/userinfo',
-    redirectUri: 'https://rtinception.dev.aws.alcon.net/'
+    clientId: '123',
+    clientSecret: '123',
+    issuer: 'https://raags.oktapreview.com',
+    audience: '123',
+    authorizationEndpoint: 'https://rags.oktapreview.com/oauth2/v1/authorize',
+    tokenEndpoint: 'https://rags.oktapreview.com/oauth2/v1/token',
+    userinfoEndpoint: 'https://rags.oktapreview.com/oauth2/v1/userinfo',
+    redirectUri: 'https://anc.dev.aws.rasg.net/'
   }
 };

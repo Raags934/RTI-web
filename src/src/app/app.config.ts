@@ -6,8 +6,11 @@ import { OKTA_AUTH, OKTA_CONFIG } from '@okta/okta-angular';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment.development';
 import { AuthService } from './core/services/auth.service';
+import { isLocalHost } from './core/utils/environment.util';
 
 function getOktaProviders(): { provide: unknown; useValue: unknown }[] {
+  // On localhost, skip Okta so the app works locally with local API only
+  if (isLocalHost()) return [];
   const okta = environment.okta;
   if (!okta?.clientId || !okta?.issuer) return [];
   const redirectUri =

@@ -40,6 +40,8 @@ export type IdeaEvent =
   | { type: 'freezeData' }
   | { type: 'confirmFreezeData' }
   | { type: 'viewIdeaOverlay'; payload: { idea_uid: string; statusLabel?: string } }
+  | { type: 'openUpdateFundingStatus' }
+  | { type: 'saveUpdateFundingStatus' }
 
 @Injectable({ providedIn: 'root' })
 export class IdeaEventsService {
@@ -195,5 +197,14 @@ export class IdeaEventsService {
 
   confirmFreezeData() {
     this.eventsSubject.next({ type: 'confirmFreezeData' });
+  }
+
+  /** Open the Update funding status popup (from Idea View when from=funding and idea is Funding Pending). */
+  openUpdateFundingStatus() {
+    this.eventsSubject.next({ type: 'openUpdateFundingStatus' });
+  }
+
+  saveUpdateFundingStatus() {
+    this.eventsSubject.next({ type: 'saveUpdateFundingStatus' });
   }
 }

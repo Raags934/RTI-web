@@ -78,6 +78,18 @@ export class Buttons {
         this.ideaEvents.submitStudyDetailsConfirmation();
         break;
 
+      case 'openUpdateFundingStatus':
+        this.ideaEvents.openUpdateFundingStatus();
+        break;
+
+      case 'saveUpdateFundingStatus':
+        this.ideaEvents.saveUpdateFundingStatus();
+        break;
+
+      case 'confirmFreezeData':
+        this.ideaEvents.confirmFreezeData();
+        break;
+
       default:
         console.warn('Unhandled actionType:', this.actionType);
         break;

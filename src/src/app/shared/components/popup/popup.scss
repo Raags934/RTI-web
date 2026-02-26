@@ -69,6 +69,11 @@
     max-height: 400px;
     overflow-y: auto;
   }
+
+  .cd-dialog--compact .cd-content {
+    max-height: none;
+    overflow: visible;
+  }
  
   // ---------- Actions ----------
   .cd-actions {

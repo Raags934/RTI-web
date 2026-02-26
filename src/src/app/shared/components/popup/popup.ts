@@ -16,6 +16,8 @@ export class PopUp {
   @Input() cancelText = 'Cancel';
   @Input() confirmText = 'Confirm';
   @Input() size : 'small' | 'medium' | 'large' = 'medium';
+  /** When true, content area has no max-height and no scrollbar (fits compact popups). */
+  @Input() compactContent = false;
   @Input() confirmPopupAction: IdeaEvent['type'] = "closePopUp";
   @Input() showCancelButton: boolean = true;
   @Input() showConfirmButton: boolean = true;

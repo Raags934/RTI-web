@@ -4,7 +4,7 @@
   (mousedown)="onBackdrop($event)"
 >
   @if (open) {
-    <div class="cd-dialog" [ngClass]="size">
+    <div class="cd-dialog" [ngClass]="[size, compactContent ? 'cd-dialog--compact' : '']">
       @if (title) {
         <div class="cd-title">{{ title }}</div>
       }

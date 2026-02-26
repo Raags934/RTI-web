@@ -1,26 +1,26 @@
 import { Component, OnInit, NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { AppState } from '../../app.state';
-import { Store, select } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { LoadIdeas } from '../../store/idea.actions';
-import { Idea } from '../../models/idea.model';
+import { Idea, ExportIdeasPayload } from '../../models/idea.model';
 import { IdeaEventsService } from '../../events/ideaServiceEvents';
+import { IdeaService } from '../../store/idea.service';
+import { AuthService } from '../../core/services/auth.service';
 import { TableHeader } from '../../shared/components/table-header/table-header';
 import { Table, TableColumn } from '../../shared/components/table/table';
 import { HeaderFilter } from '../../shared/components/header-filter/header-filter';
 import { TableFilter } from '../../shared/components/table-filter/table-filter';
 import { Pagination } from '../../shared/components/pagination/pagination';
-import { PopUp } from '../../shared/components/popup/popup';
 import { StatusTab, funding } from '../../shared/constants/statusTabs';
 import { ideaDisplayColumns, fundingDisplayColumns } from '../../shared/constants/tableColumns';
-import { loadMasterData } from '../../store/masterData/masterData.actions';
 
 @Component({
   selector: 'app-funding',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, PopUp],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
   templateUrl: './funding.html',
   styleUrl: './funding.scss',
 })
@@ -36,19 +36,24 @@ export class Funding implements OnInit {
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
+  currentFilterStatusId: number = 0;
+
+  /** Selected idea_id values for Freeze Data (bulk funding). */
+  selectedIdeaIds: number[] = [];
+
+  /** Fixed value_id for bulk funding API (Freeze Data). */
+  readonly FREEZE_VALUE_ID = 34;
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
-  showFreezePopup = false;
-  freezePopupTitle = 'Are you sure you want to freeze/baseline this list for the current year ?';
-  freezePopupHelper = 'if you select yes you cannot reverse this step.';
-  freezePopupCancelText = 'No';
-  freezePopupConfirmText = 'Yes';
-  freezePopupConfirmAction: 'confirmFreezeData' = 'confirmFreezeData';
-
   private sub!: Subscription;
 
-  constructor(private store: Store<AppState>, private ideaEvents: IdeaEventsService) {
+  constructor(
+    private store: Store<AppState>,
+    private ideaEvents: IdeaEventsService,
+    private ideaService: IdeaService,
+    private authService: AuthService
+  ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
 
@@ -79,9 +84,9 @@ export class Funding implements OnInit {
       } else if (event.type === 'searchByText') {
         this.filterBySearchText(event.payload.searchText);
       } else if (event.type === 'freezeData') {
-        this.onFreezeData();
-      } else if (event.type === 'closePopUp') {
-        this.closeFreezePopup();
+        this.onFundingClick();
+      } else if (event.type === 'exportData') {
+        this.exportData();
       } else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload || 3);
       }
@@ -135,7 +140,7 @@ export class Funding implements OnInit {
   }
 
   filterByStatus(status_id: number) {
-    console.log('status :' + status_id);
+    this.currentFilterStatusId = status_id;
     if (status_id === 0) {
       this.filteredIdeas = [...this.ideas];
     } else {
@@ -192,18 +197,70 @@ export class Funding implements OnInit {
     this.updatePagedIdeas();
   }
 
-  onFreezeData() {
-    console.log('Freeze data clicked');
-    this.showFreezePopup = true;
+  exportData() {
+    const payload: ExportIdeasPayload = {
+      id: this.filteredIdeas.map((idea) => idea.idea_id),
+    };
+
+    this.ideaService.exportIdeas(payload).subscribe({
+      next: (blob: Blob) => {
+        try {
+          if (!blob || blob.size === 0) {
+            throw new Error('Empty response received from server');
+          }
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `ideas_export_${new Date().getTime()}.xlsx`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+          this.ideaEvents.toastEvent('Export completed successfully.');
+        } catch (error) {
+          console.error('Error in export process:', error);
+          this.ideaEvents.toastEvent(
+            `Failed to export: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      },
+      error: (error: { status?: number; message?: string }) => {
+        console.error('API Error exporting data:', error);
+        let errorMessage = 'Failed to export data. Please try again.';
+        if (error?.status) errorMessage += ` (Status: ${error.status})`;
+        if (error?.message) errorMessage += ` - ${error.message}`;
+        this.ideaEvents.toastEvent(errorMessage);
+      },
+    });
   }
 
-  confirmFreezeData() {
-    console.log('Freeze data confirmed');
-    // Add your freeze logic here
-    this.showFreezePopup = false;
-  }
-
-  closeFreezePopup() {
-    this.showFreezePopup = false;
+  /** Called when Funding button is clicked: call bulk funding API directly (no popup). */
+  onFundingClick() {
+    if (!this.selectedIdeaIds?.length) {
+      this.ideaEvents.toastEvent('Please select at least one idea.');
+      return;
+    }
+    const updatedBy = this.authService.getCurrentUserId() ?? 1;
+    this.ideaService
+      .putFundingBulk({
+        value_id: this.FREEZE_VALUE_ID,
+        idea_ids: [...this.selectedIdeaIds],
+        updated_by: updatedBy,
+      })
+      .subscribe({
+        next: (res: unknown) => {
+          this.selectedIdeaIds = [];
+          this.store.dispatch(LoadIdeas());
+          const msg = (res as { message?: string })?.message ?? 'Ideas updated successfully.';
+          this.ideaEvents.toastEvent(msg);
+        },
+        error: (err: { error?: { message?: string }; message?: string }) => {
+          const msg = err?.error?.message || err?.message || 'Failed to update ideas.';
+          this.ideaEvents.toastEvent(msg);
+        },
+      });
   }
 }

@@ -307,16 +307,25 @@
   </div>
 }
 
-<!-- Action buttons row: Cancel + Enter Study Details / Assess Idea + Edit Details -->
+<!-- Action buttons row: Cancel + Enter Study Details / Assess Idea / Update funding status + Edit Details -->
 <div class="action-buttons-row">
   <app-buttons
-    *ngIf="from === 'harmonizer'"
+    *ngIf="from === 'harmonizer' || from === 'funding'"
     (click)="onCancel()"
     variant="type2"
     color="var(--primary-400)"
     size="medium"
   >
     Cancel
+  </app-buttons>
+  <app-buttons
+    *ngIf="from === 'funding' && isFundingPending"
+    [actionType]="'openUpdateFundingStatus'"
+    variant="type1"
+    color="var(--primary-400)"
+    size="medium"
+  >
+    Update funding status
   </app-buttons>
   <app-buttons
     *ngIf="from === 'assessor' || (from === 'harmonizer' && !hasStudyDetails())"
@@ -328,7 +337,7 @@
     {{ from === 'assessor' ? 'Assess Idea' : 'Enter Study Details' }}
   </app-buttons>
   <app-buttons
-    *ngIf="!shouldHideEditDetails()"
+    *ngIf="from !== 'funding' && !shouldHideEditDetails()"
     (click)="navigateToEdit()"
     variant="type1"
     color="var(--primary-400)"
@@ -358,6 +367,53 @@
         [control]="form.get('comment')"
       ></app-form-input>
     </div>
+  }
+</app-popup>
+
+<app-popup
+  *ngIf="from === 'funding'"
+  [open]="updateFundingStatusPopup.open"
+  [title]="updateFundingStatusPopup.title"
+  [helper]="updateFundingStatusPopup.helper"
+  [cancelText]="updateFundingStatusPopup.cancelText"
+  [confirmText]="updateFundingStatusPopup.confirmText"
+  [size]="updateFundingStatusPopup.size"
+  [compactContent]="true"
+  [confirmPopupAction]="updateFundingStatusPopup.confirmPopupAction"
+>
+  @if (updateFundingStatusPopup.confirmPopupAction === 'saveUpdateFundingStatus') {
+    <div class="funding-popup-fields dropdown-row">
+      <div class="form-field">
+        <app-form-input
+          label="Funding Status"
+          type="select"
+          dropdownSize="small"
+          [required]="true"
+          [control]="fundingForm.get('funding_status')"
+          [options]="fundingStatusOptions"
+        ></app-form-input>
+      </div>
+      <div class="form-field">
+        <app-form-input
+          label="Funding Source"
+          type="select"
+          dropdownSize="small"
+          [required]="true"
+          [control]="fundingForm.get('funding_source_value_id')"
+          [options]="fundingSourceSelectOptions"
+        ></app-form-input>
+      </div>
+    </div>
+    @if (showFundingCommentField) {
+      <div class="form-field">
+        <app-form-input
+          label="Comment"
+          type="textarea"
+          placeholder="Please provide a reason for abandoning"
+          [control]="fundingForm.get('funding_comment')"
+        ></app-form-input>
+      </div>
+    }
   }
 </app-popup>
 

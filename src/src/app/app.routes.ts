@@ -9,6 +9,7 @@ import { IdeaDraftEdit } from './features/ideas/idea-draft-edit/idea-draft-edit'
 import { PrioritizationOne } from './features/prioritization-one/prioritization-one';
 import { PrioritizationTwo } from './features/prioritization-two/prioritization-two';
 import { Harmonizer } from './features/harmonizer/harmonizer';
+import { Funding } from './features/funding/funding';
 import { AdminHome } from './features/admin/admin-home/admin-home';
 import { ManageUser } from './features/admin/manage-user/manage-user';
 import { AdminProduct } from './features/admin/admin-product/admin-product';
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'productprioritization', component: PrioritizationOne, canActivate: [authGuard] },
   { path: 'taprioritization', component: PrioritizationTwo, canActivate: [authGuard] },
   { path: 'harmonizer', component: Harmonizer, canActivate: [authGuard] },
+  { path: 'funding', component: Funding, canActivate: [authGuard] },
   { path: 'admin', component: AdminHome, canActivate: [authGuard] },
   { path: 'admin/users', component: ManageUser, canActivate: [authGuard] },
   { path: 'admin/products', component: AdminProduct, canActivate: [authGuard] },

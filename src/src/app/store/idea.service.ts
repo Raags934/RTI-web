@@ -9,20 +9,41 @@ import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
 import { MasterDataResponse } from '../models/api-response/masterData.model';
 import { AuditLog, AuditLogResponse } from '../models/audit-log.model';
 import { AuthService } from '../core/services/auth.service';
+import { isLocalHost } from '../core/utils/environment.util';
+
+export interface DropdownValueItem {
+  value_id: number;
+  value_label: string;
+  value_code?: string;
+  type?: { type_id: number; type_name: string; description?: string };
+  is_active?: boolean;
+  sort_order?: number;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class IdeaService {
-  private baseUrl = environment.apiUrl;
-  // private baseUrl = 'http://localhost:5000';
+  /** On localhost use local API; otherwise use environment (dev/staging/prod). */
+  private get baseUrl(): string {
+    return isLocalHost() ? 'http://localhost:5000' : environment.apiUrl;
+  }
 
-  private x_api_key = environment.x_api_key;
+  private get x_api_key(): string {
+    return environment.x_api_key;
+  }
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) {}
+
+  /** Headers: omit x-api-key on localhost for local API; include it for dev/staging/prod. */
+  private buildHeaders(extra?: Record<string, string>): HttpHeaders {
+    const map: Record<string, string> = { 'Content-Type': 'application/json', ...extra };
+    if (!isLocalHost()) map['x-api-key'] = this.x_api_key;
+    return new HttpHeaders(map);
+  }
 
   // ----------------------------------------------------
   // GET: Load ideas (uses authorized user email)
@@ -30,11 +51,7 @@ export class IdeaService {
   loadIdeas(): Observable<Idea[]> {
     const userEmail = this.authService.currentUser?.email ?? '';
 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
-
+    const headers = this.buildHeaders();
     return this.http
       .get<GetIdeasResponse<Idea[]>>(`${this.baseUrl}/ideas`, {
         headers,
@@ -52,10 +69,7 @@ export class IdeaService {
   // ----------------------------------------------------
 
   addIdea(payload: IdeaPayload): Observable<Idea> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     return this.http
       .post<GetIdeasResponse<Idea>>(`${this.baseUrl}/ideas`, payload, { headers })
@@ -64,10 +78,7 @@ export class IdeaService {
 
 
  addDraftIdea(payload: IdeaPayload): Observable<Idea> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     // Do not send approved key in draft API
     const { approved, ...draftPayload } = payload;
@@ -81,10 +92,7 @@ export class IdeaService {
   // PUT: Update existing idea
   // ----------------------------------------------------
   updateIdea(ideaId: number, payload: IdeaPayload): Observable<{ idea_id: number; message: string; status: number }> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     return this.http
       .put<{ idea_id: number; message: string; status: number }>(`${this.baseUrl}/ideas/${ideaId}`, payload, { headers });
@@ -96,10 +104,7 @@ export class IdeaService {
   // POST: Submit study details (Enter Study Details form)
   // ----------------------------------------------------
   submitStudyDetails(payload: StudyDetailsPayload | StudyDetailsWithPilotPayload): Observable<unknown> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
     return this.http.post<unknown>(`${this.baseUrl}/study_details`, payload, { headers });
   }
 
@@ -107,10 +112,7 @@ export class IdeaService {
   // PUT: Idea harmonization (called after study details submit success)
   // ----------------------------------------------------
   putHarmonization(ideaId: number, payload: { updated_by: number }): Observable<{ idea_id?: string; message?: string; status?: number }> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
     return this.http.put<{ idea_id?: string; message?: string; status?: number }>(
       `${this.baseUrl}/ideas/${ideaId}/harmonization`,
       payload,
@@ -122,10 +124,7 @@ export class IdeaService {
   // PUT: Save/Submit prioritization
   // ----------------------------------------------------
   addPrioritization(payload: PrioritizationPayload, url: string): Observable<Idea> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     return this.http
       .put<GetIdeasResponse<Idea>>(`${this.baseUrl}/${url}`, payload, { headers })
@@ -138,10 +137,7 @@ export class IdeaService {
   // We support both: blob → use as-is; text → parse base64, decode → Excel Blob.
   // ----------------------------------------------------
   exportIdeas(payload: ExportIdeasPayload): Observable<Blob> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     return this.http
       .post(`${this.baseUrl}/export_idea`, payload, {
@@ -214,13 +210,59 @@ export class IdeaService {
   }
 
   // ----------------------------------------------------
+  // GET: Dropdown values (e.g. Funding Source for update funding status popup)
+  // ----------------------------------------------------
+  getDropdownValues(): Observable<DropdownValueItem[]> {
+    const headers = this.buildHeaders();
+    return this.http
+      .get<DropdownValueItem[]>(`${this.baseUrl}/dropdown_values`, { headers })
+      .pipe(
+        map((res) => (Array.isArray(res) ? res : (res as { data?: DropdownValueItem[] })?.data ?? []))
+      );
+  }
+
+  // ----------------------------------------------------
+  // PUT: Update idea to Funded (path: idea_id; body: value_id, updated_by)
+  // ----------------------------------------------------
+  putFunding(ideaId: number, payload: { value_id: number; updated_by: number }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/funding`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Bulk update multiple ideas to Funded (path: 0; body: value_id, idea_ids, updated_by, comment?)
+  // ----------------------------------------------------
+  putFundingBulk(payload: {
+    value_id: number;
+    idea_ids: number[];
+    updated_by: number;
+    comment?: string;
+  }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/0/funding`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Update idea to Unfunded (path: idea_id; body: value_id, updated_by)
+  // ----------------------------------------------------
+  putNonFunding(ideaId: number, payload: { value_id: number; updated_by: number }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/non-funding`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Abandon idea (path: idea_id; body: comment optional, updated_by required)
+  // ----------------------------------------------------
+  putAbandon(ideaId: number, payload: { comment?: string; updated_by: number }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/abandon`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
   // PUT: Reset idea (path param: idea_id; body: comment optional, updated_by required)
   // ----------------------------------------------------
   resetIdea(ideaId: number, payload: ResetIdeaPayload): Observable<unknown> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
     return this.http.put<unknown>(`${this.baseUrl}/ideas/${ideaId}/reset`, payload, { headers });
   }
 
@@ -228,10 +270,7 @@ export class IdeaService {
   // DELETE: Delete idea
   // ----------------------------------------------------
   deleteIdea(ideaId: number): Observable<void> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     return this.http.delete<void>(`${this.baseUrl}/ideas/${ideaId}`, { headers });
   }
@@ -240,10 +279,7 @@ export class IdeaService {
   // GET: Get audit logs for an idea
   // ----------------------------------------------------
   getAuditLogs(ideaId: number): Observable<AuditLog[]> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': this.x_api_key,
-    });
+    const headers = this.buildHeaders();
 
     const url = `${this.baseUrl}/audit_logs/${ideaId}`;
     console.log('📡 Making API call to:', url);

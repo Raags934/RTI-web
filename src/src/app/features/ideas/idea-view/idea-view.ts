@@ -28,8 +28,9 @@ import { VIEW_IDEA_FORM_LABELS } from '../../../shared/constants/labels';
 import { Idea } from '../../../models/idea.model';
 import { AppState } from '../../../app.state.js';
 import { LoadIdeas } from '../../../store/idea.actions';
-import { IdeaService } from '../../../store/idea.service';
+import { IdeaService, DropdownValueItem } from '../../../store/idea.service';
 import { StudyDetailsPayload, StudyDetailsWithPilotPayload } from '../../../models/study-details.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { Buttons } from '../../../shared/components/buttons/buttons';
 import { statusColor } from '../../../shared/constants/statusColor';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
@@ -90,6 +91,20 @@ export class IdeaView implements OnInit, OnDestroy {
   enterStudyDetailsPopup: Popup = PopupConfigs.enterStudyDetails;
   submitStudyDetailsConfirmationPopup: Popup =
     PopupConfigs.submitStudyDetailsConfirmation;
+  updateFundingStatusPopup: Popup = PopupConfigs.updateFundingStatus;
+
+  /** Form for Update funding status popup (Funding status, Funding source, Comment for Abandon). */
+  fundingForm!: FormGroup;
+  /** Options for Funding source dropdown (from GET dropdown_values, type Funding Source). */
+  fundingSourceOptions: { value_id: number; value_label: string }[] = [];
+  /** Stable options for Funding source select (id = value_id, name = value_label). Set when dropdown data loads to avoid new array every CD. */
+  fundingSourceSelectOptions: { id: number; name: string }[] = [];
+  /** Funding status dropdown options. */
+  fundingStatusOptions = [
+    { id: 'Funded', name: 'Funded' },
+    { id: 'Unfunded', name: 'Unfunded' },
+    { id: 'Abandoned', name: 'Abandoned' },
+  ];
 
   /** Status label used for both full-page and overlay modes. */
   statusLabel = '.....';
@@ -141,6 +156,7 @@ export class IdeaView implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private ideaService: IdeaService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
@@ -162,6 +178,10 @@ export class IdeaView implements OnInit, OnDestroy {
         this.enterStudyDetails();
       } else if (event.type === 'submitStudyDetailsConfirmation') {
         this.submitStudyDetailsConfirmation();
+      } else if (event.type === 'openUpdateFundingStatus') {
+        this.onUpdateFundingStatus();
+      } else if (event.type === 'saveUpdateFundingStatus') {
+        this.saveUpdateFundingStatus();
       } else if (event.type === 'closePopUp') {
         if (this.submitStudyDetailsConfirmationPopup.open) {
           // Close only the confirmation popup
@@ -173,6 +193,12 @@ export class IdeaView implements OnInit, OnDestroy {
           this.assessIdeaPopup.open = false;
           this.submitToHarmonizationPopup.open = false;
           this.enterStudyDetailsPopup.open = false;
+          this.updateFundingStatusPopup.open = false;
+          this.fundingForm?.patchValue({
+            funding_status: null,
+            funding_source_value_id: null,
+            funding_comment: '',
+          });
 
           if (this.from === 'assessor') {
             // Reset assessIdeaPopup form fields when closed
@@ -401,6 +427,11 @@ export class IdeaView implements OnInit, OnDestroy {
         Validators.pattern(/^\d+(\.\d+)?$/),
       ]),
       pilot_regions_accepting_submissions: new FormControl(null, Validators.required),
+    });
+    this.fundingForm = this.fb.group({
+      funding_status: new FormControl<string | null>(null, Validators.required),
+      funding_source_value_id: new FormControl<number | null>(null, Validators.required),
+      funding_comment: new FormControl<string>(''),
     });
     this.setupStudyDetailsRecommendedListener();
   }
@@ -1105,10 +1136,107 @@ export class IdeaView implements OnInit, OnDestroy {
   }
 
   onCancel() {
-    // Redirect to harmonizer landing page when Cancel is clicked
     if (this.from === 'harmonizer') {
       this.router.navigate(['/harmonizer']);
+    } else if (this.from === 'funding') {
+      this.router.navigate(['/funding']);
     }
+  }
+
+  /** When opened from Funding: load Funding source dropdown then open popup (avoids stuck UI from options changing after open). */
+  onUpdateFundingStatus() {
+    if (!this.viewIdea) return;
+    this.fundingForm.patchValue({
+      funding_status: null,
+      funding_source_value_id: null,
+      funding_comment: '',
+    });
+    this.fundingSourceSelectOptions = [];
+    this.ideaService.getDropdownValues().subscribe((items) => {
+      const options = (items || [])
+        .filter((i) => i.type?.type_name === 'Funding Source')
+        .map((i) => ({ value_id: i.value_id, value_label: i.value_label }));
+      this.fundingSourceOptions = options;
+      this.fundingSourceSelectOptions = options.map((o) => ({ id: o.value_id, name: o.value_label }));
+      this.updateFundingStatusPopup.open = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  /** Save funding status: call funding / non-funding / abandon API based on selection, then close popup and go back to funding. */
+  saveUpdateFundingStatus() {
+    if (!this.viewIdea?.idea_id) {
+      this.ideaEvents.toastEvent('Unable to save: idea not loaded.');
+      return;
+    }
+    const statusControl = this.fundingForm.get('funding_status');
+    const sourceControl = this.fundingForm.get('funding_source_value_id');
+    const status = statusControl?.value as string | null;
+    const valueIdRaw = sourceControl?.value;
+    const valueId = valueIdRaw != null ? Number(valueIdRaw) : null;
+    const comment = this.fundingForm.get('funding_comment')?.value as string | undefined;
+    const updatedBy = this.authService.getCurrentUserId() ?? 1;
+
+    // Required: both Funding Status and Funding Source must be selected
+    if (!status || valueId == null || isNaN(valueId)) {
+      statusControl?.markAsTouched();
+      sourceControl?.markAsTouched();
+      if (!status) this.ideaEvents.toastEvent('Please select Funding Status.');
+      else this.ideaEvents.toastEvent('Please select Funding Source.');
+      return;
+    }
+
+    if (status === 'Funded' || status === 'Unfunded') {
+      const obs =
+        status === 'Funded'
+          ? this.ideaService.putFunding(this.viewIdea.idea_id, { value_id: valueId, updated_by: updatedBy })
+          : this.ideaService.putNonFunding(this.viewIdea.idea_id, { value_id: valueId, updated_by: updatedBy });
+      obs.subscribe({
+        next: (res) => {
+          this.updateFundingStatusPopup.open = false;
+          this.store.dispatch(LoadIdeas());
+          this.router.navigate(['/funding']);
+          const msg = (res as { message?: string })?.message ?? 'Funding status updated successfully.';
+          this.ideaEvents.toastEvent(msg);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.message || 'Failed to update funding status.';
+          this.ideaEvents.toastEvent(msg);
+        },
+      });
+    } else if (status === 'Abandoned') {
+      this.ideaService.putAbandon(this.viewIdea.idea_id, { comment: comment ?? '', updated_by: updatedBy }).subscribe({
+        next: (res) => {
+          this.updateFundingStatusPopup.open = false;
+          this.store.dispatch(LoadIdeas());
+          this.router.navigate(['/funding']);
+          const msg = (res as { message?: string })?.message ?? 'Funding status updated successfully.';
+          this.ideaEvents.toastEvent(msg);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.message || 'Failed to update funding status.';
+          this.ideaEvents.toastEvent(msg);
+        },
+      });
+    } else {
+      this.ideaEvents.toastEvent('Please select a valid Funding Status.');
+    }
+  }
+
+  /** True when Funding source dropdown should be shown (Funded or Unfunded selected). */
+  get showFundingSourceDropdown(): boolean {
+    const s = this.fundingForm?.get('funding_status')?.value;
+    return s === 'Funded' || s === 'Unfunded';
+  }
+
+  /** True when Comment field should be shown (Abandoned selected). */
+  get showFundingCommentField(): boolean {
+    return this.fundingForm?.get('funding_status')?.value === 'Abandoned';
+  }
+
+  /** True when idea is Funding Pending (status_id 13). Used to show Update funding status button only for Funding Pending. */
+  get isFundingPending(): boolean {
+    return this.viewIdea?.status_id === 13;
   }
 
   /**

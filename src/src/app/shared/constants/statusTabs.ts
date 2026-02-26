@@ -25,11 +25,12 @@ export const creator: StatusTab[] = [
 
 
 export const funding: StatusTab[] = [
-    { label: 'All', status_id: 0 },
-    { label: 'Funding Pending', status_id: 10 },
-    { label: 'Funded', status_id: 1 },
-    { label: 'Unfunded', status_id: 5 },
-  ].map((item) => ({ ...item, count: 0 }));
+  { label: 'All', status_id: 0 },
+  { label: 'Funding Pending', status_id: 13 },
+  { label: 'Funded', status_id: 14 },
+  { label: 'Unfunded', status_id: 15 },
+  { label: 'Abandon', status_id: 4 },
+].map((item) => ({ ...item, count: 0 }));
 
  
  
