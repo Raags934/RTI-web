@@ -17,7 +17,7 @@ export const environment: AppEnvironment = {
     remoteEnabled: true
   },
   okta: {
-    clientId: '152',
+    clientId: '152', 
     clientSecret: '556',
     issuer: 'https://rags.oktapreview.com',
     audience: '123',
