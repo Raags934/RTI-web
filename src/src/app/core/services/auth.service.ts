@@ -20,10 +20,14 @@ const LOCAL_DEV_USER: User = {
   research_pathways: [],
 };
 
+/** Key for storing user in localStorage */
+const STORED_USER_KEY = 'app_current_user';
+
 /**
  * Handles Okta login and app authorization:
- * 1. On localhost: no Okta; use stub user so app and local API work as before.
- * 2. On dev/staging: Okta login → user table check → store user or access-denied.
+ * 1. Okta login (authorize → token → userinfo).
+ * 2. Check user exists via GET /users/by_email?email= (authorization).
+ * 3. If exists → store user, redirect to home; if not → redirect to access-denied.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -33,7 +37,7 @@ export class AuthService {
 
   private readonly currentUser$ = new BehaviorSubject<User | null>(null);
 
-  /** Current app user (from our user table) after Okta + authorization check; or stub on localhost. */
+  /** Current app user (from our user table) after Okta + authorization check. */
   get currentUser(): User | null {
     return this.currentUser$.getValue();
   }
@@ -48,13 +52,42 @@ export class AuthService {
     return user?.user_id ?? null;
   }
 
-  /** Whether Okta is configured and should be used (false on localhost so no redirect). */
+  /** Whether Okta is configured (we use it for login). */
   get isOktaConfigured(): boolean {
     if (isLocalHost()) return false;
     return !!(
       environment.okta?.clientId &&
       environment.okta?.issuer
     );
+  }
+
+  /** Get stored user from localStorage */
+  private getStoredUser(): User | null {
+    if (typeof window === 'undefined') return null;
+    const stored = localStorage.getItem(STORED_USER_KEY);
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored) as User;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Store user in localStorage */
+  private storeUser(user: User): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORED_USER_KEY, JSON.stringify(user));
+  }
+
+  /** Clear stored user from localStorage */
+  private clearStoredSession(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORED_USER_KEY);
+  }
+
+  /** Check if user is stored in localStorage (for guard to use) */
+  hasStoredSession(): boolean {
+    return !!this.getStoredUser();
   }
 
   /** Start Okta login (redirects to Okta). */
@@ -99,6 +132,8 @@ export class AuthService {
         return 'access-denied';
       }
 
+      // Store user in localStorage for persistent session
+      this.storeUser(user);
       this.currentUser$.next(user);
       this.router.navigate(['/']);
       return 'authorized';
@@ -111,6 +146,7 @@ export class AuthService {
 
   logout(): void {
     this.currentUser$.next(null);
+    this.clearStoredSession();
     if (this.oktaAuth) {
       this.oktaAuth.signOut();
     } else {
@@ -121,7 +157,6 @@ export class AuthService {
   /**
    * If the URL has an authorization code (Okta redirected here), handle it first.
    * Otherwise try to restore session from existing tokens.
-   * On localhost: set stub user and skip Okta.
    * Call from APP_INITIALIZER so callback is handled before routing.
    */
   async ensureInitialAuth(): Promise<void> {
@@ -140,15 +175,28 @@ export class AuthService {
     await this.restoreSession();
   }
 
-  /** Sync auth state from existing Okta session (e.g. page refresh). On localhost, use stub user. */
+  /** Sync auth state from existing Okta session (e.g. page refresh). */
   async restoreSession(): Promise<boolean> {
     if (isLocalHost()) {
       this.currentUser$.next(LOCAL_DEV_USER);
       return true;
     }
-    if (!this.oktaAuth || this.currentUser$.getValue()) {
-      return !!this.currentUser$.getValue();
+    if (this.currentUser$.getValue()) {
+      return true;
     }
+
+    // First, try to restore from localStorage (persistent session)
+    const storedUser = this.getStoredUser();
+    if (storedUser) {
+      this.currentUser$.next(storedUser);
+      return true;
+    }
+
+    // If no stored user, try Okta session
+    if (!this.oktaAuth) {
+      return false;
+    }
+
     try {
       const isAuthenticated = await this.oktaAuth.isAuthenticated();
       if (!isAuthenticated) return false;
@@ -157,6 +205,8 @@ export class AuthService {
       if (!email) return false;
       const user = await firstValueFrom(this.userService.getByEmail(email));
       if (!user) return false;
+      // Store user for next time
+      this.storeUser(user);
       this.currentUser$.next(user);
       return true;
     } catch {

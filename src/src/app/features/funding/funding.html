@@ -13,3 +13,11 @@
   [from]="'funding'"
 ></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
+<app-popup
+  [open]="showUpdateFundingPopup"
+  [title]="updateFundingPopupTitle"
+  [helper]="updateFundingPopupHelper"
+  [cancelText]="updateFundingPopupCancelText"
+  [confirmText]="updateFundingPopupConfirmText"
+  [confirmPopupAction]="updateFundingPopupConfirmAction"
+></app-popup>

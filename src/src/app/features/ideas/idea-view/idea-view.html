@@ -320,12 +320,12 @@
   </app-buttons>
   <app-buttons
     *ngIf="from === 'funding' && isFundingPending"
-    [actionType]="'openUpdateFundingStatus'"
+    (click)="onUpdateFundingStatus()"
     variant="type1"
     color="var(--primary-400)"
     size="medium"
   >
-    Update funding status
+    Update Funding Status
   </app-buttons>
   <app-buttons
     *ngIf="from === 'assessor' || (from === 'harmonizer' && !hasStudyDetails())"
@@ -385,7 +385,7 @@
     <div class="funding-popup-fields dropdown-row">
       <div class="form-field">
         <app-form-input
-          label="Funding Status"
+          label="<strong>Funding Status</strong> <span class='red-asterisk'>*</span>"
           type="select"
           dropdownSize="small"
           [required]="true"
@@ -395,10 +395,11 @@
       </div>
       <div class="form-field">
         <app-form-input
-          label="Funding Source"
+          label="<strong>Funding Source</strong> <span class='red-asterisk'>*</span>"
           type="select"
           dropdownSize="small"
           [required]="true"
+          [isDisabled]="isFundingSourceDisabled"
           [control]="fundingForm.get('funding_source_value_id')"
           [options]="fundingSourceSelectOptions"
         ></app-form-input>
@@ -515,9 +516,9 @@
     <div class="study-details-form">
       <div class="study-details-top-row">
        <div class="form-field">
-        <app-form-input 
-        label="Is the study recommended to be conducted?" 
-        type="select" 
+        <app-form-input
+        label="Is the study recommended to be conducted?"
+        type="select"
         [required]="true"
         [control]="form.get('recommended')"
         [options]="recommendedOptions"

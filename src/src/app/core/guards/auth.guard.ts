@@ -6,6 +6,7 @@ import { AuthService } from '../services/auth.service';
 /**
  * Protects routes: only allow access if we have an authorized app user (from user table).
  * Redirects to /login if not authenticated, or /access-denied if Okta user not in our table.
+ * Uses localStorage to persist session after first successful login.
  */
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
@@ -15,6 +16,8 @@ export const authGuard: CanActivateFn = () => {
     take(1),
     map((user) => {
       if (user) return true;
+      // Check if there's a stored session in localStorage
+      if (auth.hasStoredSession()) return true;
       if (auth.isOktaConfigured) {
         return router.createUrlTree(['/login']);
       }

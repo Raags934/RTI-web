@@ -15,19 +15,32 @@ import { Table, TableColumn } from '../../shared/components/table/table';
 import { HeaderFilter } from '../../shared/components/header-filter/header-filter';
 import { TableFilter } from '../../shared/components/table-filter/table-filter';
 import { Pagination } from '../../shared/components/pagination/pagination';
+import { PopUp } from '../../shared/components/popup/popup';
 import { StatusTab, funding } from '../../shared/constants/statusTabs';
 import { ideaDisplayColumns, fundingDisplayColumns } from '../../shared/constants/tableColumns';
 
 @Component({
   selector: 'app-funding',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, PopUp],
   templateUrl: './funding.html',
   styleUrl: './funding.scss',
 })
 export class Funding implements OnInit {
   userName: string = 'Karthik Perisetti';
 
-  ideaDisplayColumns: TableColumn[] = fundingDisplayColumns;
+
+  get ideaDisplayColumns(): TableColumn[] {
+  if (this.currentFilterStatusId === 0) {
+    // Remove "selected", "ranking_brand", and "ranking_franchise" columns when on "All" tab
+    return fundingDisplayColumns.filter(col =>
+      col.key !== 'selected' &&
+      col.key !== 'ranking_brand' &&
+      col.key !== 'ranking_franchise'
+    );
+  }
+  return fundingDisplayColumns;
+}
+
   statusTabs: StatusTab[] = funding;
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
@@ -43,6 +56,14 @@ export class Funding implements OnInit {
 
   /** Fixed value_id for bulk funding API (Freeze Data). */
   readonly FREEZE_VALUE_ID = 34;
+
+  /** Popup state for update funding status confirmation */
+  showUpdateFundingPopup = false;
+  updateFundingPopupTitle = 'Are you sure you want to update the funding status for the selected ideas?';
+  updateFundingPopupHelper = 'This will update the funding status of the selected ideas.';
+  updateFundingPopupCancelText = 'No';
+  updateFundingPopupConfirmText = 'Yes';
+  updateFundingPopupConfirmAction: 'confirmUpdateFundingStatus' = 'confirmUpdateFundingStatus';
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -84,6 +105,9 @@ export class Funding implements OnInit {
       } else if (event.type === 'searchByText') {
         this.filterBySearchText(event.payload.searchText);
       } else if (event.type === 'freezeData') {
+        this.showUpdateFundingPopup = true;
+      } else if (event.type === 'confirmUpdateFundingStatus') {
+        this.showUpdateFundingPopup = false;
         this.onFundingClick();
       } else if (event.type === 'exportData') {
         this.exportData();

@@ -178,8 +178,6 @@ export class IdeaView implements OnInit, OnDestroy {
         this.enterStudyDetails();
       } else if (event.type === 'submitStudyDetailsConfirmation') {
         this.submitStudyDetailsConfirmation();
-      } else if (event.type === 'openUpdateFundingStatus') {
-        this.onUpdateFundingStatus();
       } else if (event.type === 'saveUpdateFundingStatus') {
         this.saveUpdateFundingStatus();
       } else if (event.type === 'closePopUp') {
@@ -1099,7 +1097,7 @@ export class IdeaView implements OnInit, OnDestroy {
     for (const studyKey of this.studyDetailsDisplayOrder) {
       // Skip pilot_ prefixed keys and hidden keys
       if (studyKey.startsWith('pilot_') || this.studyDetailsHiddenKeys.has(studyKey)) continue;
-      
+     
       const pilotKey = this.studyKeyToPilotKey[studyKey];
       if (pilotKey !== undefined) {
         // Show pilot field if it exists in record (even if null, show '.....')
@@ -1152,6 +1150,18 @@ export class IdeaView implements OnInit, OnDestroy {
       funding_comment: '',
     });
     this.fundingSourceSelectOptions = [];
+   
+    // Subscribe to funding_status changes to clear and disable funding source when Unfunded or Abandoned is selected
+    this.fundingForm.get('funding_status')?.valueChanges.subscribe((status: string) => {
+      const sourceControl = this.fundingForm.get('funding_source_value_id');
+      if (status === 'Unfunded' || status === 'Abandoned') {
+        this.fundingForm.patchValue({ funding_source_value_id: null });
+        sourceControl?.disable({ emitEvent: false });
+      } else {
+        sourceControl?.enable({ emitEvent: false });
+      }
+    });
+   
     this.ideaService.getDropdownValues().subscribe((items) => {
       const options = (items || [])
         .filter((i) => i.type?.type_name === 'Funding Source')
@@ -1177,20 +1187,25 @@ export class IdeaView implements OnInit, OnDestroy {
     const comment = this.fundingForm.get('funding_comment')?.value as string | undefined;
     const updatedBy = this.authService.getCurrentUserId() ?? 1;
 
-    // Required: both Funding Status and Funding Source must be selected
-    if (!status || valueId == null || isNaN(valueId)) {
+    // For Unfunded and Abandoned, Funding Source is optional (it's disabled)
+    // For Funded, both Funding Status and Funding Source are required
+    if (!status) {
       statusControl?.markAsTouched();
+      this.ideaEvents.toastEvent('Please select Funding Status.');
+      return;
+    }
+   
+    if (status === 'Funded' && (valueId == null || isNaN(valueId))) {
       sourceControl?.markAsTouched();
-      if (!status) this.ideaEvents.toastEvent('Please select Funding Status.');
-      else this.ideaEvents.toastEvent('Please select Funding Source.');
+      this.ideaEvents.toastEvent('Please select Funding Source.');
       return;
     }
 
     if (status === 'Funded' || status === 'Unfunded') {
       const obs =
         status === 'Funded'
-          ? this.ideaService.putFunding(this.viewIdea.idea_id, { value_id: valueId, updated_by: updatedBy })
-          : this.ideaService.putNonFunding(this.viewIdea.idea_id, { value_id: valueId, updated_by: updatedBy });
+          ? this.ideaService.putFunding(this.viewIdea.idea_id, { value_id: valueId ?? 0, updated_by: updatedBy })
+          : this.ideaService.putNonFunding(this.viewIdea.idea_id, { value_id: valueId ?? 0, updated_by: updatedBy });
       obs.subscribe({
         next: (res) => {
           this.updateFundingStatusPopup.open = false;
@@ -1234,9 +1249,24 @@ export class IdeaView implements OnInit, OnDestroy {
     return this.fundingForm?.get('funding_status')?.value === 'Abandoned';
   }
 
+  /** Called when Funding Status selection changes. Clears Funding Source when Unfunded or Abandoned is selected. */
+  onFundingStatusChange(): void {
+    const status = this.fundingForm?.get('funding_status')?.value;
+    if (status === 'Unfunded' || status === 'Abandoned') {
+      // Clear the funding source value when status is Unfunded or Abandoned
+      this.fundingForm?.patchValue({ funding_source_value_id: null });
+    }
+  }
+
   /** True when idea is Funding Pending (status_id 13). Used to show Update funding status button only for Funding Pending. */
   get isFundingPending(): boolean {
     return this.viewIdea?.status_id === 13;
+  }
+
+  /** True when Funding Source dropdown should be disabled (when Funding Status is Unfunded or Abandoned). */
+  get isFundingSourceDisabled(): boolean {
+    const status = this.fundingForm?.get('funding_status')?.value;
+    return status === 'Unfunded' || status === 'Abandoned';
   }
 
   /**

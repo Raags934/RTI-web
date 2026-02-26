@@ -29,7 +29,7 @@ export const funding: StatusTab[] = [
   { label: 'Funding Pending', status_id: 13 },
   { label: 'Funded', status_id: 14 },
   { label: 'Unfunded', status_id: 15 },
-  { label: 'Abandon', status_id: 4 },
+  { label: 'Abandoned', status_id: 4 },
 ].map((item) => ({ ...item, count: 0 }));
 
  

@@ -156,6 +156,13 @@ export class Table {
       return 'var(--caution-300)';
     }
 
+    // Special handling: status_id 13 is Funding Pending
+    // Only show orange (caution-300) when viewing Funding Pending filter in Funding route
+    // Otherwise, TA Ranked or other statuses with status_id 13 will show their actual color
+    if (statusId === 13 && this.isFunderRoute() && this.currentFilterStatusId === 13) {
+      return 'var(--caution-300)';
+    }
+
     // Harmonizer route only: use same colors as prioritization (no change to prioritization one)
     // Harmonization Pending (18) = Product Prioritization Pending (10) color; Harmonized (10) = Product Ranked (12) color
     if (this.isHarmonizerRoute()) {
@@ -203,9 +210,9 @@ export class Table {
     if (this.isPrioritizationOneRoute() && this.currentFilterStatusId === 10) {
       return element?.status?.pending_with || 'Product Ranking';
     }
-    // Funding Pending tab (funding, status_id 13): show pending_with, fallback to "Funding pending"
+    // Funding Pending tab (funding, status_id 13): show pending_with, fallback to "Funding Pending"
     if (this.isFunderRoute() && this.currentFilterStatusId === 13) {
-      return element?.status?.pending_with || 'Funding pending';
+      return 'Funding Pending';
     }
     // TA Prioritization Pending and other pending filters: show pending_with when present
     if (this.isPendingFilter() && element?.status?.pending_with) {
