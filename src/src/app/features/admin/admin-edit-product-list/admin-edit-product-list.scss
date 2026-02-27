@@ -1,0 +1,696 @@
+/* ============================================
+   Add Franchise Popup - Side by Side Layout
+   ============================================ */
+   
+// Make Franchise Name and Franchise Code appear side by side
+.franchise-popup-form {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0px !important;
+
+  // HIGHLIGHT: This .form-field controls the width of both input boxes
+  .form-field {
+    flex: 1 1 240px !important; // Allow growing, set base width
+    min-width: 220px !important; // Increase this value for wider input
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+// HIGHLIGHT: This targets the Angular Material field inside the Franchise Name/Code input
+::ng-deep .franchise-input-field .mat-mdc-form-field {
+  width: 100% !important;
+  min-width: 220px !important;
+  max-width: 100% !important;
+}
+
+// Optionally, make the input itself fill the space
+::ng-deep .franchise-input-field input.mat-mdc-input-element {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+// Control size of Franchise input fields
+::ng-deep .franchise-input-field {
+  .mat-form-field-flex {
+    min-width: 100px !important;
+    max-width: 180px !important;
+    height: 36px !important;
+  }
+ 
+  .mat-form-field-appearance-outline .mat-form-field-flex {
+    min-height: 36px !important;
+    padding: 0 8px !important;
+  }
+ 
+  .mat-select-trigger {
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+ 
+  input {
+    font-size: 13px !important;
+  }
+}
+
+// Only for Add/Edit Therapeutic Area popups
+::ng-deep .therapeutic-dropdown-select .mat-form-field-flex {
+  min-width: 60px !important;
+  max-width: 100px !important;
+  height: 30px !important;
+}
+::ng-deep .therapeutic-dropdown-select .mat-select-trigger {
+  font-size: 12px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+::ng-deep .therapeutic-dropdown-select .mat-select-panel {
+  max-height: 150px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+::ng-deep .therapeutic-dropdown-select .mat-select-panel::-webkit-scrollbar {
+  width: 0 !important;
+  background: transparent !important;
+}
+// Force dropdown size for Angular Material select inside custom-dropdown-select
+::ng-deep .custom-dropdown-select .mat-form-field-flex {
+  min-width: 80px !important;
+  max-width: 100px !important;
+  height: 40px !important;
+}
+::ng-deep .custom-dropdown-select .mat-select-trigger {
+  font-size: 16px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+}
+// Remove unwanted scroll bar from dropdown
+::ng-deep .custom-dropdown-select .mat-select-panel {
+  max-height: 300px !important; /* Adjust as needed */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+::ng-deep .custom-dropdown-select .mat-select-panel::-webkit-scrollbar {
+  width: 0 !important;
+  background: transparent !important;
+}
+// Custom style for Franchise and Therapeutic Area dropdowns
+.custom-dropdown-select {
+  min-width: 80px;
+  max-width: 120px;
+  height: 20px;
+  font-size: 16px;
+}
+.edit-product-list-container {
+  // .franchise-header {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+  //   margin-bottom: 20px;
+  //   padding: 10px 0;
+
+    .franchise-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .search-bar {
+      flex: 1;
+      max-width: 300px;
+      margin: 0 20px;
+    }
+
+    .add-button {
+      display: flex;
+      gap: 10px;
+    }
+  }
+
+  // padding: 20px;
+ 
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+      margin-bottom: 20px;
+      font-size: 10px;
+      color: #666;
+ 
+      .breadcrumb-item {
+        color: #333;
+        font-weight: 500;
+      }
+      .breadcrumb-item.active {
+           color: var(--primary-400);
+        }
+ 
+      .breadcrumb-separator {
+        margin: 0 8px;
+        color: #999;
+      }
+    }
+ 
+    .header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      flex-direction: row;
+     
+
+      .right {
+        flex: 2;
+        display: flex;  
+        justify-content: flex-end;  
+        align-items: center;
+        margin-top: -15px;
+        gap: 10px;
+   
+    app-buttons {  // Target the button specifically
+      margin-right: 150px;  // Added to move the button left from the far right
+     
+    }      
+  }
+ 
+      .left {
+           flex: 1;
+           display: flex;
+           flex-direction: column;
+           align-items: flex-start;
+           width: 100%;
+           .button-title-row {
+             display: flex;
+             align-items: center;
+             gap: 8px;  // Space between button and title
+           }
+           h1 {
+             margin: 0;
+             font-size: 18px;
+             font-weight: 500;
+           }
+         }
+        .add-button {
+        display: flex;
+        gap: 10px;
+       }
+    }
+ 
+    .content {
+      // Add styles for the content area
+    }
+  //}
+
+
+  .franchise-section {
+  margin-top: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+ 
+   margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+
+
+  .franchise-header {
+    background-color: #f5f5f5;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #ebebeb;
+    }
+
+    .franchise-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 10px;
+
+      .title-text {
+        font-weight: bold;
+        font-size: 12px;
+        color: #0b026c;
+      }
+
+      .expand-icon {
+        font-size: 12px;
+        color: #666;
+        transition: transform 0.3s ease;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .franchise-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+
+    &.expanded {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .franchise-inner-content {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+
+      p {
+        margin: 0;
+        color: #666;
+      }
+    }
+  }
+}
+
+.popup-actions-right {
+  display: flex;
+  justify-content: flex-end; /* pushes content to the right */
+  gap: 0.5rem;               /* optional: spacing if you add more buttons */
+  padding: 0.75rem;          /* optional: breathing room */
+}
+
+.breadcrumb {
+  font-size: 10px; /* decrease size for all items */
+  display: flex;
+  align-items: center;
+  gap: 6px; /* spacing between items */
+}
+
+.breadcrumb-item.active {
+  color: var(--primary-400); /* bright blue */
+}
+
+
+/* Therapeutic Area Section Styles */
+.therapeutic-area-section {
+  margin-top: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+ 
+
+  padding-top: 0 !important;
+
+
+  .therapeutic-area-header {
+    background-color: #f5f5f5;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #ebebeb;
+    }
+
+    .therapeutic-area-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 10px;
+
+      .title-text {
+        font-weight: bold;
+        font-size: 12px;
+        color: #0b026c;
+      }
+
+      .expand-icon {
+        font-size: 12px;
+        color: #666;
+        transition: transform 0.3s ease;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .therapeutic-area-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+
+    &.expanded {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .therapeutic-area-inner-content {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+
+      .therapeutic-area-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 0;
+
+        .therapeutic-area-title {
+          font-weight: bold;
+          font-size: 18px;
+        }
+        .search-bar {
+          flex: 1;
+          max-width: 300px;
+          margin: 0 20px;
+        }
+        .add-button {
+          display: flex;
+          gap: 10px;
+        }
+      }
+       
+      p {
+        margin: 0;
+        color: #666;
+  }
+}
+  }
+}
+
+
+
+
+//product family/brand
+
+/* ---------------------------------------------------------
+   PRODUCT FAMILY/BRAND – INNER HEADER  (MATCH FRANCHISE)
+---------------------------------------------------------- */
+
+.title-product-section .title-product-inner-content .familybrand-inner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+  padding: 10px 0;
+
+  /* Same as franchise inner header */
+}
+
+.title-product-section .title-product-inner-content .familybrand-inner-header .familybrand-title {
+  font-weight: bold;
+  font-size: 18px;   /* same as franchise */
+}
+
+.title-product-section .title-product-inner-content .familybrand-inner-header .search-bar {
+  flex: 1;
+  max-width: 300px;
+  margin: 0 20px;
+}
+
+.title-product-section .title-product-inner-content .familybrand-inner-header .add-button {
+  display: flex;
+  gap: 10px;
+}
+
+
+
+
+.title-product-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .title-product-header {
+    background-color: #f5f5f5;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #ebebeb;
+    }
+   
+.title-product-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 10px;
+
+      .title-text {
+        font-weight: bold;
+        font-size: 12px;
+        color: #0b026c;
+      }
+
+      .expand-icon {
+        font-size: 12px;
+        color: #666;
+        transition: transform 0.3s ease;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+ 
+.title-product-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+
+    &.expanded {
+      max-height: 500px; /* adjust to your content height */
+      overflow-y: auto;
+    }
+
+    .title-product-inner-content {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+     
+   p {
+        margin: 0;
+        color: #666;
+      }
+    }
+  }
+}
+//end of product family
+
+ 
+.popup-actions-right {
+  display: flex;
+  justify-content: flex-end; /* pushes content to the right */
+  gap: 0.5rem;               /* optional: spacing if you add more buttons */
+  padding: 0.75rem;          /* optional: breathing room */
+}
+
+.breadcrumb {
+  font-size: 10px; /* decrease size for all items */
+  display: flex;
+  align-items: center;
+  gap: 6px; /* spacing between items */
+}
+
+.breadcrumb-item.active {
+  color: var(--primary-400); /* bright blue */
+}
+
+
+/* Products/Projects Section Styles */
+.products-projects-section {
+  margin-top: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .products-projects-header {
+    background-color: #f5f5f5;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #ebebeb;
+    }
+
+    .products-projects-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 10px;
+
+      .title-text {
+        font-weight: bold;
+        font-size: 12px;
+        color: #0b026c;
+      }
+
+      .expand-icon {
+        font-size: 12px;
+        color: #666;
+        transition: transform 0.3s ease;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .products-projects-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+
+    &.expanded {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .products-projects-inner-content {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+
+      p {
+        margin: 0;
+        color: #666;
+      }
+    }
+  }
+}
+/* ---------------------------------------------------------
+   PRODUCTS/PROJECTS – INNER HEADER (MATCH FRANCHISE & FAMILY)
+---------------------------------------------------------- */
+.products-projects-section .products-projects-inner-content .products-inner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+
+/* Title styling (same as Franchise + FamilyBrand) */
+.products-projects-section .products-projects-inner-content .products-inner-header .products-title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* Search bar styling (matches Franchise) */
+.products-projects-section .products-projects-inner-content .products-inner-header .search-bar {
+  flex: 1;
+  max-width: 300px;
+  margin: 0 20px;
+}
+
+/* Add/Edit buttons styling (matches Franchise & FamilyBrand) */
+.products-projects-section .products-projects-inner-content .products-inner-header .add-button {
+  display: flex;
+  gap: 10px;
+}
+
+/* ============================================
+   Dropdown Width Adjustments for
+   Franchise * and Therapeutic Name *
+   in Therapeutic Area Popups
+   ============================================ */
+
+/* Using custom class for more reliable targeting */
+.popup-form .form-field.dropdown-width-control {
+  flex: 1 !important;
+  min-width: 600px !important;
+  max-width: 450px !important;
+}
+
+/* Add correct Angular Material dropdown width rules */
+::ng-deep .popup-form .form-field .mat-mdc-form-field {
+  width: 204px !important;
+  min-width: 120px !important;
+  max-width: 80% !important;
+}
+
+::ng-deep .popup-form .form-field .mat-mdc-form-field-flex {
+  width: 100% !important;
+}
+
+::ng-deep .popup-form .form-field .mat-mdc-select-trigger {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ============================================
+   Remove Scrollbar from Add Therapeutic Area Popup
+   ============================================ */
+
+// Target the Add Therapeutic Area popup content by finding the popup that contains
+// "Add Therapeutic Area" text and doesn't have a title attribute
+::ng-deep app-popup {
+  // Target the popup content when it has the Add Therapeutic Area form
+  .cd-content {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+// Specifically target the Add Therapeutic Area popup (which has size="medium" and no title)
+// We can identify it by the presence of the therapeutic-dropdown-select class in its content
+:host-context(.edit-product-list-container) {
+  // More specific targeting for the Add Therapeutic Area popup
+  app-popup[ng-reflect-open="true"] {
+    // Check if it's the Add Therapeutic Area popup by looking at content
+    .cd-content {
+      max-height: none !important;
+      overflow-y: visible !important;
+      overflow: visible !important;
+    }
+  }
+}
+
+// Alternative approach - target the popup-form inside the container
+// Since Add Therapeutic Area is the only popup with this specific form structure
+.popup-form {
+  overflow: visible !important;
+  max-height: none !important;
+
+// Target the form fields in the Add Therapeutic Area popup to reduce their size
+// Target the form fields in the Add Therapeutic Area popup to reduce their size
+::ng-deep .popup-form .form-field {
+  &.therapeutic-dropdown-select {
+    .mat-form-field {
+      font-size: 11px !important;
+    }
+   
+    .mat-form-field-appearance-outline .mat-form-field-flex {
+      height: 28px !important;
+      min-height: 28px !important;
+      padding: 0 6px !important;
+    }
+   
+    .mat-select-trigger {
+      height: 28px !important;
+      line-height: 28px !important;
+    }
+  }
+}
+}

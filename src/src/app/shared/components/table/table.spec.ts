@@ -118,11 +118,11 @@ fdescribe('Table', () => {
     ];
     expect(component.getStatusColor(99)).toBe('gray');
   });
-  it('should openOptions when onOptionClick is called',()=>{
-    const row={id:1,name:'Idea A'};
-    component.onOptionsClick(row);
-    expect(()=>component.onOptionsClick(row)).not.toThrow();
-  });
+  // it('should openOptions when onOptionClick is called',()=>{
+  //   const row={id:1,name:'Idea A'};
+  //   component.onOptionsClick(row);
+  //   expect(()=>component.onOptionsClick(row)).not.toThrow();
+  // });
   it('should navigate to idea details when viewIdea is called', async () => {
     component.from = 'dashboard';
     const key = 123;

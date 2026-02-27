@@ -6,7 +6,7 @@ import { Subscription, Observable } from 'rxjs';
 import { LoadIdeas } from '../../../store/idea.actions.js';
 import { Idea } from '../../../models/idea.model.js';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents.js';
-import { TableHeader } from '../../../shared/components/table-header/table-header.js';
+import { TableHeader } from '../../../shared/components/table-header/table-header';
 import { Table, TableColumn } from '../../../shared/components/table/table.js';
 import { HeaderFilter } from '../../../shared/components/header-filter/header-filter.js';
 import { TableFilter } from '../../../shared/components/table-filter/table-filter.js';

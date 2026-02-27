@@ -61,6 +61,13 @@ export const adminManageUsersHeader: headerTitle = {
     expected: 'admin/users'
 };
 
+export const adminEditProductListHeader: headerTitle = {
+             title: "",
+             breadcrumbParts: [],
+             backIconVisible: false,
+             expected: 'admin/edit-product-list'
+         };
+
 export const headerConfigs = {
     homeHeader,
     addIdeaHeader,
@@ -69,5 +76,6 @@ export const headerConfigs = {
     myIdeasHeader,
     contactForHelpHeader,
     adminHomeHeader,
-    adminManageUsersHeader
+    adminManageUsersHeader,
+    adminEditProductListHeader
   } as const;

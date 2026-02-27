@@ -17,6 +17,7 @@ import { LoginComponent } from './core/components/login/login.component';
 import { CallbackComponent } from './core/components/callback/callback.component';
 import { AccessDeniedComponent } from './core/components/access-denied/access-denied.component';
 import { authGuard } from './core/guards/auth.guard';
+import { AdminEditProductList } from './features/admin/admin-edit-product-list/admin-edit-product-list';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -36,4 +37,5 @@ export const routes: Routes = [
   { path: 'admin', component: AdminHome, canActivate: [authGuard] },
   { path: 'admin/users', component: ManageUser, canActivate: [authGuard] },
   { path: 'admin/products', component: AdminProduct, canActivate: [authGuard] },
+  { path: 'admin/edit-product-list', component: AdminEditProductList, canActivate: [authGuard] },
 ];

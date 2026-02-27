@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -25,6 +25,7 @@ export class TableHeader {
   // Heading and caption
   @Input() title: string = 'Ideas List';
   @Input() caption: string = 'Your latest research proposals and ideas';
+  @Input() isAdmin: boolean = false;
 
   searchValue: string = '';
 
@@ -46,7 +47,7 @@ export class TableHeader {
   @Input() exportIcon: string = 'ios_share';
   @Input() showFreezeButton: boolean = false;
 
-  constructor(private ideaEvent: IdeaEventsService) {
+  constructor(private ideaEvent: IdeaEventsService, private router: Router) {
   }
 
   onSearch() {
@@ -61,8 +62,15 @@ export class TableHeader {
   onExportClick() {
     this.ideaEvent.exportData();
   }
+  onExportListClick() {
+    this.ideaEvent.exportData();
+  }
 
   onFreezeClick() {
     this.ideaEvent.freezeData();
   }
+  onEditProductListClick() {
+    this.router.navigate(['/admin/edit-product-list']);
+  }
+ 
 }

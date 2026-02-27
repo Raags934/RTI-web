@@ -1,0 +1,1110 @@
+<div class="edit-product-list-container">
+    <div class="header">
+      <div class="left">
+        <div class="button-title-row">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-300)"
+          size="xsmall"
+          icon="arrow_back"
+          (click)="onBackClick()"
+        ></app-buttons>
+        <h1>Add/Edit Product List</h1></div>
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">Manage Products</span>
+          <span class="breadcrumb-separator">></span>
+          <span class="breadcrumb-item active">Edit Product List</span>
+        </div>
+      </div>
+      <div class="right">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-400)"
+          size="medium"
+          icon="file_upload"
+          (click)="onImportProductListClick()"
+        >
+          Import Product List
+        </app-buttons>
+      </div>
+    </div>
+    <!-- Franchise Section -->
+<div class="franchise-section">
+  <div class="franchise-header" (click)="toggleFranchise()">
+    <div class="franchise-title">
+      <span class="title-text">Franchise</span>
+      <span class="expand-icon" [class.expanded]="isFranchiseExpanded">
+        {{ isFranchiseExpanded ? '▲' : '▼' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="franchise-content" [class.expanded]="isFranchiseExpanded">
+    <div class="franchise-inner-content">
+          <!-- Franchise Header -->
+    <div class="franchise-header">
+      <div class="franchise-title">Listed Franchise</div>
+      <div class="search-bar">
+        <app-form-input
+          type="text"
+          placeholder="Search Franchise"
+          [control]="searchControl"
+          (valueChange)="onSearchChange($event)"
+        ></app-form-input>
+      </div>
+      <div class="add-button">
+        <app-buttons
+          variant="type1"
+          color="var(--primary-400)"
+          size="medium"
+          icon="add_circle_outline"
+          (click)="onAddFranchiseClick()"
+        >
+          Add Franchise
+        </app-buttons>
+        <app-buttons
+          variant="type2"
+          color="var(--primary-400)"
+          size="medium"
+          icon="edit"
+          (click)="onEditFranchiseClick()"
+        >
+          Edit Franchise
+        </app-buttons>
+      </div>
+    </div>
+    <app-admin-ta-table tableType="franchise" [searchText]="searchControl.value || ''"></app-admin-ta-table>
+  </div>
+ 
+  </div>
+ 
+</div>
+ 
+
+    <!-- Franchise Accordion -->
+    <div class="franchise-accordion">
+      <div
+        *ngFor="let franchise of franchises"
+        class="franchise-section"
+        [class.expanded]="isFranchiseExpandedFn(franchise.franchise_id)"
+      >
+       
+        <div class="franchise-section-header" (click)="toggleFranchise(franchise.franchise_id)">
+          <div class="franchise-info">
+            <span class="expand-icon" [class.rotated]="isFranchiseExpandedFn(franchise.franchise_id)">▶</span>
+            <span class="franchise-name">{{ franchise.franchise_name }}</span>
+            <span class="franchise-code">({{ franchise.franchise_code }})</span>
+          </div>
+        </div>
+
+        <!-- Franchise Section Content -->
+        <div class="franchise-section-content" *ngIf="isFranchiseExpandedFn(franchise.franchise_id)">
+          <!-- Search Bar -->
+          <div class="franchise-search-bar">
+            <app-form-input
+              type="text"
+              placeholder="Search products..."
+            ></app-form-input>
+          </div>
+
+          <!-- Add/Edit Buttons -->
+          <div class="franchise-buttons">
+            <app-buttons
+              variant="type1"
+              color="var(--primary-400)"
+              size="medium"
+              icon="add_circle_outline"
+            >
+              Add Product
+            </app-buttons>
+            <app-buttons
+              variant="type2"
+              color="var(--primary-400)"
+              size="medium"
+              icon="edit"
+            >
+              Edit Product
+            </app-buttons>
+          </div>
+        </div>      
+      </div>    
+    </div>      
+  </div>
+
+
+  <!-- Therapeutic Area Section -->
+  <div class="therapeutic-area-section">
+    <div class="therapeutic-area-header" (click)="toggleTherapeuticArea()">
+      <div class="therapeutic-area-title">
+        <span class="title-text">Therapeutic Area</span>
+        <span class="expand-icon" [class.expanded]="isTherapeuticAreaExpanded">
+          {{ isTherapeuticAreaExpanded ? '▲' : '▼' }}
+        </span>
+      </div>
+    </div>
+    <div class="therapeutic-area-content" [class.expanded]="isTherapeuticAreaExpanded">
+      <div class="therapeutic-area-inner-content">
+         <div class="therapeutic-area-header">
+          <div class="therapeutic-area-title">Listed Therapeutic Area</div>
+          <div class="search-bar">
+            <app-form-input
+              type="text"
+              placeholder="Listed Therapeutic Area"
+              [control]="searchControl"
+              (valueChange)="onSearchChange($event)"
+            ></app-form-input>
+          </div>
+          <div class="add-button">
+          <app-buttons
+            variant="type1"
+            color="var(--primary-400)"
+            size="medium"
+            icon="add_circle_outline"
+            (click)="onAddTherapeutiAreaClick()"
+          >
+            Add Therapeutic Area
+          </app-buttons>
+          <app-buttons
+            variant="type2"
+            color="var(--primary-400)"
+            size="medium"
+            icon="edit"
+            (click)="onEditTherapeuticAreaClick()"
+          >
+            Edit Therapeutic Area
+          </app-buttons>
+        </div>
+
+      </div>
+    </div>
+     <!-- Therapeutic Area Table -->
+    <app-admin-ta-table
+tableType="ta"
+  [searchText]="searchControl.value || ''"
+></app-admin-ta-table>
+  </div>
+
+
+  <!-- Title Product Family/Brand Section (immediately below) -->
+<div class="title-product-section">
+  <div class="title-product-header" (click)="toggleTitleProduct()">
+    <div class="title-product-title">
+      <span class="title-text">Product Family/Brand</span>
+      <span class="expand-icon" [class.expanded]="isTitleProductExpanded">
+        {{ isTitleProductExpanded ? '▲' : '▼' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="title-product-content" [class.expanded]="isTitleProductExpanded">
+    <div class="title-product-inner-content">
+
+  <div class="familybrand-inner-header">
+    <div class="familybrand-title">Listed Product Family/Brand</div>
+
+    <div class="search-bar">
+      <app-form-input
+        type="text"
+        placeholder="Search Product Family/Brand"
+        [control]="searchControl"
+        (valueChange)="onSearchChange($event)"
+      ></app-form-input>
+    </div>
+
+    <div class="add-button">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        icon="add_circle_outline"
+        (click)="onAddFamilyBrandClick()"
+      >
+        Add Product Family/Brand
+      </app-buttons>
+
+      <app-buttons
+        variant="type2"
+        color="var(--primary-400)"
+        size="medium"
+        icon="edit"
+        (click)="onEditFamilyBrandClick()"
+      >
+        Edit Product Family/Brand
+      </app-buttons>
+    </div>
+  </div>
+  <app-admin-ta-table
+  tableType="familyBrand" [searchText]="searchControl.value || ''">
+</app-admin-ta-table>
+</div>
+   
+  </div>
+</div>
+
+
+
+<!-- Products/Projects Section -->
+<div class="products-projects-section">
+  <div class="products-projects-header" (click)="toggleProductsProjects()">
+    <div class="products-projects-title">
+      <span class="title-text">Products / Projects</span>
+      <span class="expand-icon" [class.expanded]="isProductsProjectsExpanded">
+        {{ isProductsProjectsExpanded ? '▲' : '▼' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="products-projects-content" [class.expanded]="isProductsProjectsExpanded">
+    <div class="products-projects-inner-content">
+      <!-- TODO: Add Products/Projects content here -->
+     
+     
+      <div class="products-inner-header">
+              <div class="products-title">Listed Products / Projects</div>
+
+        <div class="search-bar">
+          <app-form-input
+            type="text"
+            placeholder="Search Products/Projects"
+            [control]="searchControl"
+            (valueChange)="onSearchChange($event)"
+          ></app-form-input>
+        </div>
+       <div class="add-button">
+          <app-buttons
+            variant="type1"
+            color="var(--primary-400)"
+            size="medium"
+            icon="add_circle_outline"
+            (click)="onAddProductProjectClick()"
+          >
+            Add Product/Project
+          </app-buttons>
+          <app-buttons
+            variant="type2"
+            color="var(--primary-400)"
+            size="medium"
+            icon="edit"
+            (click)="onEditProductProjectClick()"
+          >
+            Edit Product/Project
+          </app-buttons>
+        </div>
+      </div>
+     
+<app-admin-ta-table tableType="productProject" [searchText]="searchControl.value || ''"></app-admin-ta-table>
+
+    </div>
+  </div>
+</div>
+
+  <!-- Add Franchise Popup -->
+  <app-popup
+    [open]="showAddFranchisePopup"
+    size="medium"
+    [showCancelButton]="false"
+    [showConfirmButton]="false"
+  >
+    <div class="popup-content">
+      <!-- HEADER WITH ARROW + TITLE SIDE BY SIDE -->
+      <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-300)"
+          size="xsmall"
+          icon="arrow_back"
+          (click)="closeAddFranchisePopup()"
+        ></app-buttons>
+
+        <span style="font-size: 18px; font-weight: 600;">
+          Add Franchise
+        </span>
+      </div>
+
+      <!-- BREADCRUMB BELOW -->
+      <div class="breadcrumb" style="margin-top: 8px;">
+        <span class="breadcrumb-item">Manage Products</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item active">Add Franchise</span>
+      </div>
+     
+      <div class="popup-form franchise-popup-form">
+        <div class="form-field">
+          <app-form-input
+            label="Franchise Name *"
+            type="text"
+            placeholder="Enter Franchise Name"
+            [control]="franchiseForm.get('franchiseName')"
+            [required]="true"
+            class="franchise-input-field"
+          ></app-form-input>
+        </div>
+       
+        <div class="form-field">
+          <app-form-input
+            label="Franchise Code *"
+            type="text"
+            placeholder="Enter Franchise Code"
+            [control]="franchiseForm.get('franchiseCode')"
+            [required]="true"
+            class="franchise-input-field"
+          ></app-form-input>
+        </div>
+      </div>
+     
+      <div class="popup-actions popup-actions-right">
+        <app-buttons
+          variant="type1"
+          color="var(--primary-400)"
+          size="medium"
+          (click)="onAddFranchiseSubmit()"
+        >
+          Add Franchise
+        </app-buttons>
+      </div>
+    </div>
+  </app-popup>
+
+  <!-- Edit Franchise Popup -->
+  <app-popup
+    [open]="showEditFranchisePopup"
+    size="medium"
+    [showCancelButton]="false"
+    [showConfirmButton]="false"
+  >
+    <div class="popup-content">
+      <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-300)"
+          size="xsmall"
+          icon="arrow_back"
+          (click)="closeEditFranchisePopup()"
+        ></app-buttons>
+        <span style="font-size: 18px; font-weight: 600;">
+          Edit Franchise
+        </span>
+      </div>
+         <div class="breadcrumb">
+          <span class="breadcrumb-item">Manage Products</span>
+          <span class="breadcrumb-separator">></span>
+          <span class="breadcrumb-item active">Edit Franchise</span>
+       </div>
+     
+      <div class="popup-form franchise-popup-form">
+        <!-- Status Radio Buttons -->
+        <!-- <div class="form-field">
+          <label class="radio-label">Status</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="status"
+                value="active"
+                [checked]="franchiseForm.get('status')?.value === 'active'"
+                (change)="franchiseForm.get('status')?.setValue('active')"
+              >
+              <span>Active</span>
+            </label>
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="status"
+                value="inactive"
+                [checked]="franchiseForm.get('status')?.value === 'inactive'"
+                (change)="franchiseForm.get('status')?.setValue('inactive')"
+              >
+              <span>Inactive</span>
+            </label>
+          </div> -->
+        <!-- </div> -->
+       
+        <div class="form-field">
+          <app-form-input
+            label="Franchise Name *"
+            type="text"
+            placeholder="Enter Franchise Name"
+            [control]="franchiseForm.get('franchiseName')"
+            [required]="true"
+            class="franchise-input-field"
+          ></app-form-input>
+        </div>
+       
+        <div class="form-field">
+          <app-form-input
+            label="Franchise Code *"
+            type="text"
+            placeholder="Enter Franchise Code"
+            [control]="franchiseForm.get('franchiseCode')"
+            [required]="true"
+            class="franchise-input-field"
+          ></app-form-input>
+        </div>
+      </div>
+     
+      <div class="popup-actions popup-actions-right">
+        <app-buttons
+          variant="type1"
+          color="var(--primary-400)"
+          size="medium"
+          (click)="onEditFranchiseSubmit()"
+        >
+          Update
+        </app-buttons>
+      </div>
+    </div>
+  </app-popup>
+
+  <!-- Add Therapeutic Area Popup -->
+  <app-popup
+    [open]="showAddTherapeutiAreaPopup"
+    size="medium"
+    [showCancelButton]="false"
+    [showConfirmButton]="false"
+  >
+    <div class="popup-content">
+
+      <!-- HEADER WITH ARROW + TITLE SIDE BY SIDE -->
+      <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-300)"
+          size="xsmall"
+          icon="arrow_back"
+          (click)="closeAddTherapeuticAreaPopup()"
+        ></app-buttons>
+
+        <span style="font-size: 18px; font-weight: 600;">
+          Add Therapeutic Area
+        </span>
+      </div>
+
+      <!-- BREADCRUMB BELOW -->
+      <div class="breadcrumb" style="margin-top: 8px;">
+        <span class="breadcrumb-item">Manage Products</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item active">Add Therapeutic Area</span>
+      </div>
+
+      <!-- FORM START -->
+      <div class="popup-form" style="display: flex; gap: 8px;">
+
+      <!-- Franchise -->
+          <div class="form-field" style="flex: 1;">
+            <app-form-input
+              label="Franchise *"
+              type="select"
+              [options]="franchiseOptions"
+              [control]="therapeutiAreaForm.get('franchiseName')"
+              [required]="true"
+              class="therapeutic-dropdown-select"
+            ></app-form-input>
+          </div>
+
+         
+          <!-- Therapeutic Name -->
+          <div class="form-field" style="flex: 1;">
+            <app-form-input
+              label="Therapeutic Name *"
+              type="text"
+              placeholder="Enter Therapeutic Name"
+              [control]="therapeutiAreaForm.get('therapeutiAreaCode')"
+              [required]="true"
+              class="therapeutic-dropdown-select"
+            ></app-form-input>
+          </div>
+        </div>
+        <!-- FORM END -->
+        <div class="popup-actions popup-actions-right">
+          <app-buttons
+            variant="type1"
+            color="var(--primary-400)"
+            size="medium"
+            (click)="onAddTherapeuticAreaSubmit()"
+          >
+          Add Therapeutic Area
+        </app-buttons>
+      </div>
+    </div>
+  </app-popup>
+
+  <!-- Edit Therapeutic Area Popup -->
+  <app-popup
+    [open]="showEditTherapeutiAreaPopup"
+    size="medium"
+    [showCancelButton]="false"
+    [showConfirmButton]="false"
+  >
+    <div class="popup-content">
+
+      <!-- HEADER WITH ARROW + TITLE SIDE BY SIDE -->
+      <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+        <app-buttons
+          variant="type2"
+          color="var(--primary-300)"
+          size="xsmall"
+          icon="arrow_back"
+          (click)="closeEditTherapeuticAreaPopup()"
+        ></app-buttons>
+
+        <span style="font-size: 18px; font-weight: 600;">
+          Edit Therapeutic Area
+        </span>
+      </div>
+
+      <!-- BREADCRUMB BELOW -->
+      <div class="breadcrumb" style="margin-top: 8px;">
+        <span class="breadcrumb-item">Manage Products</span>
+        <span class="breadcrumb-separator">></span>
+        <span class="breadcrumb-item active">Edit Therapeutic Area</span>
+      </div>
+
+      <!-- FORM START -->
+      <div class="popup-form" style="display: flex; gap: 02px;">
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Franchise *"
+            type="select"
+            [options]="franchiseOptions"
+            [control]="editTherapeuticAreaForm.get('franchiseName')"
+            [required]="true"
+            class="therapeutic-dropdown-select"
+          ></app-form-input>
+        </div>
+
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Therapeutic Area Name *"
+            type="text"
+            placeholder="Enter Therapeutic Area Code"
+            [control]="editTherapeuticAreaForm.get('therapeutiAreaCode')"
+            [required]="true"
+            class="therapeutic-dropdown-select"
+          ></app-form-input>
+        </div>
+      </div>
+      <!-- FORM END -->
+
+      <div class="popup-actions popup-actions-right">
+        <app-buttons
+          variant="type1"
+          color="var(--primary-400)"
+          size="medium"
+          (click)="onEditTherapeuticAreaSubmit()"
+        >
+          Edit Therapeutic Area
+        </app-buttons>
+      </div>
+
+    </div>
+  </app-popup>
+
+<!-- Add Product Family/Brand Popup (UPDATED) -->
+<app-popup
+  [open]="showAddFamilyBrandPopup"
+  size="medium"
+  [showCancelButton]="false"
+  [showConfirmButton]="false"
+>
+  <div class="popup-content">
+    <!-- HEADER WITH ARROW + TITLE SIDE BY SIDE -->
+    <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-300)"
+        size="xsmall"
+        icon="arrow_back"
+        (click)="closeAddFamilyBrandPopup()"
+      ></app-buttons>
+
+      <span style="font-size: 18px; font-weight: 600;">
+        Add Product Family/Brand
+      </span>
+    </div>
+
+    <!-- BREADCRUMB BELOW -->
+    <div class="breadcrumb" style="margin-top: 8px;">
+      <span class="breadcrumb-item">Manage Products</span>
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item active">Add Product Family/Brand</span>
+    </div>
+
+    <!-- Row 1: Franchise and Therapeutic Area side by side -->
+    <div class="popup-form" style="display: flex; gap: 8px;">
+
+      <!-- Franchise Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Franchise *"
+          type="select"
+          placeholder="Select Franchise"
+          [options]="franchiseOptions"
+          [control]="familyBrandForm.get('franchise')"
+          [required]="true"
+          class="custom-dropdown-select"
+        ></app-form-input>
+      </div>
+
+      <!-- Therapeutic Area Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Therapeutic Area *"
+          type="select"
+          placeholder="Select Therapeutic Area"
+          [options]="therapeuticAreaList"
+          [control]="familyBrandForm.get('therapeuticArea')"
+          [required]="true"
+          class="custom-dropdown-select"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <!-- Row 2: Product Family/Brand Name below -->
+    <div class="popup-form">
+      <!-- Product Family/Brand Name -->
+      <div class="form-field">
+        <app-form-input
+          label="Product Family/Brand Name *"
+          type="text"
+          placeholder="Enter Product Family/Brand Name"
+          [control]="familyBrandForm.get('brandName')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <div class="popup-actions popup-actions-right">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        (click)="onAddFamilyBrandSubmit()"
+      >
+        Add Product Family/Brand
+      </app-buttons>
+    </div>
+  </div>
+</app-popup>
+
+
+<!-- Edit Product Family/Brand Popup (UPDATED) -->
+<app-popup
+  [open]="showEditFamilyBrandPopup"
+  size="medium"
+  [showCancelButton]="false"
+  [showConfirmButton]="false"
+>
+  <div class="popup-content">
+    <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-300)"
+        size="xsmall"
+        icon="arrow_back"
+        (click)="closeEditFamilyBrandPopup()"
+      ></app-buttons>
+   
+      <span style="font-size: 18px; font-weight: 600;">
+        Edit Product Family/Brand
+      </span>
+    </div>
+
+   
+
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Manage Products</span>
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item active">Edit Product Family/Brand</span>
+    </div>
+
+    <!-- Status Radio Buttons (Commented Out) -->
+    <!-- <div class="form-field">
+      <label class="radio-label">Status</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="brandStatus"
+            value="active"
+            [checked]="familyBrandForm.get('status')?.value === 'active'"
+            (change)="familyBrandForm.get('status')?.setValue('active')"
+          />
+          <span>Active</span>
+        </label>
+
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="brandStatus"
+            value="inactive"
+            [checked]="familyBrandForm.get('status')?.value === 'inactive'"
+            (change)="familyBrandForm.get('status')?.setValue('inactive')"
+          />
+          <span>Inactive</span>
+        </label>
+      </div>
+    </div> -->
+
+    <!-- Row 1: Franchise and Therapeutic Area side by side -->
+    <div class="popup-form" style="display: flex; gap: 8px;">
+      <!-- Franchise Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Franchise *"
+          type="select"
+          placeholder="Select Franchise"
+          [options]="franchiseOptions"
+          [control]="familyBrandForm.get('franchise')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+
+      <!-- Therapeutic Area Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Therapeutic Area *"
+          type="select"
+          placeholder="Select Therapeutic Area"
+          [options]="therapeuticAreaList"
+          [control]="familyBrandForm.get('therapeuticArea')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <!-- Row 2: Product Family/Brand Name below -->
+    <div class="popup-form">
+      <!-- Product Family/Brand Name -->
+      <div class="form-field">
+        <app-form-input
+          label="Product Family/Brand Name *"
+          type="text"
+          placeholder="Enter Name"
+          [control]="familyBrandForm.get('brandName')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <div class="popup-actions popup-actions-right">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        (click)="onEditFamilyBrandSubmit()"
+      >
+        Update
+      </app-buttons>
+    </div>
+  </div>
+</app-popup>
+
+<!-- Add Product/Project Popup -->
+<app-popup
+  [open]="showAddProductProjectPopup"
+  size="medium"
+  [showCancelButton]="false"
+  [showConfirmButton]="false"
+>
+  <div class="popup-content">
+    <!-- Header with Back Button and Breadcrumb -->
+    <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-300)"
+        size="xsmall"
+        icon="arrow_back"
+        (click)="closeAddProductProjectPopup()"
+      ></app-buttons>
+      <span style="font-size: 18px; font-weight: 600;">
+        Add Product/Project
+      </span>
+    </div>
+
+
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Manage Products</span>
+      <span class="breadcrumb-separator">&gt;</span>
+      <span class="breadcrumb-item active">Add Product/Project</span>
+    </div>
+
+    <!-- Row 1: Franchise and Therapeutic Area side by side -->
+    <div class="popup-form" style="display: flex; gap: 8px;">
+      <!-- Franchise Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Franchise *"
+          type="select"
+          placeholder="Select Franchise"
+          [options]="franchiseOptions"
+          [control]="productProjectForm.get('franchise')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+
+      <!-- Therapeutic Area Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Therapeutic Area *"
+          type="select"
+          placeholder="Select Therapeutic Area"
+          [options]="therapeuticAreaList"
+          [control]="productProjectForm.get('therapeuticArea')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <!-- Row 2: Product Family/Brand and Product/Project side by side -->
+    <div class="popup-form" style="display: flex; gap: 8px;">
+      <!-- Product Family/Brand Dropdown -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Product Family/Brand *"
+          type="select"
+          placeholder="Select Product Family/Brand"
+          [options]="familyBrandList"
+          [control]="productProjectForm.get('familyBrand')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+
+      <!-- Product/Project Text Field -->
+      <div class="form-field" style="flex: 1;">
+        <app-form-input
+          label="Product/Project *"
+          type="text"
+          placeholder="Enter Product/Project"
+          [control]="productProjectForm.get('productProjectName')"
+          [required]="true"
+        ></app-form-input>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="popup-actions popup-actions-right">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        (click)="onAddProductProjectSubmit()"
+      >
+        Add Product/Project
+      </app-buttons>
+    </div>
+  </div>
+</app-popup>
+
+<!-- Edit Product/Project Popup -->
+<app-popup
+  [open]="showEditProductProjectPopup"
+  size="medium"
+  [showCancelButton]="false"
+  [showConfirmButton]="false"
+>
+  <div class="popup-content">
+   
+    <!-- Header -->
+    <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-300)"
+        size="xsmall"
+        icon="arrow_back"
+        (click)="closeEditProductProjectPopup()"
+      ></app-buttons>
+      <span style="font-size: 18px; font-weight: 600;">
+        Edit Product/Project
+      </span>
+    </div>
+
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Manage Products</span>
+      <span class="breadcrumb-separator">&gt;</span>
+      <span class="breadcrumb-item active">Edit Product/Project</span>
+    </div>
+
+    <!-- Form -->
+    <div class="popup-form">
+
+      <!-- Status Radio Buttons (Commented Out) -->
+      <!-- <div class="form-field">
+        <label class="radio-label">Status</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="productProjectStatus"
+              value="active"
+              [checked]="productProjectForm.get('status')?.value === 'active'"
+              (change)="productProjectForm.get('status')?.setValue('active')"
+            />
+            <span>Active</span>
+          </label>
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="productProjectStatus"
+              value="inactive"
+              [checked]="productProjectForm.get('status')?.value === 'inactive'"
+              (change)="productProjectForm.get('status')?.setValue('inactive')"
+            />
+            <span>Inactive</span>
+          </label>
+        </div>
+      </div> -->
+
+      <!-- Row 1: Franchise and Therapeutic Area side by side -->
+      <div class="popup-form" style="display: flex; gap: 8px;">
+        <!-- Franchise Dropdown -->
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Franchise *"
+            type="select"
+            placeholder="Select Franchise"
+            [options]="franchiseOptions"
+            [control]="productProjectForm.get('franchise')"
+            [required]="true"
+          ></app-form-input>
+        </div>
+
+        <!-- Therapeutic Area Dropdown -->
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Therapeutic Area *"
+            type="select"
+            placeholder="Select Therapeutic Area"
+            [options]="therapeuticAreaList"
+            [control]="productProjectForm.get('therapeuticArea')"
+            [required]="true"
+          ></app-form-input>
+        </div>
+      </div>
+
+      <!-- Row 2: Product Family/Brand and Product/Project side by side -->
+      <div class="popup-form" style="display: flex; gap: 8px;">
+        <!-- Product Family/Brand Dropdown -->
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Product Family/Brand *"
+            type="select"
+            placeholder="Select Product Family/Brand"
+            [options]="familyBrandList"
+            [control]="productProjectForm.get('familyBrand')"
+            [required]="true"
+          ></app-form-input>
+        </div>
+
+        <!-- Product/Project Name -->
+        <div class="form-field" style="flex: 1;">
+          <app-form-input
+            label="Product/Project Name *"
+            type="text"
+            placeholder="Enter Name"
+            [control]="productProjectForm.get('productProjectName')"
+            [required]="true"
+          ></app-form-input>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="popup-actions popup-actions-right">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        (click)="onEditProductProjectSubmit()"
+      >
+        Update
+      </app-buttons>
+    </div>
+
+  </div>
+</app-popup>
+
+<!-- Action for import productlist Upload Product List Popup -->
+<app-popup
+  [open]="showImportProductListPopup"
+  size="medium"
+  [showCancelButton]="false"
+  [showConfirmButton]="false"
+>
+  <div class="popup-content">
+    <!-- Header with back arrow (optional) -->
+    <div class="popup-header" style="display: flex; align-items: center; gap: 12px;">
+      <app-buttons
+        variant="type2"
+        color="var(--primary-300)"
+        size="xsmall"
+        icon="arrow_back"
+        (click)="closeImportProductListPopup()"
+      ></app-buttons>
+
+      <span style="font-size: 18px; font-weight: 600;">
+        Upload Product List
+      </span>
+    </div>
+
+    <!-- Helper text -->
+    <div class="helper-text" style="margin: 12px 0 16px; color: var(--neutral-500);">
+      Please upload files in <strong>EXL/CSV</strong> format and make sure the file size is under <strong>25&nbsp;MB</strong>.
+    </div>
+
+    <!-- File uploader -->
+    <div class="file-upload-row" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <!-- Hidden file input -->
+      <input
+        #fileInput
+        type="file"
+        accept=".csv, .xls, .xlsx, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        (change)="onImportFileSelected($event)"
+        style="display: none;"
+      />
+
+      <!-- Browse link/button -->
+      <app-buttons
+        variant="type2"
+        color="var(--primary-400)"
+        size="medium"
+        icon="upload_file"
+        (click)="fileInput.click()"
+      >
+        Browse
+      </app-buttons>
+     
+<input
+  #fileInput
+  type="file"
+  accept=".csv,.xls,.xlsx"
+  (change)="onImportFileSelected($event)"
+  style="display: none"
+/>
+
+
+      <!-- Selected file name (if any) -->
+      <span *ngIf="importFileName" style="color: var(--neutral-700);">
+        {{ importFileName }}
+      </span>
+
+      <!-- Error message (if any) -->
+      <span *ngIf="importFileError" style="color: #D12A2A;">
+        {{ importFileError }}
+      </span>
+    </div>
+
+    <!-- Actions -->
+    <div class="popup-actions popup-actions-right" style="margin-top: 16px;">
+      <app-buttons
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        [isDisabled]="!importFile"
+        (click)="onImportProductListUpdate()"
+      >
+        Upload Product List
+      </app-buttons>
+    </div>
+  </div>
+</app-popup>

@@ -1,0 +1,46 @@
+<div class="ta-table-container">
+  <!-- TA TABLE (as-is) -->
+  <ng-container *ngIf="tableType === 'ta'">
+    <!-- (Optional) status tabs block can be re-enabled if you had it -->
+    <app-table
+      [columns]="taDisplayColumns"
+      [dataSource]="filteredTherapeuticAreas">
+    </app-table>
+  </ng-container>
+
+  <!-- Franchise TABLE (new) -->
+ 
+<ng-container *ngIf="tableType === 'franchise'">
+  <div class="franchise-table-container">
+    <app-table
+      [columns]="franchiseDisplayColumns"
+      [dataSource]="filteredFranchises">
+    </app-table>
+  </div>
+</ng-container>
+
+
+ <!-- ✅ Family/Brand -->
+  <ng-container *ngIf="tableType === 'familyBrand'">
+    <div class="familybrand-table-container">
+      <app-table
+        [columns]="familyBrandDisplayColumns"
+        [dataSource]="filteredFamilyBrands">
+      </app-table>
+    </div>
+  </ng-container>
+
+ 
+<!-- ✅ Products/Projects -->
+<ng-container *ngIf="tableType === 'productProject'">
+  <div class="productproject-table-container">
+    <app-table
+      [columns]="productProjectDisplayColumns"
+      [dataSource]="filteredProductProjects">
+    </app-table>
+  </div>
+</ng-container>
+
+
+
+</div>

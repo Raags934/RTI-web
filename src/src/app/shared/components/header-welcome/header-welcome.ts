@@ -54,6 +54,10 @@ export class HeaderWelcome implements OnInit {
       this.pageHeader = headerConfigs.adminManageUsersHeader;
       return;
     }
+    if (fullPath.includes('admin/edit-product-list')) {
+      this.pageHeader = headerConfigs.adminEditProductListHeader;
+      return;
+    }
     switch (path) {
       case headerConfigs.addIdeaHeader.expected:
         this.pageHeader = headerConfigs.addIdeaHeader;

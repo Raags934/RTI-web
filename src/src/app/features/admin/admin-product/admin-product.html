@@ -1,5 +1,5 @@
 <app-header-filter class="header-filter" [isAdmin]="true"></app-header-filter>
-<app-table-header [title]="pageTitle" [caption]="pageCaption"></app-table-header>
+<app-table-header [title]="pageTitle" [caption]="pageCaption" [isAdmin]="true" [showNewIdea]="false"></app-table-header>
 <app-table-filter ></app-table-filter>
 <app-table [columns]="ideaDisplayColumns"
 [dataSource]="pagedIdeas"></app-table>

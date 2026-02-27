@@ -18,6 +18,28 @@
         <mat-icon>close</mat-icon>
       </button>
     </div>
+
+    <div class="right">
+      <app-buttons
+        *ngIf="isAdmin"
+        variant="type2"
+        color="var(--primary-300)"
+        size="medium"
+        icon="ios_share"
+        (click)="onExportListClick()"
+      >
+        Export List
+      </app-buttons>
+      <app-buttons
+        *ngIf="isAdmin"
+        variant="type1"
+        color="var(--primary-400)"
+        size="medium"
+        icon="edit"
+        (click)="onEditProductListClick()"
+      >
+        Add/Edit Product List
+      </app-buttons>
  
     <!-- Right side: buttons -->
     <div class="right">
@@ -33,7 +55,7 @@
         Update Funding Status
       </app-buttons>
       <app-buttons
-        *ngIf="!showNewIdea"
+        *ngIf="!isAdmin"
         [variant]="exportVariant"
         [color]="exportColor"
         [size]="exportSize"
@@ -53,7 +75,7 @@
       >
         New Idea
       </app-buttons>
-      <app-buttons
+      <!-- <app-buttons
         *ngIf="showNewIdea"
         variant="type2"
         color="var(--primary-300)"
@@ -63,7 +85,7 @@
         (click)="onExportClick()"
       >
         Export Data
-      </app-buttons>
+      </app-buttons> -->
     </div>
   </div>
  
