@@ -17,10 +17,12 @@ import { StatusTab, creator, harmonizer } from '../../shared/constants/statusTab
 import { ideaDisplayColumns } from '../../shared/constants/tableColumns.js';
 import { loadMasterData } from '../../store/masterData/masterData.actions.js';
 import { IdeaHistory } from '../ideas/idea-history/idea-history.js';
+import { ViewIdeaOverlay } from '../ideas/view-idea-overlay/view-idea-overlay.js';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-harmonizer',
-  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, IdeaHistory],
+  imports: [HeaderFilter, TableHeader, TableFilter, Table, Pagination, IdeaHistory, ViewIdeaOverlay],
   templateUrl: './harmonizer.html',
   styleUrl: './harmonizer.scss',
 })
@@ -32,6 +34,9 @@ export class Harmonizer implements OnInit {
   showIdeaHistory = false;
   selectedIdeaId = 0;
   selectedIdeaUid = '';
+  showViewIdeaOverlay = false;
+  overlayIdeaUid: string | null = null;
+  overlayStatusLabel: string | null = null;
   ideas$: Observable<Idea[]>;
   ideas: Idea[] = [];
   filteredIdeas: Idea[] = [];
@@ -48,7 +53,8 @@ export class Harmonizer implements OnInit {
   constructor(
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
-    private ideaService: IdeaService
+    private ideaService: IdeaService,
+    private router: Router
   ) {
     this.ideas$ = this.store.select((state) => state.ideas);
   }
@@ -88,8 +94,34 @@ export class Harmonizer implements OnInit {
         this.showIdeaHistory = false;
         this.selectedIdeaId = 0;
         this.selectedIdeaUid = '';
+      } else if (event.type === 'viewIdeaOverlay') {
+        this.overlayIdeaUid = event.payload.idea_uid;
+        this.overlayStatusLabel = event.payload.statusLabel ?? null;
+        this.showViewIdeaOverlay = true;
       }
     });
+  }
+
+  onCloseViewIdeaOverlay(): void {
+    this.showViewIdeaOverlay = false;
+    this.overlayIdeaUid = null;
+    this.overlayStatusLabel = null;
+    this.currentFilterStatusId = 0;
+    this.filteredIdeas = [...this.ideas];
+    this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+    this.currentPage = 1;
+    this.updatePagedIdeas();
+    this.updateStatusCounts();
+    this.store.dispatch(LoadIdeas());
+  }
+
+  onEditFromOverlay(idea: Idea): void {
+    this.showViewIdeaOverlay = false;
+    this.overlayIdeaUid = null;
+    this.overlayStatusLabel = null;
+    const isDraft = idea.status_id === 5;
+    const path = isDraft ? '/ideas/' + idea.idea_uid + '/edit-draft' : '/ideas/' + idea.idea_uid + '/edit';
+    this.router.navigate([path], { queryParams: { from: '/harmonizer' } });
   }
 
   ngOnDestroy() {
@@ -189,8 +221,12 @@ export class Harmonizer implements OnInit {
     const dir = direction === 'asc' ? 1 : -1;
 
     this.filteredIdeas = [...this.filteredIdeas].sort((a, b) => {
-      const av = this.getValue(a, column);
-      const bv = this.getValue(b, column);
+      let av = this.getValue(a, column);
+      let bv = this.getValue(b, column);
+      if (column === 'rti_unique_id') {
+        av = av != null ? String(av) : '';
+        bv = bv != null ? String(bv) : '';
+      }
 
       if (av < bv) return -1 * dir;
       if (av > bv) return 1 * dir;

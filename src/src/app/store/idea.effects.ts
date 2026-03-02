@@ -84,14 +84,16 @@ export class IdeaEffects {
                   return ideaActions.SavePrioritizationSuccess({ ideas });
                 }),
                 catchError((error) => {
-                  this.ideaEvents.prioritizationFailure(error.message);
-                  return of(ideaActions.SavePrioritizationFailure({ error: error.message }));
+                  const message = error?.error?.message || error?.message || 'Request failed';
+                  this.ideaEvents.prioritizationFailure(message);
+                  return of(ideaActions.SavePrioritizationFailure({ error: message }));
                 })
               )
             ),
             catchError((error) => {
-              this.ideaEvents.prioritizationFailure(error.message);
-              return of(ideaActions.SavePrioritizationFailure({ error: error.message }));
+              const message = error?.error?.message || error?.message || 'Request failed';
+              this.ideaEvents.prioritizationFailure(message);
+              return of(ideaActions.SavePrioritizationFailure({ error: message }));
             })
           )
         )
@@ -111,14 +113,16 @@ export class IdeaEffects {
                   return ideaActions.SubmitPrioritizationSuccess({ ideas });
                 }),
                 catchError((error) => {
-                  this.ideaEvents.prioritizationFailure(error.message);
-                  return of(ideaActions.SubmitPrioritizationFailure({ error: error.message }));
+                  const message = error?.error?.message || error?.message || 'Request failed';
+                  this.ideaEvents.prioritizationFailure(message);
+                  return of(ideaActions.SubmitPrioritizationFailure({ error: message }));
                 })
               )
             ),
             catchError((error) => {
-              this.ideaEvents.prioritizationFailure(error.message);
-              return of(ideaActions.SubmitPrioritizationFailure({ error: error.message }));
+              const message = error?.error?.message || error?.message || 'Request failed';
+              this.ideaEvents.prioritizationFailure(message);
+              return of(ideaActions.SubmitPrioritizationFailure({ error: message }));
             })
           )
         )

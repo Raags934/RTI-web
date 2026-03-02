@@ -1,20 +1,22 @@
 <app-header-filter class="header-filter"></app-header-filter>
 <app-table-header [showSearch]="false" [showNewIdea]="false" exportVariant="type1"
     exportColor="var(--primary-400)"></app-table-header>
-<app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns" [dataSource]="displayedIdeas" [currentFilterStatusId]="currentFilterStatusId"
+<app-table-filter [tabs]="statusTabs" [activeStatusId]="currentFilterStatusId"></app-table-filter>
+<app-table [columns]="displayedColumns" [dataSource]="displayedIdeas" [currentFilterStatusId]="currentFilterStatusId"
     [useViewIdeaOverlay]="true"></app-table>
 @if (showPagination) {
   <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
 }
-<div class="ranking-actions">
+@if (showRankingButtons) {
+  <div class="ranking-actions">
     <app-buttons variant="type2" color="var(--primary-400)" size="medium" (click)="saveRanking()">
-        Save Ranking
+      Save Ranking
     </app-buttons>
     <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="submitRanking()">
-        Submit Ranking
+      Submit Ranking
     </app-buttons>
-</div>
+  </div>
+}
 
 <app-popup [open]="popup.open" [title]="popup.title" [helper]="popup.helper" [cancelText]="popup.cancelText"
     [confirmText]="popup.confirmText" [size]="popup.size" [confirmPopupAction]="popup.confirmPopupAction"

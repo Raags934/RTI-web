@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,11 +14,20 @@ import { IdeaEventsService } from '../../../events/ideaServiceEvents';
   templateUrl: './table-filter.html',
   styleUrl: './table-filter.scss',
 })
-export class TableFilter {
+export class TableFilter implements OnChanges {
   @Input() tabs: any[] = [];
+  /** When set, syncs active tab with the tab that has this status_id (e.g. after save ranking). */
+  @Input() activeStatusId: number | null = null;
   activeTab: string = "All";
 
   constructor(private ideaEvents: IdeaEventsService) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activeStatusId'] && this.tabs?.length) {
+      const tab = this.tabs.find((t: any) => t.status_id === this.activeStatusId);
+      this.activeTab = tab ? tab.label : (this.activeStatusId === 0 ? 'All' : this.activeTab);
+    }
+  }
 
   selectTab(tab: any) {
     console.log(this.tabs)

@@ -1,10 +1,27 @@
 /**
+ * Minimal payload for POST /study_details when user selects "Is the study recommended?" = No.
+ * Only these fields are sent; no other study detail fields.
+ */
+export interface StudyDetailsMinimalPayload {
+  idea_id: number;
+  /** Set only when study details already exist for this idea (e.g. edit); omit for new study details. */
+  study_id?: number;
+  is_recommended: boolean;
+  pos: number;
+  pos_reasons: string;
+  created_by: number;
+}
+
+/**
  * Payload for POST /study_details (Enter Study Details form submit).
  * Matches API contract; created_by is set by client (e.g. hardcoded) until auth is integrated.
  * Used when Pilot Study toggle is No (study details only).
  */
 export interface StudyDetailsPayload {
   idea_id: number;
+  /** Set only when study details already exist for this idea (e.g. edit); omit for new study details. */
+  study_id?: number;
+  is_recommended: boolean;
   research_question: string;
   potential_claims: string;
   primary_endpoints: string;
@@ -32,6 +49,9 @@ export interface StudyDetailsPayload {
  */
 export interface StudyDetailsWithPilotPayload {
   idea_id: number;
+  /** Set only when study details already exist for this idea (e.g. edit); omit for new study details. */
+  study_id?: number;
+  is_recommended: boolean;
   pos_reasons: string;
   research_question: string;
   potential_claims: string;

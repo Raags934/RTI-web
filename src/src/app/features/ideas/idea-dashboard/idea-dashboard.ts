@@ -268,8 +268,13 @@ export class IdeaDashboard implements OnInit {
     const dir = direction === 'asc' ? 1 : -1;
 
     this.filteredIdeas = [...this.filteredIdeas].sort((a, b) => {
-      const av = this.getValue(a, column);
-      const bv = this.getValue(b, column);
+      let av = this.getValue(a, column);
+      let bv = this.getValue(b, column);
+      // RTI UID: normalize null/empty for consistent asc/desc order
+      if (column === 'rti_unique_id') {
+        av = av != null ? String(av) : '';
+        bv = bv != null ? String(bv) : '';
+      }
 
       if (av < bv) return -1 * dir;
       if (av > bv) return 1 * dir;

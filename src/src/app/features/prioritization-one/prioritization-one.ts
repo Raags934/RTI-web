@@ -70,9 +70,12 @@ export class PrioritizationOne implements OnInit {
   pageSize = 10;
   totalPages = 1;
   currentFilterStatusId: number = 0; // Track current filter status_id
+  /** After save ranking: reload on Product Prioritization Pending and sort by ranking_brand */
+  private justSavedRanking = false;
 
   // Status IDs where pagination is hidden (Product Prioritization Pending, Product Ranked)
   private readonly noPaginationStatusIds = [10, 12];
+  private readonly productPrioritizationPendingStatusId = 10;
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -85,6 +88,19 @@ export class PrioritizationOne implements OnInit {
 
   get showPagination(): boolean {
     return !this.noPaginationStatusIds.includes(this.currentFilterStatusId);
+  }
+
+  /** Show Save/Submit Ranking buttons only on Product Prioritization Pending (status_id 10); hide on All and Product Ranked */
+  get showRankingButtons(): boolean {
+    return this.currentFilterStatusId === this.productPrioritizationPendingStatusId;
+  }
+
+  /** Columns for table: hide Product Ranking in "All" filter */
+  get displayedColumns(): TableColumn[] {
+    if (this.currentFilterStatusId === 0) {
+      return this.ideaDisplayColumns.filter((col) => col.key !== 'ranking_brand');
+    }
+    return this.ideaDisplayColumns;
   }
 
   // Array to store ranking changes
@@ -110,10 +126,34 @@ export class PrioritizationOne implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.taFilterChange(null);
-      this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-      this.updatePagedIdeas();
-      this.updateStatusCounts();
+      if (this.justSavedRanking) {
+        this.justSavedRanking = false;
+        this.currentFilterStatusId = this.productPrioritizationPendingStatusId;
+        this.filteredIdeas = this.ideas.filter((i) => i.status_id === this.productPrioritizationPendingStatusId);
+        this.filteredIdeas.sort((a, b) => {
+          const ra = a.ranking_brand != null ? Number(a.ranking_brand) : Infinity;
+          const rb = b.ranking_brand != null ? Number(b.ranking_brand) : Infinity;
+          return ra - rb;
+        });
+        // Repopulate rankingChanges from saved data so Submit Ranking button stays clickable (allIdeasRanked)
+        this.rankingChanges = this.filteredIdeas.map((idea) => ({
+          idea_id: idea.idea_id,
+          ranking_brand: idea.ranking_brand != null ? String(idea.ranking_brand) : null
+        }));
+        this.originalRankings.clear();
+        this.filteredIdeas.forEach((idea) => {
+          this.originalRankings.set(idea.idea_id, idea.ranking_brand != null ? String(idea.ranking_brand) : null);
+        });
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.currentPage = 1;
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+      } else {
+        this.taFilterChange(null);
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+      }
     });
 
     this.sub = this.ideaEvents.events$.subscribe((event: any) => {
@@ -190,10 +230,8 @@ export class PrioritizationOne implements OnInit {
       } else if (event.type === 'savePrioritizationSuccess') {
         this.popup = PopupConfigs.rankingSaved;
         this.popup.open = true;
-        this.taFilterChange(null);
-        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-        this.updatePagedIdeas();
-        this.updateStatusCounts();
+        this.justSavedRanking = true;
+        this.currentFilterStatusId = this.productPrioritizationPendingStatusId;
         this.rankingChanges = [];
         this.originalRankings.clear();
       } else if (event.type === 'submitPrioritizationSuccess') {
@@ -206,7 +244,7 @@ export class PrioritizationOne implements OnInit {
         this.rankingChanges = [];
         this.originalRankings.clear();
       } else if (event.type === 'prioritizationFailure') {
-        alert(event.payload);
+        this.ideaEvents.toastErrorEvent(event.payload);
         console.error('Error saving ranking:', event.payload);
       } else if (event.type === 'exportData') {
         this.exportData();
@@ -313,6 +351,14 @@ export class PrioritizationOne implements OnInit {
       this.filteredIdeas = [...this.ideas];
     } else {
       this.filteredIdeas = this.ideas.filter((i) => i.status_id === status_id);
+      // Product Prioritization Pending and Product Ranked: display by product ranking ascending (1, 2, 3...)
+      if (this.noPaginationStatusIds.includes(status_id)) {
+        this.filteredIdeas.sort((a, b) => {
+          const ra = a.ranking_brand != null ? Number(a.ranking_brand) : Infinity;
+          const rb = b.ranking_brand != null ? Number(b.ranking_brand) : Infinity;
+          return ra - rb;
+        });
+      }
     }
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
@@ -354,8 +400,12 @@ export class PrioritizationOne implements OnInit {
     const dir = direction === 'asc' ? 1 : -1;
 
     this.filteredIdeas = [...this.filteredIdeas].sort((a, b) => {
-      const av = this.getValue(a, column);
-      const bv = this.getValue(b, column);
+      let av = this.getValue(a, column);
+      let bv = this.getValue(b, column);
+      if (column === 'rti_unique_id') {
+        av = av != null ? String(av) : '';
+        bv = bv != null ? String(bv) : '';
+      }
 
       if (av < bv) return -1 * dir;
       if (av > bv) return 1 * dir;
@@ -371,6 +421,7 @@ export class PrioritizationOne implements OnInit {
       (c) => c.ranking_brand != null && displayedIds.has(c.idea_id)
     );
 
+    // Payload: exact user-selected rankings as-is (no reorder). Display in Pending tab is sorted by rank separately.
     console.log('🔍 Original rankings:', Array.from(this.originalRankings.entries()));
     console.log('🔍 Current ranking changes:', rankedInView);
 
@@ -407,27 +458,25 @@ export class PrioritizationOne implements OnInit {
 
   /**
    * Build final payload for API.
-   * Case 1 (new ranks, no duplicates): Pass through user-selected ranks as-is [1, 5, 6, 8, 9].
-   * Case 2 (re-rank with conflicts): Run reorder to resolve duplicates via shifting; output unique ranks.
+   * Pass user-selected ranks as-is to backend (reorder logic commented out).
    */
   private buildFinalPayload(basePayload: PrioritizationPayload): PrioritizationPayload {
     if (!basePayload.ideas?.length) {
       return basePayload;
     }
-    const ideas = basePayload.ideas as ProductRankingChange[];
-    const rankValues = ideas
-      .map((i) => (i.ranking_brand != null ? String(i.ranking_brand).trim() : null))
-      .filter((r): r is string => r != null && r !== '');
-    const hasDuplicates =
-      rankValues.length > 0 &&
-      rankValues.length !== new Set(rankValues).size;
-
-    if (!hasDuplicates) {
-      // Case 1: All unique ranks – pass through
-      return basePayload;
-    }
-    // Case 2: Duplicate ranks – resolve via reorder/shifting
-    return this.reorderPayloadWithLockedRanks(basePayload);
+    // Reorder logic commented out: pass user-selected ranks as-is to API
+    // const ideas = basePayload.ideas as ProductRankingChange[];
+    // const rankValues = ideas
+    //   .map((i) => (i.ranking_brand != null ? String(i.ranking_brand).trim() : null))
+    //   .filter((r): r is string => r != null && r !== '');
+    // const hasDuplicates =
+    //   rankValues.length > 0 &&
+    //   rankValues.length !== new Set(rankValues).size;
+    // if (!hasDuplicates) {
+    //   return basePayload;
+    // }
+    // return this.reorderPayloadWithLockedRanks(basePayload);
+    return basePayload;
   }
 
   /** Reorder payload so locked ranks are preserved and others are shifted around them. */

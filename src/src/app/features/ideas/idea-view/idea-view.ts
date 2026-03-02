@@ -29,7 +29,7 @@ import { Idea } from '../../../models/idea.model';
 import { AppState } from '../../../app.state.js';
 import { LoadIdeas } from '../../../store/idea.actions';
 import { IdeaService, DropdownValueItem } from '../../../store/idea.service';
-import { StudyDetailsPayload, StudyDetailsWithPilotPayload } from '../../../models/study-details.model';
+import { StudyDetailsPayload, StudyDetailsWithPilotPayload, StudyDetailsMinimalPayload } from '../../../models/study-details.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { Buttons } from '../../../shared/components/buttons/buttons';
 import { statusColor } from '../../../shared/constants/statusColor';
@@ -114,7 +114,8 @@ export class IdeaView implements OnInit, OnDestroy {
   showProductRank = false;
   showTaRank = false;
 
-  /** Accordion open state for View Idea Details (Study Details, Pilot Details, Prioritization 1 & 2). */
+  /** Accordion open state for View Idea Details (Ideation always open by default, then Study Details, Pilot, Prioritization 1 & 2). */
+  accordionIdeationOpen = true;
   accordionStudyDetailsOpen = false;
   accordionPilotDetailsOpen = false;
   accordionPrioritizationOneOpen = false;
@@ -145,6 +146,7 @@ export class IdeaView implements OnInit, OnDestroy {
   @Input() overlayReferrer: string | null = null;
   @Input() overlayStatusLabel: string | null = null;
   @Output() editDetails = new EventEmitter<Idea>();
+  @Output() cancelOverlay = new EventEmitter<void>();
 
   private sub!: Subscription;
   private overlaySub?: Subscription;
@@ -178,6 +180,8 @@ export class IdeaView implements OnInit, OnDestroy {
         this.enterStudyDetails();
       } else if (event.type === 'submitStudyDetailsConfirmation') {
         this.submitStudyDetailsConfirmation();
+      } else if (event.type === 'saveStudyDetailsDraft') {
+        this.saveStudyDetailsDraft();
       } else if (event.type === 'saveUpdateFundingStatus') {
         this.saveUpdateFundingStatus();
       } else if (event.type === 'closePopUp') {
@@ -265,6 +269,7 @@ export class IdeaView implements OnInit, OnDestroy {
 
     if (this.overlayMode) {
       this.referrer = this.overlayReferrer;
+      this.from = (this.overlayReferrer || '').replace(/^\//, '') || '';
       if (this.referrer === '/prioritization') {
         this.showProductRank = true;
         this.showTaRank = false;
@@ -434,7 +439,7 @@ export class IdeaView implements OnInit, OnDestroy {
     this.setupStudyDetailsRecommendedListener();
   }
 
-  /** When recommended or pilot is 'No', disable all other Enter Study Details fields; enable only when both are 'Yes'. */
+  /** When recommended or pilot is 'No', disable all Enter Study Details fields except POS / POS Reasons; enable only when both are 'Yes'. */
   private studyDetailsControlNames = [
     'research_questions',
     'potential_claims',
@@ -451,8 +456,6 @@ export class IdeaView implements OnInit, OnDestroy {
     'estimated_spend_plus_1',
     'estimated_spend_plus_2',
     'estimated_spend_plus_3',
-    'study_details_pos',
-    'study_details_pos_reasons',
     'regions_accepting_submissions',
   ] as const;
 
@@ -627,6 +630,11 @@ export class IdeaView implements OnInit, OnDestroy {
 
   onAssessIdea() {
     if (this.from === 'harmonizer') {
+      const isEditMode = this.hasStudyDetails() && this.viewIdea?.status?.status_id === 18;
+      if (isEditMode) {
+        const record = this.getFirstStudyDetailsRecord();
+        if (record) this.patchEnterStudyDetailsFormFromRecord(record);
+      }
       this.enterStudyDetailsPopup.open = true;
       this.applyStudyDetailsFieldsState();
     } else {
@@ -722,6 +730,14 @@ export class IdeaView implements OnInit, OnDestroy {
   }
 
   submitStudyDetailsConfirmation() {
+    this.submitStudyDetailsWithOption(true);
+  }
+
+  /**
+   * Shared submit logic used by both Submit and Save buttons.
+   * When harmonize is true, calls putHarmonization after submit. When false, skips harmonization.
+   */
+  private submitStudyDetailsWithOption(harmonize: boolean): void {
     if (!this.viewIdea?.idea_id) return;
     const payload = this.buildStudyDetailsPayload();
     if (!payload) return;
@@ -730,18 +746,25 @@ export class IdeaView implements OnInit, OnDestroy {
         this.submitStudyDetailsConfirmationPopup.open = false;
         this.enterStudyDetailsPopup.open = false;
         this.store.dispatch(LoadIdeas());
-        this.ideaService
-          .putHarmonization(this.viewIdea!.idea_id, { updated_by: 3 })
-          .subscribe({
-            next: (harmonizationRes) => {
-              const message =
-                (harmonizationRes as { message?: string })?.message ||
-                'Idea harmonization completed successfully';
-              this.ideaEvents.toastEvent(message);
-              this.router.navigate(['/harmonizer']);
-            },
-            error: () => {},
-          });
+
+        if (harmonize) {
+          this.ideaService
+            .putHarmonization(this.viewIdea!.idea_id, { updated_by: 3 })
+            .subscribe({
+              next: (harmonizationRes) => {
+                const message =
+                  (harmonizationRes as { message?: string })?.message ||
+                  'Idea harmonization completed successfully';
+                this.ideaEvents.toastEvent(message);
+                if (this.overlayMode) this.cancelOverlay.emit();
+                this.router.navigate(['/harmonizer']);
+              },
+              error: () => {},
+            });
+        } else {
+          if (this.overlayMode) this.cancelOverlay.emit();
+          this.router.navigate(['/harmonizer']);
+        }
       },
       error: () => {
         this.submitStudyDetailsConfirmationPopup.open = false;
@@ -750,8 +773,8 @@ export class IdeaView implements OnInit, OnDestroy {
     });
   }
 
-  /** Build payload for POST /study_details from form + current idea. When Pilot Study is Yes, includes pilot details. */
-  private buildStudyDetailsPayload(): StudyDetailsPayload | StudyDetailsWithPilotPayload | null {
+  /** Build payload for POST /study_details from form + current idea. When Recommended=No, returns minimal payload only (idea_id, is_recommended, pos, pos_reasons, created_by). Includes study_id only when study details already exist for this idea. */
+  private buildStudyDetailsPayload(): StudyDetailsPayload | StudyDetailsWithPilotPayload | StudyDetailsMinimalPayload | null {
     if (!this.viewIdea?.idea_id) return null;
     const raw = this.form.getRawValue();
     const toNum = (v: unknown): number => (v === '' || v == null ? 0 : Number(v));
@@ -764,10 +787,29 @@ export class IdeaView implements OnInit, OnDestroy {
       return s;
     };
     const isPilotYes = raw.pilot === 'Yes';
+    const isRecommended = raw.recommended === 'Yes';
+    const existingRecord = this.hasStudyDetails() ? this.getFirstStudyDetailsRecord() : null;
+    const studyIdRaw = existingRecord != null ? existingRecord['study_id'] : undefined;
+    const studyId = studyIdRaw != null ? Number(studyIdRaw) : undefined;
+    const studyIdPayload = studyId != null && !isNaN(studyId) ? { study_id: studyId } : {};
+
+    // When user selected No for "Is the study recommended?", send only these fields.
+    if (!isRecommended) {
+      return {
+        ...studyIdPayload,
+        idea_id: this.viewIdea.idea_id,
+        is_recommended: false,
+        pos: toNum(raw.study_details_pos),
+        pos_reasons: toStr(raw.study_details_pos_reasons),
+        created_by: 1, // TODO: replace with current user when auth is integrated
+      } as StudyDetailsMinimalPayload;
+    }
 
     if (isPilotYes) {
       return {
+        ...studyIdPayload,
         idea_id: this.viewIdea.idea_id,
+        is_recommended: isRecommended,
         pos_reasons: toStr(raw.study_details_pos_reasons),
         research_question: toStr(raw.research_questions),
         potential_claims: toStr(raw.potential_claims),
@@ -808,7 +850,9 @@ export class IdeaView implements OnInit, OnDestroy {
     }
 
     return {
+      ...studyIdPayload,
       idea_id: this.viewIdea.idea_id,
+      is_recommended: isRecommended,
       research_question: toStr(raw.research_questions),
       potential_claims: toStr(raw.potential_claims),
       primary_endpoints: toStr(raw.primary_endpoints),
@@ -838,6 +882,15 @@ export class IdeaView implements OnInit, OnDestroy {
     return typeof sd === 'object' && Object.keys(sd).length > 0;
   }
 
+  /** Label for the Enter/Edit Study Details button: "Edit Study Detail" when study details exist and status is 18, else "Enter Study Details" (or "Assess Idea" for assessor). */
+  getStudyDetailsButtonLabel(): string {
+    if (this.from === 'assessor') return 'Assess Idea';
+    if (this.from === 'harmonizer' && this.hasStudyDetails() && this.viewIdea?.status?.status_id === 18) {
+      return 'Edit Study Detail';
+    }
+    return 'Enter Study Details';
+  }
+
   hasPrioritizationOne(): boolean {
     const v = this.viewIdea?.ranking_brand;
     return v != null && String(v).trim() !== '';
@@ -848,7 +901,8 @@ export class IdeaView implements OnInit, OnDestroy {
     return v != null && String(v).trim() !== '';
   }
 
-  toggleAccordion(panel: 'studyDetails' | 'pilotDetails' | 'prioritizationOne' | 'prioritizationTwo') {
+  toggleAccordion(panel: 'ideation' | 'studyDetails' | 'pilotDetails' | 'prioritizationOne' | 'prioritizationTwo') {
+    if (panel === 'ideation') this.accordionIdeationOpen = !this.accordionIdeationOpen;
     if (panel === 'studyDetails') this.accordionStudyDetailsOpen = !this.accordionStudyDetailsOpen;
     if (panel === 'pilotDetails') this.accordionPilotDetailsOpen = !this.accordionPilotDetailsOpen;
     if (panel === 'prioritizationOne') this.accordionPrioritizationOneOpen = !this.accordionPrioritizationOneOpen;
@@ -917,10 +971,76 @@ export class IdeaView implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Save: submit study details API only, then redirect to /harmonizer.
+   * Does not call put harmonizer API (unlike Submit Study Details).
+   * When Recommended=No: only recommended, POS, and POS Reasons are validated; payload sends is_recommended, pos, pos_reasons, created_by (+ idea_id).
+   * When Recommended=Yes: same validation as Submit (all study details, and pilot if Pilot=Yes).
+   */
   saveStudyDetailsDraft(): void {
-    // Save as draft functionality - same as submit but mark as draft
-    // For now, just close the popup (can be extended later if draft API is needed)
-    this.enterStudyDetailsPopup.open = false;
+    const recommended = this.form.get('recommended');
+    if (!recommended?.valid) {
+      recommended?.markAsTouched();
+      return;
+    }
+
+    const isRecommendedYes = recommended.value === 'Yes';
+
+    // When Recommended=No: only require recommended, POS, and POS Reasons. Skip pilot check (pilot is disabled and can block Save).
+    if (!isRecommendedYes) {
+      const posControl = this.form.get('study_details_pos');
+      const posReasonsControl = this.form.get('study_details_pos_reasons');
+      const posValid = posControl?.valid ?? false;
+      const posReasonsValid = posReasonsControl?.valid ?? false;
+      if (posValid && posReasonsValid) {
+        this.submitStudyDetailsWithOption(false);
+      } else {
+        posControl?.markAsTouched();
+        posReasonsControl?.markAsTouched();
+      }
+      return;
+    }
+
+    const pilot = this.form.get('pilot');
+    if (!pilot?.valid) {
+      pilot?.markAsTouched();
+      return;
+    }
+
+    const studyDetailControls = [
+      this.form.get('research_questions'),
+      this.form.get('potential_claims'),
+      this.form.get('primary_endpoints'),
+      this.form.get('secondary_endpoints'),
+      this.form.get('other_potential_endpoints'),
+      this.form.get('proposed_study_design'),
+      this.form.get('proposed_statistics'),
+      this.form.get('estimated_study_start_date'),
+      this.form.get('estimated_study_end_date'),
+      this.form.get('estimated_sample_size'),
+      this.form.get('total_estimated_budget'),
+      this.form.get('budget_currency'),
+      this.form.get('estimated_spend_plus_1'),
+      this.form.get('estimated_spend_plus_2'),
+      this.form.get('estimated_spend_plus_3'),
+      this.form.get('study_details_pos'),
+      this.form.get('regions_accepting_submissions'),
+    ];
+
+    const isPilotYes = pilot.value === 'Yes';
+    const controlsToValidate = isPilotYes
+      ? [
+          ...studyDetailControls,
+          ...this.pilotDetailsControlNames.map((name) => this.form.get(name)),
+        ]
+      : studyDetailControls;
+
+    const allValid = controlsToValidate.every((c) => c?.valid);
+    if (allValid) {
+      this.submitStudyDetailsWithOption(false);
+    } else {
+      controlsToValidate.forEach((c) => c?.markAsTouched());
+    }
   }
 
   private studyDetailsLabelMap: Record<string, string> = {
@@ -1051,6 +1171,67 @@ export class IdeaView implements OnInit, OnDestroy {
     return null;
   }
 
+  /** Pre-populate Enter Study Details form from API study_details record (for Edit Study Detail). */
+  private patchEnterStudyDetailsFormFromRecord(record: Record<string, unknown>): void {
+    const v = (key: string) => record[key];
+    const str = (key: string) => {
+      const val = v(key);
+      return val == null ? '' : String(val);
+    };
+    const num = (key: string) => {
+      const val = v(key);
+      if (val == null || val === '') return '';
+      const n = Number(val);
+      return isNaN(n) ? '' : n;
+    };
+    const dateVal = (key: string) => {
+      const val = v(key);
+      if (val == null || val === '') return null;
+      const s = String(val);
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+      return s;
+    };
+    const recommended = v('is_recommended');
+    this.form.patchValue({
+      recommended: recommended === true ? 'Yes' : recommended === false ? 'No' : null,
+      study_details_pos: num('pos') !== '' ? num('pos') : str('pos'),
+      study_details_pos_reasons: str('pos_reasons'),
+      pilot: v('pilot') === 'Yes' ? 'Yes' : 'No',
+      research_questions: str('research_question'),
+      potential_claims: str('potential_claims'),
+      primary_endpoints: str('primary_endpoints'),
+      secondary_endpoints: str('secondary_endpoints'),
+      other_potential_endpoints: str('other_potential_endpoints'),
+      proposed_study_design: v('proposed_study_design') ?? null,
+      proposed_statistics: str('proposed_statistics'),
+      estimated_study_start_date: dateVal('estimated_start_date'),
+      estimated_study_end_date: dateVal('estimated_end_date'),
+      estimated_sample_size: num('estimated_sample_size') !== '' ? num('estimated_sample_size') : str('estimated_sample_size'),
+      total_estimated_budget: num('total_estimated_budget') !== '' ? num('total_estimated_budget') : str('total_estimated_budget'),
+      budget_currency: str('budget_currency'),
+      estimated_spend_plus_1: num('estimated_spend_plus_1') !== '' ? num('estimated_spend_plus_1') : str('estimated_spend_plus_1'),
+      estimated_spend_plus_2: num('estimated_spend_plus_2') !== '' ? num('estimated_spend_plus_2') : str('estimated_spend_plus_2'),
+      estimated_spend_plus_3: num('estimated_spend_plus_3') !== '' ? num('estimated_spend_plus_3') : str('estimated_spend_plus_3'),
+      regions_accepting_submissions: v('regions_accepting_submissions') ?? null,
+      pilot_research_questions: str('pilot_research_question'),
+      pilot_potential_claims: str('pilot_potential_claims'),
+      pilot_primary_endpoints: str('pilot_primary_endpoints'),
+      pilot_secondary_endpoints: str('pilot_secondary_endpoints'),
+      pilot_other_potential_endpoints: str('pilot_other_potential_endpoints'),
+      pilot_proposed_study_design: v('pilot_proposed_study_design') ?? null,
+      pilot_proposed_statistics: str('pilot_proposed_statistics'),
+      pilot_estimated_study_start_date: dateVal('pilot_estimated_start_date'),
+      pilot_estimated_study_end_date: dateVal('pilot_estimated_end_date'),
+      pilot_estimated_sample_size: num('pilot_estimated_sample_size') !== '' ? num('pilot_estimated_sample_size') : str('pilot_estimated_sample_size'),
+      pilot_total_estimated_budget: num('pilot_total_estimated_budget') !== '' ? num('pilot_total_estimated_budget') : str('pilot_total_estimated_budget'),
+      pilot_budget_currency: str('pilot_budget_currency'),
+      pilot_estimated_spend_plus_1: num('pilot_estimated_spend_plus_1') !== '' ? num('pilot_estimated_spend_plus_1') : str('pilot_estimated_spend_plus_1'),
+      pilot_estimated_spend_plus_2: num('pilot_estimated_spend_plus_2') !== '' ? num('pilot_estimated_spend_plus_2') : str('pilot_estimated_spend_plus_2'),
+      pilot_estimated_spend_plus_3: num('pilot_estimated_spend_plus_3') !== '' ? num('pilot_estimated_spend_plus_3') : str('pilot_estimated_spend_plus_3'),
+      pilot_regions_accepting_submissions: v('pilot_regions_accepting_submissions') ?? null,
+    }, { emitEvent: false });
+  }
+
   /** Keys hidden from Study Details accordion (not shown to user). */
   private studyDetailsHiddenKeys = new Set(['study_id', 'status_id', 'flag_soft_lock', 'study_type']);
 
@@ -1134,6 +1315,10 @@ export class IdeaView implements OnInit, OnDestroy {
   }
 
   onCancel() {
+    if (this.overlayMode) {
+      this.cancelOverlay.emit();
+      return;
+    }
     if (this.from === 'harmonizer') {
       this.router.navigate(['/harmonizer']);
     } else if (this.from === 'funding') {
@@ -1271,11 +1456,16 @@ export class IdeaView implements OnInit, OnDestroy {
 
   /**
    * Check if Edit Details button should be hidden.
-   * Hide when idea is harmonized (status_id === 10 or statusLabel contains "Harmonized").
+   * Hide when opened from prioritization or ta-prioritization (view idea overlay).
+   * Hide when idea is harmonized (status_id === 10 or statusLabel contains "Harmonized") in harmonizer.
    * Show when idea is harmonization pending (status_id === 18 or statusLabel === "Harmonization pending").
    */
   shouldHideEditDetails(): boolean {
-    // Only apply this logic when coming from harmonizer
+    // Hide Edit Details when view is opened from Product or TA Prioritization overlay
+    if (this.from === 'prioritization' || this.from === 'ta-prioritization') {
+      return true;
+    }
+    // Only apply harmonizer logic when coming from harmonizer
     if (this.from !== 'harmonizer') {
       return false;
     }

@@ -1,7 +1,17 @@
 <app-header-filter class="header-filter"></app-header-filter>
 <app-table-header [showSearch]="false" [showNewIdea]="false"></app-table-header>
-<app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [from]="'harmonizer'" [currentFilterStatusId]="currentFilterStatusId" [useViewIdeaOverlay]="false"></app-table>
+<app-table-filter [tabs]="statusTabs" [activeStatusId]="currentFilterStatusId"></app-table-filter>
+<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [from]="'harmonizer'" [currentFilterStatusId]="currentFilterStatusId" [useViewIdeaOverlay]="true"></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
 
 <app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>
+
+<app-view-idea-overlay
+  [open]="showViewIdeaOverlay"
+  [ideaUid]="overlayIdeaUid"
+  [ideas]="filteredIdeas"
+  [referrer]="'/harmonizer'"
+  [statusLabel]="overlayStatusLabel"
+  (closeOverlay)="onCloseViewIdeaOverlay()"
+  (editDetails)="onEditFromOverlay($event)"
+></app-view-idea-overlay>

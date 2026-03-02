@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 import { Idea, IdeaPayload, ExportIdeasPayload, ResetIdeaPayload } from '../models/idea.model';
 import { PrioritizationPayload } from '../models/prioritization.model';
-import { StudyDetailsPayload, StudyDetailsWithPilotPayload } from '../models/study-details.model';
+import { StudyDetailsPayload, StudyDetailsWithPilotPayload, StudyDetailsMinimalPayload } from '../models/study-details.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { GetIdeasResponse } from '../models/api-response/get-ideas.model';
@@ -26,12 +26,12 @@ export interface DropdownValueItem {
 export class IdeaService {
   /** On localhost use local API; otherwise use environment (dev/staging/prod). */
   private get baseUrl(): string {
-    return isLocalHost() ? 'https://rti-ideas.dev.aws.alcon.net' : environment.apiUrl;
+    return isLocalHost() ? 'http://localhost:5000' : environment.apiUrl;
   }
 
   /** Admin API URL for dropdown values and other admin endpoints */
   private get adminApiUrl(): string {
-    return 'https://rti-admin.dev.aws.alcon.net';
+    return 'http://localhost:5000';
   }
 
   private get x_api_key(): string {
@@ -132,7 +132,7 @@ export class IdeaService {
   // ----------------------------------------------------
   // POST: Submit study details (Enter Study Details form)
   // ----------------------------------------------------
-  submitStudyDetails(payload: StudyDetailsPayload | StudyDetailsWithPilotPayload): Observable<unknown> {
+  submitStudyDetails(payload: StudyDetailsPayload | StudyDetailsWithPilotPayload | StudyDetailsMinimalPayload): Observable<unknown> {
     const headers = this.buildHeaders();
     //    const headers = new HttpHeaders({
     //   'Content-Type': 'application/json',

@@ -89,6 +89,8 @@ export class IdeaEdit implements OnInit, OnDestroy {
   ideaUid: string | null = null;
   currentIdea: Idea | null = null;
   from: string = ''; // Track where user came from (e.g., 'harmonizer')
+  /** Query params to restore when user cancels (e.g. from harmonizer view with statusLabel). */
+  private returnQueryParams: Record<string, string> = {};
 
   constructor(
     private fb: FormBuilder,
@@ -115,11 +117,15 @@ export class IdeaEdit implements OnInit, OnDestroy {
       this.ideaUid = params.get('idea_uid');
     });
 
-    // Get query params (e.g., 'from' parameter)
+    // Get query params (e.g., 'from', 'statusLabel') and store for cancel redirect
     this.route.queryParamMap.pipe(take(1)).subscribe((queryParams) => {
       const fromParam = queryParams.get('from');
       // Normalize so both '/harmonizer' and 'harmonizer' work
       this.from = (fromParam || '').replace(/^\//, '') || '';
+      queryParams.keys.forEach((key) => {
+        const v = queryParams.get(key);
+        if (v != null) this.returnQueryParams[key] = v;
+      });
     });
 
     // Load dropdowns and then populate form
@@ -305,8 +311,19 @@ export class IdeaEdit implements OnInit, OnDestroy {
 
   cancelIdea(): void {
     this.popup.open = false;
+    if (this.from === 'harmonizer') {
+      this.router.navigate(['/harmonizer']);
+      return;
+    }
+    if (this.from === '') {
+      this.router.navigate(['/']);
+      return;
+    }
     if (this.ideaUid) {
-      this.router.navigate(['/ideas/' + this.ideaUid]);
+      const hasReturnParams = Object.keys(this.returnQueryParams).length > 0;
+      this.router.navigate(['/ideas/' + this.ideaUid], {
+        queryParams: hasReturnParams ? this.returnQueryParams : undefined,
+      });
     } else {
       this.router.navigate(['/']);
     }

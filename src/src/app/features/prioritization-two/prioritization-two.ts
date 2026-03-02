@@ -32,7 +32,7 @@ export const ideaDisplayColumns: TableColumn[] = [
   { key: 'product.product_name', label: 'Product / Project', sortable: true, width: 'medium' },
   { key: 'TAC_or_RP', label: 'Target Aspirational Claim / Research Proposal', sortable: true, width: 'large' },
   { key: 'ranking_brand', label: 'Product Ranking', sortable: true, width: 'small' },
-  { key: 'ranking_franchise', label: 'Franchise Ranking', sortable: true, width: 'small' },
+  { key: 'ranking_franchise', label: 'TA Ranking', sortable: true, width: 'small' },
   { key: 'status.status_name', label: 'Status', sortable: true, width: 'small' },
   { key: 'options', label: '', sortable: false, width: 'xsmall' }
 ];
@@ -71,9 +71,12 @@ export class PrioritizationTwo implements OnInit {
   pageSize = 10;
   totalPages = 1;
   currentFilterStatusId: number = 0; // Track current filter status_id
+  /** After save ranking: reload on TA Prioritization Pending and sort by ranking_franchise */
+  private justSavedRanking = false;
 
   // Status IDs where pagination is hidden (TA Prioritization Pending, TA Ranked)
   private readonly noPaginationStatusIds = [12, 13];
+  private readonly taPrioritizationPendingStatusId = 12;
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -86,6 +89,21 @@ export class PrioritizationTwo implements OnInit {
 
   get showPagination(): boolean {
     return !this.noPaginationStatusIds.includes(this.currentFilterStatusId);
+  }
+
+  /** Show Save/Submit Ranking buttons only on TA Prioritization Pending (status_id 12); hide on All and TA Ranked */
+  get showRankingButtons(): boolean {
+    return this.currentFilterStatusId === this.taPrioritizationPendingStatusId;
+  }
+
+  /** Columns for table: hide Product Ranking and TA Ranking in "All" filter */
+  get displayedColumns(): TableColumn[] {
+    if (this.currentFilterStatusId === 0) {
+      return this.ideaDisplayColumns.filter(
+        (col) => col.key !== 'ranking_brand' && col.key !== 'ranking_franchise'
+      );
+    }
+    return this.ideaDisplayColumns;
   }
 
   // Array to store ranking changes
@@ -111,18 +129,37 @@ export class PrioritizationTwo implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      // Store original rankings when ideas are loaded
-      ideas.forEach(idea => {
-        this.originalRankings.set(
-          idea.idea_id,
-          idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
-        );
-      });
-      console.log('📋 Original rankings stored on ideas load:', Array.from(this.originalRankings.entries()));
-      this.taFilterChange(null);
-      this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-      this.updatePagedIdeas();
-      this.updateStatusCounts();
+      if (this.justSavedRanking) {
+        this.justSavedRanking = false;
+        this.currentFilterStatusId = this.taPrioritizationPendingStatusId;
+        this.filteredIdeas = this.ideas.filter((i) => i.status_id === this.taPrioritizationPendingStatusId);
+        this.filteredIdeas.sort((a, b) => this.sortByFranchiseOrProductRank(a, b));
+        // Repopulate rankingChanges and originalRankings from saved data so Submit Ranking stays clickable
+        this.rankingChanges = this.filteredIdeas.map((idea) => ({
+          idea_id: idea.idea_id,
+          ranking_franchise: idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
+        }));
+        this.originalRankings.clear();
+        this.filteredIdeas.forEach((idea) => {
+          this.originalRankings.set(idea.idea_id, idea.ranking_franchise != null ? String(idea.ranking_franchise) : null);
+        });
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.currentPage = 1;
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+      } else {
+        ideas.forEach(idea => {
+          this.originalRankings.set(
+            idea.idea_id,
+            idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
+          );
+        });
+        console.log('📋 Original rankings stored on ideas load:', Array.from(this.originalRankings.entries()));
+        this.taFilterChange(null);
+        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
+        this.updatePagedIdeas();
+        this.updateStatusCounts();
+      }
     });
 
     this.sub = this.ideaEvents.events$.subscribe((event: any) => {
@@ -199,10 +236,8 @@ export class PrioritizationTwo implements OnInit {
       } else if (event.type === 'savePrioritizationSuccess') {
         this.popup = PopupConfigs.rankingSaved;
         this.popup.open = true;
-        this.taFilterChange(null);
-        this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
-        this.updatePagedIdeas();
-        this.updateStatusCounts();
+        this.justSavedRanking = true;
+        this.currentFilterStatusId = this.taPrioritizationPendingStatusId;
         this.rankingChanges = [];
         this.originalRankings.clear();
       } else if (event.type === 'submitPrioritizationSuccess') {
@@ -215,7 +250,7 @@ export class PrioritizationTwo implements OnInit {
         this.rankingChanges = [];
         this.originalRankings.clear();
       } else if (event.type === 'prioritizationFailure') {
-        alert(event.payload);
+        this.ideaEvents.toastErrorEvent(event.payload);
         console.error('Error saving ranking:', event.payload);
       } else if (event.type === 'exportData') {
         this.exportData();
@@ -322,10 +357,35 @@ export class PrioritizationTwo implements OnInit {
       this.filteredIdeas = [...this.ideas];
     } else {
       this.filteredIdeas = this.ideas.filter((i) => i.status_id === status_id);
+      // TA Prioritization Pending and TA Ranked: franchise rank if set, else product rank; display ascending
+      if (this.noPaginationStatusIds.includes(status_id)) {
+        this.filteredIdeas.sort((a, b) => this.sortByFranchiseOrProductRank(a, b));
+      }
     }
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
     this.updatePagedIdeas();
+  }
+
+  /** Display sort: franchise rank if set, else product rank; ascending. Franchise rank has priority. */
+  private sortByFranchiseOrProductRank(a: Idea, b: Idea): number {
+    const rankA = this.getDisplayRankValue(a);
+    const rankB = this.getDisplayRankValue(b);
+    return rankA - rankB;
+  }
+
+  private getDisplayRankValue(idea: Idea): number {
+    const fr = idea.ranking_franchise;
+    if (fr != null && String(fr).trim() !== '') {
+      const n = Number(fr);
+      return Number.isFinite(n) ? n : Infinity;
+    }
+    const br = idea.ranking_brand;
+    if (br != null && String(br).trim() !== '') {
+      const n = Number(br);
+      return Number.isFinite(n) ? n : Infinity;
+    }
+    return Infinity;
   }
 
   filterBySearchText(searchText: string) {
@@ -363,8 +423,12 @@ export class PrioritizationTwo implements OnInit {
     const dir = direction === 'asc' ? 1 : -1;
 
     this.filteredIdeas = [...this.filteredIdeas].sort((a, b) => {
-      const av = this.getValue(a, column);
-      const bv = this.getValue(b, column);
+      let av = this.getValue(a, column);
+      let bv = this.getValue(b, column);
+      if (column === 'rti_unique_id') {
+        av = av != null ? String(av) : '';
+        bv = bv != null ? String(bv) : '';
+      }
 
       if (av < bv) return -1 * dir;
       if (av > bv) return 1 * dir;
@@ -380,6 +444,7 @@ export class PrioritizationTwo implements OnInit {
       (c) => c.ranking_franchise != null && displayedIds.has(c.idea_id)
     );
 
+    // Payload: exact user-selected rankings as-is (no reorder). Display in Pending tab is sorted by rank separately.
     console.log('🔍 Original rankings:', Array.from(this.originalRankings.entries()));
     console.log('🔍 Current ranking changes:', rankedInView);
 
@@ -416,27 +481,25 @@ export class PrioritizationTwo implements OnInit {
 
   /**
    * Build final payload for API.
-   * Case 1 (new ranks, no duplicates): Pass through user-selected ranks as-is [1, 5, 6, 8, 9].
-   * Case 2 (re-rank with conflicts): Run reorder to resolve duplicates via shifting; output unique ranks.
+   * Pass user-selected ranks as-is to backend (reorder logic commented out).
    */
   private buildFinalPayload(basePayload: PrioritizationPayload): PrioritizationPayload {
     if (!basePayload.ideas?.length) {
       return basePayload;
     }
-    const ideas = basePayload.ideas as TARankingChange[];
-    const rankValues = ideas
-      .map((i) => (i.ranking_franchise != null ? String(i.ranking_franchise).trim() : null))
-      .filter((r): r is string => r != null && r !== '');
-    const hasDuplicates =
-      rankValues.length > 0 &&
-      rankValues.length !== new Set(rankValues).size;
-
-    if (!hasDuplicates) {
-      // Case 1: All unique ranks – pass through
-      return basePayload;
-    }
-    // Case 2: Duplicate ranks – resolve via reorder/shifting
-    return this.reorderPayloadWithLockedRanks(basePayload);
+    // Reorder logic commented out: pass user-selected ranks as-is to API
+    // const ideas = basePayload.ideas as TARankingChange[];
+    // const rankValues = ideas
+    //   .map((i) => (i.ranking_franchise != null ? String(i.ranking_franchise).trim() : null))
+    //   .filter((r): r is string => r != null && r !== '');
+    // const hasDuplicates =
+    //   rankValues.length > 0 &&
+    //   rankValues.length !== new Set(rankValues).size;
+    // if (!hasDuplicates) {
+    //   return basePayload;
+    // }
+    // return this.reorderPayloadWithLockedRanks(basePayload);
+    return basePayload;
   }
 
   /** Reorder payload so locked ranks are preserved and others are shifted around them. */

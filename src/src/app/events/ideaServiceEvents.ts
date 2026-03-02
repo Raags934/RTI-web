@@ -24,12 +24,14 @@ export type IdeaEvent =
   | { type: 'nextIdea' }
   | { type: 'prevIdea' }
   | { type: 'toastEvent'; payload: string }
+  | { type: 'toastErrorEvent'; payload: string }
   | { type: 'abandonIdea' }
   | { type: 'needMoreInfo' }
   | { type: 'assessIdea' }
   | { type: 'submitToHarmonization' }
   | { type: 'enterStudyDetails' }
   | { type: 'submitStudyDetailsConfirmation' }
+  | { type: 'saveStudyDetailsDraft' }
   | { type: 'savePrioritizationSuccess' }
   | { type: 'submitPrioritizationSuccess' }
   | { type: 'prioritizationFailure'; payload: string }
@@ -95,6 +97,10 @@ export class IdeaEventsService {
 
   toastEvent(message: string) {
     this.eventsSubject.next({ type: 'toastEvent', payload: message });
+  }
+
+  toastErrorEvent(message: string) {
+    this.eventsSubject.next({ type: 'toastErrorEvent', payload: message });
   }
 
   taFilterChange(ta_id: number | null) {
@@ -190,7 +196,11 @@ export class IdeaEventsService {
   submitStudyDetailsConfirmation() {
     this.eventsSubject.next({ type: 'submitStudyDetailsConfirmation'} );
   }
- 
+
+  saveStudyDetailsDraft() {
+    this.eventsSubject.next({ type: 'saveStudyDetailsDraft' });
+  }
+
   freezeData() {
     this.eventsSubject.next({ type: 'freezeData' });
   }

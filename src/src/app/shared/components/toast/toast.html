@@ -1,6 +1,6 @@
 @if (show) {
-    <div class="toast">
-      {{ message }}
-    </div>
-  }
+  <div class="toast" [class.toast-error]="type === 'error'">
+    {{ message }}
+  </div>
+}
  

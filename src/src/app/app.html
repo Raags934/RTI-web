@@ -7,10 +7,10 @@
     <mat-sidenav-content class="app-content pxr-16">
       <app-header></app-header>
       <router-outlet></router-outlet>
-      <app-toast [message]="createIdeaToast.message" [show]="createIdeaToast.visible"> </app-toast>
+      <app-toast [message]="createIdeaToast.message" [show]="createIdeaToast.visible" [type]="createIdeaToast.type ?? 'success'"></app-toast>
     </mat-sidenav-content>
   </mat-sidenav-container>
 } @else {
   <router-outlet></router-outlet>
-  <app-toast [message]="createIdeaToast.message" [show]="createIdeaToast.visible"> </app-toast>
+  <app-toast [message]="createIdeaToast.message" [show]="createIdeaToast.visible" [type]="createIdeaToast.type ?? 'success'"></app-toast>
 }

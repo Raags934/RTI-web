@@ -11,7 +11,7 @@
   </app-buttons>
 
   @if (showProductRank) {
-    <p class="status-label" style="margin-left: 24px;">Product Rank:</p>
+    <p class="status-label" style="margin-left: 24px;">Product Ranking:</p>
     <app-buttons
       variant="type2"
       [color]="getStatusColor(viewIdea?.status?.status_id)"
@@ -23,7 +23,7 @@
   }
 
   @if (showTaRank) {
-    <p class="status-label" style="margin-left: 24px;">TA Rank:</p>
+    <p class="status-label" style="margin-left: 24px;">TA Ranking:</p>
     <app-buttons
       variant="type2"
       [color]="getStatusColor(viewIdea?.status?.status_id)"
@@ -35,183 +35,195 @@
   }
 </div>
 
-<div class="card-heading">
-  <p>Ideation</p>
-</div>
+<div class="view-accordions">
+  <!-- Ideation accordion (always shown, open by default) -->
+  <div class="accordion-item">
+    <button type="button" class="accordion-header" (click)="toggleAccordion('ideation')" [attr.aria-expanded]="accordionIdeationOpen">
+      <span class="accordion-title">Ideation</span>
+      <span class="accordion-icon-circle" [class.accordion-icon--collapsed]="!accordionIdeationOpen">
+        <svg class="accordion-chevron" viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M 2 9 L 6 4 L 10 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </span>
+    </button>
+    @if (accordionIdeationOpen) {
+      <div class="accordion-content">
+        <form class="material-form" [class.assessor-view]="from === 'assessor'">
+          <!-- Product -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[0].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('product_id')"
+            >
+            </app-form-input>
+          </div>
 
-<form class="material-form" [class.assessor-view]="from === 'assessor'">
-  <!-- Product -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[0].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('product_id')"
-    >
-    </app-form-input>
+          <!-- TA (auto-filled) -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[1].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('ta_id')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Product Type -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[2].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('product_type')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Research Pathway -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[3].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('pathway_id')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Brand (auto-filled) -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[4].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('brand_id')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- RTI Year -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[5].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [autoSelectFirst]="true"
+              [control]="form.get('rti_year')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Franchise (auto-filled) -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[6].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('franchise_id')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Monadic or Comparative -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[7].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('monadic_or_comparative')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Origin Request -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[8].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [autoSelectFirst]="true"
+              [control]="form.get('origin_request')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Strategic Rationale -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[9].text"
+              type="textarea"
+              [isDisabled]="true"
+              [required]="true"
+              rows="1"
+              [control]="form.get('strategic_rationale')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Target Aspirational Claim -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[10].text"
+              type="textarea"
+              [isDisabled]="true"
+              [required]="true"
+              rows="1"
+              [control]="form.get('target_aspirational_claim')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Launch Claim -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[11].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('launch_claim')"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Confirmation -->
+          <div class="confirmation-row" *ngIf="from === 'assessor'">
+            Confirmation
+          </div>
+
+          <!-- Confirmer Comment section -->
+          <div class="confirmer-comment" *ngIf="from === 'assessor'">
+            <app-form-input
+              label="Confirmer Comment"
+              type="textarea"
+              [control]="form.get('comment')"
+              placeholder="Enter comment here"
+              rows="1"
+            ></app-form-input>
+          </div>
+        </form>
+      </div>
+    }
   </div>
 
-  <!-- TA (auto-filled) -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[1].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('ta_id')"
-      [showIconDropdown]="false"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Product Type -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[2].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('product_type')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Research Pathway -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[3].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('pathway_id')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Brand (auto-filled) -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[4].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('brand_id')"
-      [showIconDropdown]="false"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- RTI Year -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[5].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [autoSelectFirst]="true"
-      [control]="form.get('rti_year')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Franchise (auto-filled) -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[6].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('franchise_id')"
-      [showIconDropdown]="false"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Monadic or Comparative -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[7].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('monadic_or_comparative')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Origin Request -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[8].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [autoSelectFirst]="true"
-      [control]="form.get('origin_request')"
-      [showIconDropdown]="false"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Strategic Rationale -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[9].text"
-      type="textarea"
-      [isDisabled]="true"
-      [required]="true"
-      rows="1"
-      [control]="form.get('strategic_rationale')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Target Aspirational Claim -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[10].text"
-      type="textarea"
-      [isDisabled]="true"
-      [required]="true"
-      rows="1"
-      [control]="form.get('target_aspirational_claim')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Launch Claim -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[11].text"
-      type="text"
-      [isDisabled]="true"
-      [required]="true"
-      [control]="form.get('launch_claim')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Confirmation -->
-  <div class="confirmation-row" *ngIf="from === 'assessor'">
-    Confirmation
-  </div>
-
-  <!-- Confirmer Comment section -->
-  <div class="confirmer-comment" *ngIf="from === 'assessor'">
-    <app-form-input
-      label="Confirmer Comment"
-      type="textarea"
-      [control]="form.get('comment')"
-      placeholder="Enter comment here"
-      rows="1"
-    ></app-form-input>
-  </div>
-</form>
-
-<!-- Accordion: Study Details & Prioritization (when data exists) -->
-@if (hasStudyDetails() || hasPilotDetails() || hasPrioritizationOne() || hasPrioritizationTwo()) {
-  <div class="view-accordions">
+  <!-- Study Details, Pilot Details, Prioritization accordions (when data exists) -->
+  @if (hasStudyDetails() || hasPilotDetails() || hasPrioritizationOne() || hasPrioritizationTwo()) {
     @if (hasStudyDetails()) {
       <div class="accordion-item">
         <button type="button" class="accordion-header" (click)="toggleAccordion('studyDetails')" [attr.aria-expanded]="accordionStudyDetailsOpen">
@@ -304,8 +316,8 @@
         }
       </div>
     }
-  </div>
-}
+  }
+</div>
 
 <!-- Action buttons row: Cancel + Enter Study Details / Assess Idea / Update funding status + Edit Details -->
 <div class="action-buttons-row">
@@ -328,13 +340,13 @@
     Update Funding Status
   </app-buttons>
   <app-buttons
-    *ngIf="from === 'assessor' || (from === 'harmonizer' && !hasStudyDetails())"
+    *ngIf="from === 'assessor' || (from === 'harmonizer' && (!hasStudyDetails() || (hasStudyDetails() && viewIdea?.status?.status_id === 18)))"
     variant="type1"
     color="var(--primary-400)"
     size="medium"
     (click)="onAssessIdea()"
   >
-    {{ from === 'assessor' ? 'Assess Idea' : 'Enter Study Details' }}
+    {{ getStudyDetailsButtonLabel() }}
   </app-buttons>
   <app-buttons
     *ngIf="from !== 'funding' && !shouldHideEditDetails()"
@@ -470,8 +482,7 @@
       </div>
     </div>
     <div class="form-field">
-      <app-form-input label="POS Reasons" type="textarea" [required]="true" [control]="form.get('pos_reasons')"
-        rows="2"></app-form-input>
+      <app-form-input label="POS Reasons" type="text" [required]="true" [control]="form.get('pos_reasons')"></app-form-input>
     </div>
     <div class="form-field">
       <app-form-input label="EF Assessment Comments" type="textarea" [required]="true"
@@ -531,8 +542,8 @@
     </div>
     <div class="study-details-pos-reasons-row">
       <div class="form-field">
-        <app-form-input label="POS Reasons" type="textarea" [required]="true"
-          [control]="form.get('study_details_pos_reasons')" rows="3"></app-form-input>
+        <app-form-input label="POS Reasons" type="text" [required]="true"
+          [control]="form.get('study_details_pos_reasons')"></app-form-input>
       </div>
     </div>
     <!-- Study Details Accordion (moved before Pilot Study toggle) -->
@@ -557,24 +568,24 @@
             submitting.</p>
         </div>
         <div class="form-field">
-          <app-form-input label="Research Questions" type="textarea" [required]="true"
-            [control]="form.get('research_questions')" rows="2"></app-form-input>
+          <app-form-input label="Research Questions" type="text" [required]="true"
+            [control]="form.get('research_questions')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="Potential Claims" type="textarea" [required]="true"
-            [control]="form.get('potential_claims')" rows="4"></app-form-input>
+          <app-form-input label="Potential Claims" type="text" [required]="true"
+            [control]="form.get('potential_claims')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="Primary Endpoints" type="textarea" [required]="true"
-            [control]="form.get('primary_endpoints')" rows="1"></app-form-input>
+          <app-form-input label="Primary Endpoints" type="text" [required]="true"
+            [control]="form.get('primary_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="Secondary Endpoints" type="textarea" [required]="true"
-            [control]="form.get('secondary_endpoints')" rows="3"></app-form-input>
+          <app-form-input label="Secondary Endpoints" type="text" [required]="true"
+            [control]="form.get('secondary_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="Other Potential Endpoints" type="textarea" [required]="true"
-            [control]="form.get('other_potential_endpoints')" rows="3"></app-form-input>
+          <app-form-input label="Other Potential Endpoints" type="text" [required]="true"
+            [control]="form.get('other_potential_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
           <app-form-input
@@ -586,8 +597,8 @@
           ></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="Proposed Statistics" type="textarea" [required]="true"
-            [control]="form.get('proposed_statistics')" rows="3"></app-form-input>
+          <app-form-input label="Proposed Statistics" type="text" [required]="true"
+            [control]="form.get('proposed_statistics')"></app-form-input>
         </div>
         <div class="date-fields-row">
           <div class="form-field">
@@ -674,24 +685,24 @@
                 submitting.</p>
             </div>
             <div class="form-field">
-              <app-form-input label="Research Questions" type="textarea" [required]="true"
-                [control]="form.get('pilot_research_questions')" rows="2"></app-form-input>
+              <app-form-input label="Research Questions" type="text" [required]="true"
+                [control]="form.get('pilot_research_questions')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="Potential Claims" type="textarea" [required]="true"
-                [control]="form.get('pilot_potential_claims')" rows="4"></app-form-input>
+              <app-form-input label="Potential Claims" type="text" [required]="true"
+                [control]="form.get('pilot_potential_claims')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="Primary Endpoints" type="textarea" [required]="true"
-                [control]="form.get('pilot_primary_endpoints')" rows="1"></app-form-input>
+              <app-form-input label="Primary Endpoints" type="text" [required]="true"
+                [control]="form.get('pilot_primary_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="Secondary Endpoints" type="textarea" [required]="true"
-                [control]="form.get('pilot_secondary_endpoints')" rows="3"></app-form-input>
+              <app-form-input label="Secondary Endpoints" type="text" [required]="true"
+                [control]="form.get('pilot_secondary_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="Other Potential Endpoints" type="textarea" [required]="true"
-                [control]="form.get('pilot_other_potential_endpoints')" rows="3"></app-form-input>
+              <app-form-input label="Other Potential Endpoints" type="text" [required]="true"
+                [control]="form.get('pilot_other_potential_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
               <app-form-input
@@ -703,8 +714,8 @@
               ></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="Proposed Statistics" type="textarea" [required]="true"
-                [control]="form.get('pilot_proposed_statistics')" rows="3"></app-form-input>
+              <app-form-input label="Proposed Statistics" type="text" [required]="true"
+                [control]="form.get('pilot_proposed_statistics')"></app-form-input>
             </div>
             <div class="date-fields-row">
               <div class="form-field">
@@ -766,21 +777,20 @@
       >
         Cancel
       </app-buttons>
-      <!-- Save button - commented for future use
       <app-buttons
-        (click)="saveStudyDetailsDraft()"
-        variant="type2"
+        actionType="saveStudyDetailsDraft"
+        variant="type1"
         color="var(--primary-400)"
         size="large"
       >
         Save
       </app-buttons>
-      -->
       <app-buttons
         actionType="enterStudyDetails"
         variant="type1"
         color="var(--primary-400)"
         size="large"
+        [isDisabled]="form.get('recommended')?.value !== 'Yes'"
       >
         Submit Study Details
       </app-buttons>

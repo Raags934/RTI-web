@@ -15,7 +15,7 @@ interface ApiMasterDataResponse {
 export class MasterDataService {
   /** On localhost use local API; otherwise use environment API URL. */
   private get baseUrl(): string {
-    return isLocalHost() ? 'https://rti-ideas.dev.aws.alcon.net' : environment.apiUrl;
+    return isLocalHost() ? 'http://localhost:5000' : environment.apiUrl;
   }
 
   private get x_api_key(): string {

@@ -78,6 +78,10 @@ export class Buttons {
         this.ideaEvents.submitStudyDetailsConfirmation();
         break;
 
+      case 'saveStudyDetailsDraft':
+        this.ideaEvents.saveStudyDetailsDraft();
+        break;
+
       case 'saveUpdateFundingStatus':
         this.ideaEvents.saveUpdateFundingStatus();
         break;

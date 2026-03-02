@@ -10,6 +10,11 @@
     animation: fadeInOut 4s ease forwards;
     font-size: var(--font-size-b3);
   }
+
+  .toast.toast-error {
+    background: var(--danger, #c62828);
+    color: var(--neutral-white);
+  }
  
   @keyframes fadeInOut {
     0%   { opacity: 0; transform: translateY(20px); }

@@ -59,13 +59,24 @@ export class App implements OnInit {
     this.eventsSub = this.ideaEvents.events$.subscribe((event) => {
       if (event.type === 'toastEvent') {
         this.showToast(event.payload);
+      } else if (event.type === 'toastErrorEvent') {
+        this.showErrorToast(event.payload);
       }
     });
   }
 
   showToast(message: string) {
-    console.log('app toast');
     this.createIdeaToast.message = message;
+    this.createIdeaToast.type = 'success';
+    this.createIdeaToast.visible = true;
+    setTimeout(() => {
+      this.createIdeaToast.visible = false;
+    }, 9000);
+  }
+
+  showErrorToast(message: string) {
+    this.createIdeaToast.message = message;
+    this.createIdeaToast.type = 'error';
     this.createIdeaToast.visible = true;
     setTimeout(() => {
       this.createIdeaToast.visible = false;

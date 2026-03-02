@@ -9,4 +9,5 @@ import { Component, Input } from '@angular/core';
 export class Toast {
   @Input() message = '';
   @Input() show = false;
+  @Input() type: 'success' | 'error' = 'success';
 }
