@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
- 
+
 import { Idea, IdeaPayload } from '../../../models/idea.model';
 import { IdeaEventsService } from '../../../events/ideaServiceEvents';
 import { HighlightPipe } from '../../pipes/highlight.pipe.js';
@@ -16,16 +16,17 @@ import { RankingDropdown } from '../ranking-dropdown/ranking-dropdown';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state.js';
 import { DeleteIdea, AddDraftIdea } from '../../../store/idea.actions.js';
- 
+import { User } from '../../../models/user.model';
+
 export interface TableColumn {
   key: string; // property name in data
   label: string; // header label
   sortable?: boolean; // enable sorting
   width?: ColumnWidth;
 }
- 
+
 export type ColumnWidth = 'xsmall' | 'small' | 'medium' | 'large';
- 
+
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -49,23 +50,25 @@ export class Table {
   @Output() selectedIdeaIdsChange = new EventEmitter<number[]>();
 
   private sub!: Subscription;
+  private userSub!: Subscription;
+  private currentUser: User | null = null;
 
   get displayedColumns(): string[] {
     return this.showCheckboxColumn
       ? ['checkbox', ...this.columns.map((c) => c.key)]
       : this.columns.map((c) => c.key);
   }
- 
+
   searchText = '';
   // No column sorted initially
   private currentSortColumn: string | null = null;
- 
+
   // No direction until the first click
   private currentDirection: 'asc' | 'desc' | null = null;
- 
+
   // Options menu state
   openOptionsMenuId: string | null = null;
- 
+
   constructor(
     private ideaEvents: IdeaEventsService,
     private router: Router,
@@ -76,9 +79,16 @@ export class Table {
         this.searchText = event.payload.searchText;
       }
     });
+
+    // Keep current user in sync for conditional TAC/RP display on idea dashboard
+    this.userSub = this.store
+      .select((state) => state.masterData?.data?.user as User | undefined)
+      .subscribe((user) => {
+        this.currentUser = user ?? null;
+      });
   }
- 
-  ngOnInit() {}
+
+  ngOnInit() { }
 
   onSort(column: string) {
     if (this.currentSortColumn === column) {
@@ -89,23 +99,57 @@ export class Table {
       this.currentSortColumn = column;
       this.currentDirection = 'asc';
     }
- 
+
     // Raise global sort event
     this.ideaEvents.sortByColumn(this.currentSortColumn, this.currentDirection || 'asc');
   }
- 
+
   getDirection(column: string): 'asc' | 'desc' | null {
     // Only show icon for the active column
     return this.currentSortColumn === column ? this.currentDirection : null;
   }
- 
+
   getValue(obj: any, path: string): any {
     // Special merged TAC/RP column
     if (path === 'TAC_or_RP') {
       const tac = obj?.target_aspirational_claim;
       const rp = obj?.research_proposal;
+      let value = '';
 
-      const value = tac ? `TAC: ${tac}` : rp ? `RP: ${rp}` : '';
+      // On idea dashboard (landing page), TAC/RP display is driven by user function:
+      // - Evidence Function only: show RP
+      // - Business Function only: show TAC
+      // - Both Evidence + Business: show both "TAC: ..., RP: ..."
+      if (this.isIdeaDashboardRoute() && this.currentUser?.functions) {
+        const functions = this.currentUser.functions || [];
+        const hasEvidenceFunction = functions.some(
+          (f) => f.function_type === 'Evidence Function'
+        );
+        const hasBusinessFunction = functions.some(
+          (f) => f.function_type === 'Business Function'
+        );
+
+        if (hasEvidenceFunction && hasBusinessFunction) {
+          const parts: string[] = [];
+          if (tac) {
+            parts.push(`TAC: ${tac}`);
+          }
+          if (rp) {
+            parts.push(`RP: ${rp}`);
+          }
+          value = parts.join(', ');
+        } else if (hasEvidenceFunction && !hasBusinessFunction) {
+          value = rp ? `RP: ${rp}` : '';
+        } else if (hasBusinessFunction && !hasEvidenceFunction) {
+          value = tac ? `TAC: ${tac}` : '';
+        } else {
+          // Fallback to legacy behavior if user has no matching functions
+          value = tac ? `TAC: ${tac}` : rp ? `RP: ${rp}` : '';
+        }
+      } else {
+        // Legacy behavior for all non-idea-dashboard routes
+        value = tac ? `TAC: ${tac}` : rp ? `RP: ${rp}` : '';
+      }
 
       return value && value.trim() !== '' ? value : '.....';
     }
@@ -131,18 +175,18 @@ export class Table {
       this.viewIdea(ideaUid);
       return;
     }
- 
+
     if (this.openOptionsMenuId === ideaUid) {
       this.openOptionsMenuId = null;
     } else {
       this.openOptionsMenuId = ideaUid;
     }
   }
- 
+
   closeOptionsMenu() {
     this.openOptionsMenuId = null;
   }
- 
+
   isOptionsMenuOpen(ideaUid: string): boolean {
     return this.openOptionsMenuId === ideaUid;
   }
@@ -179,7 +223,7 @@ export class Table {
     const match = this.statusColor.find((s) => s.status_id === statusId);
     return match ? match.color : 'gray'; // fallback color
   }
- 
+
   // Check if current filter is a pending status based on the component/route
   // Prioritization One: status_id 10 = Product Prioritization Pending
   // Prioritization Two: status_id 12 = TA Prioritization Pending
@@ -298,7 +342,7 @@ export class Table {
   viewIdea(arg: any) {
     let ideaUid: string;
     let statusLabel: string | null = null;
- 
+
     if (typeof arg === 'string') {
       ideaUid = arg;
     } else {
@@ -347,14 +391,14 @@ export class Table {
     });
     this.closeOptionsMenu();
   }
- 
+
   duplicateIdea(idea: Idea) {
     if (!idea) {
       console.error('Idea not found');
       this.closeOptionsMenu();
       return;
     }
- 
+
     // Get user from store to set created_by
     this.store
       .select((state) => state.masterData?.data?.user)
@@ -365,7 +409,7 @@ export class Table {
         let approved = false;
         if (user?.roles && user?.functions) {
           const hasCreatorRole = user.roles.some(
-            (role) => role.role_name === 'Creator'
+            (role) => role.role_name === 'Creator/Approver'
           );
           const hasFranchiseBusinessFunction = user.functions.some(
             (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'
@@ -398,7 +442,7 @@ export class Table {
         this.closeOptionsMenu();
       });
   }
- 
+
   deleteIdea(element: Idea) {
     if (confirm(`Are you sure you want to delete idea ${element.idea_uid}?`)) {
       this.store.dispatch(DeleteIdea({ ideaId: element.idea_id }));
@@ -412,7 +456,7 @@ export class Table {
     this.ideaEvents.rankingChanged(element.idea_id, rank?.toString() || null);
     element.ranking_brand = rank?.toString() || null;
   }
- 
+
   getRankingValue(element: Idea): number | null {
     if (!element.ranking_brand) {
       return null;
@@ -425,7 +469,7 @@ export class Table {
     this.ideaEvents.rankingTaChanged(element.idea_id, rank?.toString() || null);
     element.ranking_franchise = rank?.toString() || null;
   }
- 
+
   getTARankingValue(element: Idea): number | null {
     if (!element.ranking_franchise) {
       return null;
@@ -439,7 +483,7 @@ export class Table {
     const index = this.dataSource.indexOf(element);
     return index >= this.dataSource.length - 3;
   }
- 
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     // Close options menu when clicking outside
@@ -447,15 +491,18 @@ export class Table {
       this.closeOptionsMenu();
     }
   }
- 
+
   // Check if current route is funding page
   isFunderRoute(): boolean {
     return this.router.url.includes('/funding');
   }
- 
+
   ngOnDestroy() {
     if (this.sub) {
       this.sub.unsubscribe();
+    }
+    if (this.userSub) {
+      this.userSub.unsubscribe();
     }
   }
 }

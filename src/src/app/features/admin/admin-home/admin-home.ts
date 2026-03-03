@@ -111,6 +111,12 @@ export class AdminHome implements OnInit, OnDestroy {
     });
   }
 
+  onCloseViewIdeaOverlay(): void {
+    this.showViewIdeaOverlay = false;
+    this.overlayIdeaUid = null;
+    this.overlayStatusLabel = null;
+  }
+
   onEditDetailsFromOverlay(idea: Idea): void {
     this.showViewIdeaOverlay = false;
     this.overlayIdeaUid = null;

@@ -18,6 +18,7 @@ import { loadMasterData } from '../../../store/masterData/masterData.actions.js'
 import { IdeaHistory } from '../idea-history/idea-history';
 import { ViewIdeaOverlay } from '../view-idea-overlay/view-idea-overlay';
 import { Router } from '@angular/router';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-idea-dashboard',
@@ -55,6 +56,7 @@ export class IdeaDashboard implements OnInit {
   };
 
   private sub!: Subscription;
+  private user$!: Observable<User | undefined>;
 
   constructor(
     private store: Store<AppState>,
@@ -66,6 +68,17 @@ export class IdeaDashboard implements OnInit {
   }
 
   ngOnInit(): void {
+    // Determine initial landing page based on user roles using hierarchy.
+    this.user$ = this.store.select((state) => state.masterData?.data?.user);
+    this.user$.subscribe((user) => {
+      if (!user) return;
+      const targetRoute = this.getDefaultRouteForRoles(user);
+      // Redirect only when we're on the root dashboard and another role-specific page should be used.
+      if (targetRoute !== '/' && this.router.url === '/') {
+        this.router.navigate([targetRoute]);
+      }
+    });
+
     // On every load/redirect: reset all filters to All and refresh list
     this.activeFilters.franchise_id = null;
     this.activeFilters.ta_id = null;
@@ -124,6 +137,40 @@ export class IdeaDashboard implements OnInit {
     const isDraft = idea?.status_id === 1;
     const editPath = isDraft ? '/ideas/' + idea.idea_uid + '/edit-draft' : '/ideas/' + idea.idea_uid + '/edit';
     this.router.navigate([editPath]);
+  }
+
+  /**
+   * Apply role hierarchy to decide which landing page a user should see.
+   * Creator > Harmonizer > Product Prioritizer > TA Prioritizer > Funder.
+   * Admin is deliberately ignored for default landing so users with both
+   * Admin and Creator land on the Creator dashboard.
+   */
+  private getDefaultRouteForRoles(user: User): string {
+    const roles = user.roles ?? [];
+    const names = roles.map((r) =>
+      (r.role_name || '').toLowerCase().trim()
+    );
+
+    const hasCreatorLike = names.some((n) =>
+      n.includes('creator') || n === 'creator/approver' || n.startsWith('creator ')
+    );
+    const hasHarmonizerLike = names.some((n) => n.includes('harmon'));
+    const hasProductPrioritizerLike = names.some(
+      (n) => n.includes('product') && n.includes('priorit')
+    );
+    const hasTaPrioritizerLike = names.some(
+      (n) => n.includes('ta') && n.includes('priorit')
+    );
+    const hasFunderLike = names.some((n) => n.includes('fund'));
+
+    if (hasCreatorLike) return '/';
+    if (hasHarmonizerLike) return '/harmonizer';
+    if (hasProductPrioritizerLike) return '/productprioritization';
+    if (hasTaPrioritizerLike) return '/taprioritization';
+    if (hasFunderLike) return '/funding';
+
+    // Fallback: stay on creator dashboard
+    return '/';
   }
 
   ngOnDestroy() {

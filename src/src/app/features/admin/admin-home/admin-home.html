@@ -12,7 +12,7 @@
   [ideas]="pagedIdeas"
   [referrer]="'/admin'"
   [statusLabel]="overlayStatusLabel"
-  (closeOverlay)="showViewIdeaOverlay = false; overlayIdeaUid = null; overlayStatusLabel = null"
+  (closeOverlay)="onCloseViewIdeaOverlay()"
   (editDetails)="onEditDetailsFromOverlay($event)"
 ></app-view-idea-overlay>
 

@@ -1,4 +1,5 @@
 <form class="material-form" [formGroup]="form">
+  <!-- Row 1: Product / Brand / TA -->
   <!-- Product -->
   <div class="form-field">
     <app-form-input
@@ -11,10 +12,23 @@
     </app-form-input>
   </div>
 
+  <!-- Brand (auto-filled) -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[4].text"
+      type="select"
+      [options]="brandOptions"
+      [isDisabled]="true"
+      [control]="form.get('brand_id')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
   <!-- TA (auto-filled) -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[1].text"
+      [label]="labels[1].text"
       type="select"
       [options]="taOptions"
       [isDisabled]="true"
@@ -24,10 +38,24 @@
     </app-form-input>
   </div>
 
+  <!-- Row 2: Franchise / Product Type / Research Pathway -->
+  <!-- Franchise (auto-filled) -->
+  <div class="form-field">
+    <app-form-input
+      [label]="labels[6].text"
+      type="select"
+      [options]="franchiseOptions"
+      [isDisabled]="true"
+      [control]="form.get('franchise_id')"
+      [showIconDropdown]="false"
+    >
+    </app-form-input>
+  </div>
+
   <!-- Product Type -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[2].text"
+      [label]="labels[2].text"
       type="select"
       [options]="productTypeOptions"
       [required]="true"
@@ -39,7 +67,7 @@
   <!-- Research Pathway -->
   <div class="form-field">
     <app-form-input
-    [label]="labels[3].text"
+      [label]="labels[3].text"
       type="select"
       [options]="researchPathwayOptions"
       [required]="true"
@@ -48,19 +76,7 @@
     </app-form-input>
   </div>
 
-  <!-- Brand (auto-filled) -->
-  <div class="form-field">
-    <app-form-input
-    [label]="labels[4].text"
-      type="select"
-      [options]="brandOptions"
-      [isDisabled]="true"
-      [control]="form.get('brand_id')"
-      [showIconDropdown]="false"
-    >
-    </app-form-input>
-  </div>
-
+  <!-- Row 3: RTI Year / Monadic / Origin Request -->
   <!-- RTI Year -->
   <div class="form-field">
     <app-form-input
@@ -70,19 +86,6 @@
       [required]="true"
       [autoSelectFirst]="true"
       [control]="form.get('rti_year')"
-    >
-    </app-form-input>
-  </div>
-
-  <!-- Franchise (auto-filled) -->
-  <div class="form-field">
-    <app-form-input
-      [label]="labels[6].text"
-      type="select"
-      [options]="franchiseOptions"
-      [isDisabled]="true"
-      [control]="form.get('franchise_id')"
-      [showIconDropdown]="false"
     >
     </app-form-input>
   </div>
@@ -113,6 +116,7 @@
     </app-form-input>
   </div>
 
+  <!-- Row 4: Strategic Rationale / TAC / Launch Claim -->
   <!-- Strategic Rationale -->
   <div class="form-field">
     <app-form-input

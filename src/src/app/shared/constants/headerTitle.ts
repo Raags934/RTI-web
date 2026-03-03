@@ -6,7 +6,9 @@ export interface headerTitle {
 }
 
 export const homeHeader: headerTitle = {
-    title: "Welcome Back, ",
+    // Title intentionally left blank; the home page uses the dynamic
+    // "Welcome back, {{ userName }}" line from HeaderWelcome instead.
+    title: "",
     breadcrumbParts: [],
     backIconVisible: false,
     expected: ''

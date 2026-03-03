@@ -1,19 +1,45 @@
 
-.app-shell { height: 100vh; }
+/* Shell: full viewport; sidebar and content managed so content is never overlapped */
+.app-shell {
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .app-sidenav {
-  width: 200px;
+  width: 240px;
   border-right: 1px solid var(--border);
   background: #fff;
   padding-left: 12px;
   padding-right: 12px;
+  transition: width 200ms ease;
+  box-sizing: border-box;
 }
+
+/* When sidebar is collapsed: narrow strip (icons + toggle) */
+.app-sidenav-collapsed {
+  width: 72px !important;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Content: reserve space for sidebar so it never overlaps (margin = sidebar width) */
 .app-content {
+  margin-left: 240px;
+  transition: margin-left 200ms ease;
   padding-left: 16px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* When sidebar is collapsed, content starts after narrow strip */
+.app-content.app-content-sidebar-collapsed {
+  margin-left: 72px;
 }
 
 @media (max-width: 1024px) {
-  .app-sidenav { width: 240px; }
+  .app-sidenav:not(.app-sidenav-collapsed) { width: 240px; }
 }

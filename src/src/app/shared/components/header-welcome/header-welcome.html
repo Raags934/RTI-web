@@ -1,4 +1,7 @@
 <div class="header">
+    <!-- Welcome line shown only on landing/feature pages (not on View/Edit Idea). -->
+    <p class="welcome-line" *ngIf="showWelcomeLine">Welcome back,{{ userName || 'User' }}</p>
+
     <!-- Title -->
     <h2 class="title">
       <!-- Back Icon (only visible when backIconVisible = true) -->

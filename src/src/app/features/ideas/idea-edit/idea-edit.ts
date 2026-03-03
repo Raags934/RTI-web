@@ -72,7 +72,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
   get showApproveButton(): boolean {
     if (!this.currentUser?.roles?.length || !this.currentUser?.functions?.length) return false;
     if (this.currentIdea?.status_id !== 5) return false; // 5 = Submitted
-    const hasCreatorRole = this.currentUser.roles.some((r) => r.role_name === 'Creator');
+    const hasCreatorRole = this.currentUser.roles.some((r) => r.role_name === 'Creator/Approver');
     const hasFranchiseBusinessFunction = this.currentUser.functions.some(
       (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
     );
@@ -355,7 +355,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
       (f) => f.function_type === 'Business Function' && f.function_name === 'Franchise'
     );
     const isCreatorAndFranchise =
-      this.currentUser?.roles?.some((r) => r.role_name === 'Creator') && hasFranchiseFunction;
+      this.currentUser?.roles?.some((r) => r.role_name === 'Creator/Approver') && hasFranchiseFunction;
     const isHarmonizerAndFranchise =
       this.currentUser?.roles?.some((r) => r.role_name === 'Harmonizer') && hasFranchiseFunction;
 
@@ -370,7 +370,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
             this.store.dispatch(LoadIdeas());
             this.router.navigate(['/harmonizer']);
           },
-          error: () => {},
+          error: () => { },
         });
       } else {
         // Pending harmonizer -> view idea detail -> edit -> Save: Creator+Franchise OR Harmonizer+Franchise -> PUT, else -> POST with approved: false
@@ -382,7 +382,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
               this.store.dispatch(LoadIdeas());
               this.router.navigate(['/harmonizer']);
             },
-            error: () => {},
+            error: () => { },
           });
         } else {
           // Else: call addIdea API with approved: false
@@ -392,7 +392,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
               this.store.dispatch(LoadIdeas());
               this.router.navigate(['/harmonizer']);
             },
-            error: () => {},
+            error: () => { },
           });
         }
       }
@@ -473,7 +473,7 @@ export class IdeaEdit implements OnInit, OnDestroy {
     let approved = false;
     if (this.currentUser?.roles && this.currentUser?.functions) {
       const hasCreatorRole = this.currentUser.roles.some(
-        (role) => role.role_name === 'Creator'
+        (role) => role.role_name === 'Creator/Approver'
       );
       const hasFranchiseBusinessFunction = this.currentUser.functions.some(
         (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'

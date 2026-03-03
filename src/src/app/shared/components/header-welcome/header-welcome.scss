@@ -1,11 +1,18 @@
 .header {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     width: 85%;
+
+    .welcome-line {
+      margin: 0 0 2px 0;
+      font-size: var(--font-size-h6);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+    }
  
     .title {
-      margin: 4px;
+      margin: 2px 4px;
       font-size: var(--font-size-h7);
       font-weight: var(--font-weight-semibold);
  

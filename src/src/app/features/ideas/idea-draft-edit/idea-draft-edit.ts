@@ -306,7 +306,7 @@ export class IdeaDraftEdit implements OnInit, OnDestroy {
     let approved = false;
     if (this.currentUser?.roles && this.currentUser?.functions) {
       const hasCreatorRole = this.currentUser.roles.some(
-        (role) => role.role_name === 'Creator'
+        (role) => role.role_name === 'Creator/Approver'
       );
       const hasFranchiseBusinessFunction = this.currentUser.functions.some(
         (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'

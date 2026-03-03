@@ -12,6 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { User } from '../../../models/user.model';
 import { Franchise } from '../../../models/productsList.model';
 import { DropdownOption } from '../../../models/DropDownOption';
+import { NavigationEnd, Router } from '@angular/router';
 
 import {
   mapFranchisesToDropdown,
@@ -60,7 +61,11 @@ export class HeaderFilter implements OnInit {
 
   private sub= Subscription;
 
-  constructor(private store: Store<AppState>, private eventService: IdeaEventsService) {
+  constructor(
+    private store: Store<AppState>,
+    private eventService: IdeaEventsService,
+    private router: Router
+  ) {
     this.user$ = this.store.select((state) => state.masterData?.data?.user);
     this.franchises$ = this.store.select((state) => state.masterData?.data?.franchises);
 
@@ -76,6 +81,9 @@ export class HeaderFilter implements OnInit {
       this.roleOptions = mapRolesToDropdown(user);
       this.functionsOptions = mapFunctionsToDropdown(user);
       this.groupsOptions = mapFunctionsToDropdown(user);
+
+      // Once roles are loaded, sync selected role with current route.
+      this.syncRoleWithCurrentRoute(this.router.url);
     });
 
     this.franchises$.subscribe((list) => {
@@ -106,6 +114,19 @@ export class HeaderFilter implements OnInit {
     this.filterForm.get('role')?.valueChanges.subscribe((roleId) => {
       const value = roleId ? Number(roleId) : null;
       this.eventService.roleFilterChange(value);
+
+      const targetRoute = this.getRouteForRoleId(value);
+      if (targetRoute) {
+        const currentPath = (this.router.url || '').split('?')[0];
+        // Only force a full reload when actually changing to a different role route.
+        if (currentPath !== targetRoute) {
+          this.router.navigateByUrl(targetRoute).then(() => {
+            // Full page reload so that the new role dashboard boots
+            // with its default filters/status tabs applied.
+            window.location.reload();
+          });
+        }
+      }
     });
 
     // 🔥 Function-specific change listener
@@ -113,7 +134,13 @@ export class HeaderFilter implements OnInit {
       const value = functionId ? Number(functionId) : null;
       this.eventService.functionFilterChange(value);
     });
-   
+
+    // Keep role dropdown in sync when navigating via sidebar / URL.
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.syncRoleWithCurrentRoute(event.urlAfterRedirects || event.url);
+      }
+    });
   }
 
   // // Optional helper if needed
@@ -122,4 +149,101 @@ export class HeaderFilter implements OnInit {
   //     (f as any).ta_ids?.includes(taId)
   //   );
   // }
+
+  /** Map a selected role to its corresponding landing route. */
+  private getRouteForRoleId(roleId: number | null): string | null {
+    if (roleId == null) return null;
+
+    const role = this.roleOptions.find((r) => r.id === roleId);
+    if (!role) return null;
+
+    const name = this.normalizeRoleName(role.name);
+
+    if (this.isAdminLike(name)) return '/admin';
+    if (this.isCreatorLike(name)) return '/';
+    if (this.isHarmonizerLike(name)) return '/harmonizer';
+    if (this.isProductPrioritizerLike(name)) return '/productprioritization';
+    if (this.isTaPrioritizerLike(name)) return '/taprioritization';
+    if (this.isFunderLike(name)) return '/funding';
+
+    return null;
+  }
+
+  /** Ensure role dropdown reflects the current route (creator, harmonizer, etc.). */
+  private syncRoleWithCurrentRoute(url: string): void {
+    const path = (url || '').split('?')[0];
+
+    let targetRolePredicate: ((name: string) => boolean) | null = null;
+
+    if (path === '/' || path === '') {
+      // Creator landing
+      targetRolePredicate = (name) => this.isCreatorLike(name);
+    } else if (path === '/harmonizer') {
+      targetRolePredicate = (name) => this.isHarmonizerLike(name);
+    } else if (path === '/productprioritization') {
+      targetRolePredicate = (name) => this.isProductPrioritizerLike(name);
+    } else if (path === '/taprioritization') {
+      targetRolePredicate = (name) => this.isTaPrioritizerLike(name);
+    } else if (path === '/funding') {
+      targetRolePredicate = (name) => this.isFunderLike(name);
+    } else if (path.startsWith('/admin')) {
+      targetRolePredicate = (name) => this.isAdminLike(name);
+    }
+
+    if (!targetRolePredicate) return;
+
+    const match = this.roleOptions.find((r) =>
+      targetRolePredicate!(this.normalizeRoleName(r.name))
+    );
+    if (!match) return;
+
+    const control = this.filterForm.get('role');
+    if (!control) return;
+
+    // Avoid triggering navigation again when we programmatically sync.
+    if (control.value !== match.id) {
+      // Cast to satisfy FormControl<string | null> typing while keeping the
+      // underlying numeric id so MatSelect can correctly match options.
+      control.setValue(match.id as any, { emitEvent: false });
+    }
+  }
+
+  /** Normalise role name for comparisons. */
+  private normalizeRoleName(name: string | null | undefined): string {
+    return (name || '').toLowerCase().trim();
+  }
+
+  private isCreatorLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return (
+      n.includes('creator') ||
+      n === 'creator/approver' ||
+      n.startsWith('creator ')
+    );
+  }
+
+  private isHarmonizerLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return n.includes('harmon');
+  }
+
+  private isProductPrioritizerLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return n.includes('product') && n.includes('priorit');
+  }
+
+  private isTaPrioritizerLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return n.includes('ta') && n.includes('priorit');
+  }
+
+  private isFunderLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return n.includes('fund');
+  }
+
+  private isAdminLike(name: string): boolean {
+    const n = this.normalizeRoleName(name);
+    return n === 'admin';
+  }
 }

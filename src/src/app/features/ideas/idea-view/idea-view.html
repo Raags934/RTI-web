@@ -50,6 +50,7 @@
     @if (accordionIdeationOpen) {
       <div class="accordion-content">
         <form class="material-form" [class.assessor-view]="from === 'assessor'">
+          <!-- Row 1: Product / Brand / TA -->
           <!-- Product -->
           <div class="form-field">
             <app-form-input
@@ -62,6 +63,19 @@
             </app-form-input>
           </div>
 
+          <!-- Brand (auto-filled) -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[4].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('brand_id')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
           <!-- TA (auto-filled) -->
           <div class="form-field">
             <app-form-input
@@ -70,6 +84,20 @@
               [isDisabled]="true"
               [required]="true"
               [control]="form.get('ta_id')"
+              [showIconDropdown]="false"
+            >
+            </app-form-input>
+          </div>
+
+          <!-- Row 2: Franchise / Product Type / Research Pathway -->
+          <!-- Franchise (auto-filled) -->
+          <div class="form-field">
+            <app-form-input
+              [label]="labels[6].text"
+              type="text"
+              [isDisabled]="true"
+              [required]="true"
+              [control]="form.get('franchise_id')"
               [showIconDropdown]="false"
             >
             </app-form-input>
@@ -99,19 +127,7 @@
             </app-form-input>
           </div>
 
-          <!-- Brand (auto-filled) -->
-          <div class="form-field">
-            <app-form-input
-              [label]="labels[4].text"
-              type="text"
-              [isDisabled]="true"
-              [required]="true"
-              [control]="form.get('brand_id')"
-              [showIconDropdown]="false"
-            >
-            </app-form-input>
-          </div>
-
+          <!-- Row 3: RTI Year / Monadic / Origin Request -->
           <!-- RTI Year -->
           <div class="form-field">
             <app-form-input
@@ -121,19 +137,6 @@
               [required]="true"
               [autoSelectFirst]="true"
               [control]="form.get('rti_year')"
-            >
-            </app-form-input>
-          </div>
-
-          <!-- Franchise (auto-filled) -->
-          <div class="form-field">
-            <app-form-input
-              [label]="labels[6].text"
-              type="text"
-              [isDisabled]="true"
-              [required]="true"
-              [control]="form.get('franchise_id')"
-              [showIconDropdown]="false"
             >
             </app-form-input>
           </div>
@@ -164,6 +167,7 @@
             </app-form-input>
           </div>
 
+          <!-- Row 4: Strategic Rationale / TAC / Launch Claim -->
           <!-- Strategic Rationale -->
           <div class="form-field">
             <app-form-input

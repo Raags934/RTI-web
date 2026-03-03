@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -11,17 +11,22 @@ import { menuItems, adminMenuItems } from '../../constants/sidebar';
   selector: 'app-sidebar',
   host: {
     '[class.sidebar-admin]': 'isAdminMode',
+    '[class.sidebar-collapsed]': 'menuClosed',
   },
   imports: [RouterModule, CommonModule, MatIconModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
 export class Sidebar implements OnInit, OnDestroy {
-  menuClosed: boolean = false;
+  /** Collapsed = narrow icon-only strip; expanded = full sidebar with labels. */
+  menuClosed = false;
   menuItems = menuItems;
   adminMenuItems = adminMenuItems;
   /** True when current route is /admin (or under). Switches menu and styling only; no impact on idea or other routes. */
   isAdminMode = false;
+
+  /** Emits true when sidebar is collapsed, false when expanded. Parent uses this to adjust main content width. */
+  @Output() sidebarToggled = new EventEmitter<boolean>();
 
   private sub?: Subscription;
 
@@ -45,6 +50,7 @@ export class Sidebar implements OnInit, OnDestroy {
 
   onMenuclick(): void {
     this.menuClosed = !this.menuClosed;
+    this.sidebarToggled.emit(this.menuClosed);
   }
 
   gotoHome(): void {

@@ -89,7 +89,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
   ) {
     this.user$ = this.store.select((state) => state.masterData?.data?.user);
     this.franchises$ = this.store.select((state) => state.masterData?.data?.franchises);
-  this.dropdowns$ = this.store.select((state) => state.masterData?.data?.dropdowns);
+    this.dropdowns$ = this.store.select((state) => state.masterData?.data?.dropdowns);
   }
 
   ngOnInit(): void {
@@ -277,7 +277,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
     let approved = false;
     if (this.currentUser?.roles && this.currentUser?.functions) {
       const hasCreatorRole = this.currentUser.roles.some(
-        (role) => role.role_name === 'Creator'
+        (role) => role.role_name === 'Creator/Approver'
       );
       const hasFranchiseBusinessFunction = this.currentUser.functions.some(
         (func) => func.function_type === 'Business Function' && func.function_name === 'Franchise'
@@ -298,7 +298,7 @@ export class IdeaCreate implements OnInit, OnDestroy {
       franchise_id: raw.franchise_id,
       strategic_rationale: raw.strategic_rationale,
       target_aspirational_claim: raw.target_aspirational_claim,
-      research_proposal: '',
+      research_proposal: raw.target_aspirational_claim,
       created_by: this.authService.getCurrentUserId() ?? 1,
       updated_by: this.authService.getCurrentUserId() ?? 1,
       approved: approved,

@@ -32,6 +32,8 @@ export class App implements OnInit {
   /** Show main layout (sidebar + header) only when on a protected route (not login/callback/access-denied). */
   showShell = false;
 
+  /** Track whether the sidebar is collapsed so we can shrink/expand the sidenav container. */
+  isSidebarCollapsed = false;
   createIdeaToast: toast = createIdeaToast;
 
   private eventsSub!: Subscription;
@@ -63,6 +65,10 @@ export class App implements OnInit {
         this.showErrorToast(event.payload);
       }
     });
+  }
+
+  onSidebarToggled(collapsed: boolean) {
+    this.isSidebarCollapsed = collapsed;
   }
 
   showToast(message: string) {

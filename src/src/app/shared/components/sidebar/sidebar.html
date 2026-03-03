@@ -1,7 +1,9 @@
-<!-- Brand header -->
+<!-- Brand header: << when expanded (collapse), >> when collapsed (expand) -->
 <div class="brand">
     <img *ngIf="!menuClosed" src="assets/logos/alcon.png" alt="Alcon Logo" (click)="gotoHome()" />
-    <button class="chevron" (click)="onMenuclick()">&laquo;</button>
+    <button type="button" class="chevron" (click)="onMenuclick()" [attr.aria-label]="menuClosed ? 'Expand sidebar' : 'Collapse sidebar'">
+      {{ menuClosed ? '»' : '«' }}
+    </button>
   </div>
  
   <!-- Navigation: admin menu when on /admin, otherwise default menu (no impact on idea or other routes) -->
