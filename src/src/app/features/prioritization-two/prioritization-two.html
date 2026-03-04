@@ -12,7 +12,12 @@
     <app-buttons variant="type2" color="var(--primary-400)" size="medium" (click)="saveRanking()">
       Save Ranking
     </app-buttons>
-    <app-buttons variant="type1" color="var(--primary-400)" size="medium" (click)="submitRanking()">
+    <app-buttons
+      variant="type1"
+      color="var(--primary-400)"
+      size="medium"
+      [isDisabled]="!allIdeasRanked && currentFilterStatusId === taPrioritizationPendingStatusId"
+      (click)="submitRanking()">
       Submit Ranking
     </app-buttons>
   </div>

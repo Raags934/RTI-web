@@ -76,7 +76,7 @@ export class PrioritizationTwo implements OnInit {
 
   // Status IDs where pagination is hidden (TA Prioritization Pending, TA Ranked)
   private readonly noPaginationStatusIds = [12, 13];
-  private readonly taPrioritizationPendingStatusId = 12;
+  readonly taPrioritizationPendingStatusId = 12;
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -577,7 +577,30 @@ const N = maxUserRank
     };
   }
 
+  /** Check if all displayed ideas are ranked (only for TA Prioritization Pending filter) */
+  get allIdeasRanked(): boolean {
+    // Only validate when in "TA Prioritization Pending" filter (status_id 12)
+    if (this.currentFilterStatusId !== this.taPrioritizationPendingStatusId) {
+      return true; // Allow submission in other filters
+    }
+
+    // Check if all displayed ideas have TA rankings
+    const allRanked = this.displayedIdeas.every((idea) => {
+      const rankingChange = this.rankingChanges.find((c) => c.idea_id === idea.idea_id);
+      return rankingChange?.ranking_franchise != null && rankingChange.ranking_franchise !== '';
+    });
+
+    return allRanked;
+  }
+
   submitRanking() {
+    // Check if all ideas are ranked (only for TA Prioritization Pending filter)
+    if (this.currentFilterStatusId === this.taPrioritizationPendingStatusId && !this.allIdeasRanked) {
+      this.popup = PopupConfigs.completeAllRanking;
+      this.popup.open = true;
+      return;
+    }
+
     // Show confirmation popup before submission
     this.popup = PopupConfigs.submitRankingConfirmTwo;
     this.popup.open = true;

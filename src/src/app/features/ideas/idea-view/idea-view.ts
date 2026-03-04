@@ -742,7 +742,15 @@ export class IdeaView implements OnInit, OnDestroy {
     const payload = this.buildStudyDetailsPayload();
     if (!payload) return;
     this.ideaService.submitStudyDetails(payload).subscribe({
-      next: () => {
+      next: (res) => {
+        // For Save (draft) flow (harmonize === false), show API success message in toast.
+        // For Submit + Harmonize (harmonize === true), toast is handled after harmonization to avoid duplicates.
+        if (!harmonize) {
+          const message =
+            (res as { message?: string })?.message ||
+            'Study detail created successfully';
+          this.ideaEvents.toastEvent(message);
+        }
         this.submitStudyDetailsConfirmationPopup.open = false;
         this.enterStudyDetailsPopup.open = false;
         this.store.dispatch(LoadIdeas());
