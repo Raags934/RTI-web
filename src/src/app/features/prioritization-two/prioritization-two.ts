@@ -243,8 +243,7 @@ export class PrioritizationTwo implements OnInit {
         const url = 'ideas/ta-prioritization';
         this.store.dispatch(SubmitPrioritization({ payload, url }));
       } else if (event.type === 'savePrioritizationSuccess') {
-        this.popup = PopupConfigs.rankingSaved;
-        this.popup.open = true;
+        // After successful save, keep state updates but do not show the rankingSaved popup
         this.justSavedRanking = true;
         this.currentFilterStatusId = this.taPrioritizationPendingStatusId;
         this.rankingChanges = [];

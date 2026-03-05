@@ -237,8 +237,7 @@ export class PrioritizationOne implements OnInit {
         const url = 'ideas/product-prioritization';
         this.store.dispatch(SubmitPrioritization({ payload, url }));
       } else if (event.type === 'savePrioritizationSuccess') {
-        this.popup = PopupConfigs.rankingSaved;
-        this.popup.open = true;
+        // After successful save, keep state updates but do not show the rankingSaved popup
         this.justSavedRanking = true;
         this.currentFilterStatusId = this.productPrioritizationPendingStatusId;
         this.rankingChanges = [];

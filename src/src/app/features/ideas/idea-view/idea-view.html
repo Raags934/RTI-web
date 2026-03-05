@@ -411,7 +411,7 @@
     <div class="funding-popup-fields dropdown-row">
       <div class="form-field">
         <app-form-input
-          label="<strong>Funding Status</strong> <span class='red-asterisk'>*</span>"
+          label="<strong>Funding Status</strong>"
           type="select"
           dropdownSize="small"
           [required]="true"
@@ -422,7 +422,7 @@
       </div>
       <div class="form-field">
         <app-form-input
-          label="<strong>Funding Source</strong> <span class='red-asterisk'>*</span>"
+          label="<strong>Funding Source</strong>"
           type="select"
           dropdownSize="small"
           [required]="true"
@@ -542,9 +542,9 @@
   @if (enterStudyDetailsPopup.confirmPopupAction === 'enterStudyDetails') {
     <div class="study-details-form">
       <div class="study-details-top-row">
-       <div class="form-field">
+        <div class="form-field">
         <app-form-input
-        label="<strong>Is the study recommended to be conducted?</strong> <span class='red-asterisk'>*</span>"
+        label="<strong>Is the study recommended to be conducted?</strong>"
         type="select"
         [required]="true"
         [control]="form.get('recommended')"
@@ -552,13 +552,13 @@
         ></app-form-input>
       </div>
       <div class="form-field">
-        <app-form-input label="<strong>POS</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true" [control]="form.get('study_details_pos')"
+        <app-form-input label="<strong>POS</strong>" type="text" [required]="true" [control]="form.get('study_details_pos')"
           placeholder="Number only (0-100)"></app-form-input>
       </div>
     </div>
     <div class="study-details-pos-reasons-row">
       <div class="form-field">
-        <app-form-input label="<strong>POS Reasons</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+        <app-form-input label="<strong>POS Reasons</strong>" type="text" [required]="true"
           [control]="form.get('study_details_pos_reasons')"></app-form-input>
       </div>
     </div>
@@ -584,28 +584,28 @@
             submitting.</p>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Research Questions</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Research Questions</strong>" type="text" [required]="true"
             [control]="form.get('research_questions')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Potential Claims</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Potential Claims</strong>" type="text" [required]="true"
             [control]="form.get('potential_claims')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Primary Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Primary Endpoints</strong>" type="text" [required]="true"
             [control]="form.get('primary_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Secondary Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Secondary Endpoints</strong>" type="text" [required]="true"
             [control]="form.get('secondary_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Other Potential Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Other Potential Endpoints</strong>" type="text" [required]="true"
             [control]="form.get('other_potential_endpoints')"></app-form-input>
         </div>
         <div class="form-field">
           <app-form-input
-            label="<strong>Proposed Study Design</strong> <span class='red-asterisk'>*</span>"
+            label="<strong>Proposed Study Design</strong>"
             type="select"
             [required]="true"
             [control]="form.get('proposed_study_design')"
@@ -613,49 +613,49 @@
           ></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Proposed Statistics</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Proposed Statistics</strong>" type="text" [required]="true"
             [control]="form.get('proposed_statistics')"></app-form-input>
         </div>
         <div class="date-fields-row">
           <div class="form-field">
-            <app-form-input label="<strong>Estimated Start Date</strong> <span class='red-asterisk'>*</span>" type="date" [required]="true"
+            <app-form-input label="<strong>Estimated Start Date</strong>" type="date" [required]="true"
               [control]="form.get('estimated_study_start_date')" placeholder="MM/DD/YYYY"
               [minDate]="minStartDate"></app-form-input>
           </div>
           <div class="form-field">
-            <app-form-input label="<strong>Estimated End Date</strong> <span class='red-asterisk'>*</span>" type="date" [required]="true"
+            <app-form-input label="<strong>Estimated End Date</strong>" type="date" [required]="true"
               [control]="form.get('estimated_study_end_date')" placeholder="MM/DD/YYYY"></app-form-input>
           </div>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Estimated Sample Size</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Estimated Sample Size</strong>" type="text" [required]="true"
             [control]="form.get('estimated_sample_size')"></app-form-input>
         </div>
         <div class="form-field">
-          <app-form-input label="<strong>Total Estimated Budget</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+          <app-form-input label="<strong>Total Estimated Budget</strong>" type="text" [required]="true"
             [control]="form.get('total_estimated_budget')"></app-form-input>
         </div>
         <div class="form-field">
-            <app-form-input label="<strong>Budget Currency</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true" [control]="form.get('budget_currency')"
+            <app-form-input label="<strong>Budget Currency</strong>" type="text" [required]="true" [control]="form.get('budget_currency')"
             placeholder="e.g. USD"></app-form-input>
         </div>
         <div class="study-details-number-fields">
           <div class="form-field">
-            <app-form-input label="<strong>Estimated (Current Year +1) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+            <app-form-input label="<strong>Estimated (Current Year +1) Spend</strong>" type="text" [required]="true"
               [control]="form.get('estimated_spend_plus_1')" placeholder="Number only"></app-form-input>
           </div>
           <div class="form-field">
-            <app-form-input label="<strong>Estimated (Current Year +2) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+            <app-form-input label="<strong>Estimated (Current Year +2) Spend</strong>" type="text" [required]="true"
               [control]="form.get('estimated_spend_plus_2')" placeholder="Number only"></app-form-input>
           </div>
           <div class="form-field">
-            <app-form-input label="<strong>Estimated (Current Year +3) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+            <app-form-input label="<strong>Estimated (Current Year +3) Spend</strong>" type="text" [required]="true"
               [control]="form.get('estimated_spend_plus_3')" placeholder="Number only"></app-form-input>
           </div>
       </div>
       <div class="form-field">
         <app-form-input
-          label="<strong>Regions Accepting Submissions</strong> <span class='red-asterisk'>*</span>"
+          label="<strong>Regions Accepting Submissions</strong>"
           type="select"
           [required]="true"
           [control]="form.get('regions_accepting_submissions')"
@@ -701,28 +701,28 @@
                 submitting.</p>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Research Questions</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Research Questions</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_research_questions')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Potential Claims</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Potential Claims</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_potential_claims')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Primary Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Primary Endpoints</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_primary_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Secondary Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Secondary Endpoints</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_secondary_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Other Potential Endpoints</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Other Potential Endpoints</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_other_potential_endpoints')"></app-form-input>
             </div>
             <div class="form-field">
               <app-form-input
-                label="<strong>Proposed Study Design</strong> <span class='red-asterisk'>*</span>"
+                label="<strong>Proposed Study Design</strong>"
                 type="select"
                 [required]="true"
                 [control]="form.get('pilot_proposed_study_design')"
@@ -730,49 +730,49 @@
               ></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Proposed Statistics</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Proposed Statistics</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_proposed_statistics')"></app-form-input>
             </div>
             <div class="date-fields-row">
               <div class="form-field">
-                <app-form-input label="<strong>Estimated Start Date</strong> <span class='red-asterisk'>*</span>" type="date" [required]="true"
+                <app-form-input label="<strong>Estimated Start Date</strong>" type="date" [required]="true"
                   [control]="form.get('pilot_estimated_study_start_date')" placeholder="MM/DD/YYYY"
                   [minDate]="minStartDate"></app-form-input>
               </div>
               <div class="form-field">
-                <app-form-input label="<strong>Estimated End Date</strong> <span class='red-asterisk'>*</span>" type="date" [required]="true"
+                <app-form-input label="<strong>Estimated End Date</strong>" type="date" [required]="true"
                   [control]="form.get('pilot_estimated_study_end_date')" placeholder="MM/DD/YYYY"></app-form-input>
               </div>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Estimated Sample Size</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Estimated Sample Size</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_estimated_sample_size')"></app-form-input>
             </div>
             <div class="form-field">
-              <app-form-input label="<strong>Total Estimated Budget</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Total Estimated Budget</strong>" type="text" [required]="true"
                 [control]="form.get('pilot_total_estimated_budget')"></app-form-input>
             </div>
             <div class="form-field">
-            <app-form-input label="<strong>Budget Currency</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true" [control]="form.get('pilot_budget_currency')"
+            <app-form-input label="<strong>Budget Currency</strong>" type="text" [required]="true" [control]="form.get('pilot_budget_currency')"
                 placeholder="e.g. USD"></app-form-input>
             </div>
             <div class="study-details-number-fields">
               <div class="form-field">
-              <app-form-input label="<strong>Estimated (Current Year +1) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Estimated (Current Year +1) Spend</strong>" type="text" [required]="true"
                   [control]="form.get('pilot_estimated_spend_plus_1')" placeholder="Number only"></app-form-input>
               </div>
               <div class="form-field">
-              <app-form-input label="<strong>Estimated (Current Year +2) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Estimated (Current Year +2) Spend</strong>" type="text" [required]="true"
                   [control]="form.get('pilot_estimated_spend_plus_2')" placeholder="Number only"></app-form-input>
               </div>
               <div class="form-field">
-              <app-form-input label="<strong>Estimated (Current Year +3) Spend</strong> <span class='red-asterisk'>*</span>" type="text" [required]="true"
+              <app-form-input label="<strong>Estimated (Current Year +3) Spend</strong>" type="text" [required]="true"
                   [control]="form.get('pilot_estimated_spend_plus_3')" placeholder="Number only"></app-form-input>
               </div>
             </div>
             <div class="form-field">
               <app-form-input
-                label="<strong>Regions Accepting Submissions</strong> <span class='red-asterisk'>*</span>"
+                label="<strong>Regions Accepting Submissions</strong>"
                 type="select"
                 [required]="true"
                 [control]="form.get('pilot_regions_accepting_submissions')"
