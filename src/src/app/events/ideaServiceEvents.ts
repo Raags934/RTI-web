@@ -50,6 +50,14 @@ export class IdeaEventsService {
   private eventsSubject = new Subject<IdeaEvent>();
   events$ = this.eventsSubject.asObservable();
 
+  // Keep track of latest selected filter values so that
+  // components can read current state even if they missed
+  // the original event emission (e.g. during initial load).
+  private currentTaId: number | null = null;
+  private currentFranchiseId: number | null = null;
+  private currentRoleId: number | null = null;
+  private currentFunctionId: number | null = null;
+
   applyFilter(criteria: any) {
     this.eventsSubject.next({ type: 'applyFilter', payload: criteria });
   }
@@ -104,19 +112,40 @@ export class IdeaEventsService {
   }
 
   taFilterChange(ta_id: number | null) {
+    this.currentTaId = ta_id;
     this.eventsSubject.next({ type: 'taFilterChange', payload: ta_id });
   }
 
   franchiseFilterChange(franchise_id: number | null) {
+    this.currentFranchiseId = franchise_id;
     this.eventsSubject.next({ type: 'franchiseFilterChange', payload: franchise_id });
   }
 
   roleFilterChange(role_id: number | null) {
+    this.currentRoleId = role_id;
     this.eventsSubject.next({ type: 'roleFilterChange', payload: role_id });
   }
 
   functionFilterChange(function_id: number | null) {
+    this.currentFunctionId = function_id;
     this.eventsSubject.next({ type: 'functionFilterChange', payload: function_id });
+  }
+
+  /** Expose latest selected filter values (may be null when not set). */
+  getCurrentTaId(): number | null {
+    return this.currentTaId;
+  }
+
+  getCurrentFranchiseId(): number | null {
+    return this.currentFranchiseId;
+  }
+
+  getCurrentRoleId(): number | null {
+    return this.currentRoleId;
+  }
+
+  getCurrentFunctionId(): number | null {
+    return this.currentFunctionId;
   }
 
   nextIdea() {

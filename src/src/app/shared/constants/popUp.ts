@@ -149,7 +149,7 @@ export const enterStudyDetails: Popup = {
 
 export const submitStudyDetailsConfirmation: Popup = {
   open: false,
-  title: 'Are you sure you want to submit this idea for the final harmonization phase?',
+  title: 'Are you sure you want to submit this study details for the final harmonization phase?',
   helper: 'Verify idea and study details before submission.',
   cancelText: 'No',
   confirmText: 'Yes',

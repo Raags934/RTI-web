@@ -69,6 +69,10 @@ export class Funding implements OnInit {
 
   private sub!: Subscription;
 
+  /** Current active TA and Franchise filters for this page. */
+  private activeTaId: number | null = null;
+  private activeFranchiseId: number | null = null;
+
   constructor(
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
@@ -87,7 +91,13 @@ export class Funding implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      this.filteredIdeas = [...this.ideas]; // Show all ideas
+
+      // If TA/Franchise are already selected in header filter (auto-populated),
+      // apply them so funding list matches the visible filters.
+      this.activeTaId = this.ideaEvents.getCurrentTaId();
+      this.activeFranchiseId = this.ideaEvents.getCurrentFranchiseId();
+      this.applyActiveFilters();
+
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();
@@ -112,7 +122,9 @@ export class Funding implements OnInit {
       } else if (event.type === 'exportData') {
         this.exportData();
       } else if (event.type === 'taFilterChange') {
-        this.taFilterChange(event.payload || 3);
+        this.taFilterChange(event.payload);
+      } else if (event.type === 'franchiseFilterChange') {
+        this.franchiseFilterChange(event.payload);
       }
     });
   }
@@ -121,9 +133,28 @@ export class Funding implements OnInit {
     if (this.sub) this.sub.unsubscribe();
   }
 
-  taFilterChange(ta_id: number) {
-    this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+  taFilterChange(ta_id: number | null) {
+    this.activeTaId = ta_id;
+    this.applyActiveFilters();
+  }
 
+  franchiseFilterChange(franchise_id: number | null) {
+    this.activeFranchiseId = franchise_id;
+    this.applyActiveFilters();
+  }
+
+  /** Apply current TA + Franchise filters together. */
+  private applyActiveFilters(): void {
+    let list = [...this.ideas];
+
+    if (this.activeTaId != null) {
+      list = list.filter((idea) => idea.ta_id === this.activeTaId);
+    }
+    if (this.activeFranchiseId != null) {
+      list = list.filter((idea) => idea.franchise_id === this.activeFranchiseId);
+    }
+
+    this.filteredIdeas = list;
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
     this.updatePagedIdeas();

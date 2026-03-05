@@ -111,6 +111,10 @@ export class PrioritizationTwo implements OnInit {
   // Store original rankings when ideas are loaded to detect changes
   originalRankings: Map<number, string | null> = new Map();
 
+  /** Current active TA and Franchise filters for this page. */
+  private activeTaId: number | null = null;
+  private activeFranchiseId: number | null = null;
+
   private sub!: Subscription;
 
   constructor(
@@ -148,14 +152,17 @@ export class PrioritizationTwo implements OnInit {
         this.updatePagedIdeas();
         this.updateStatusCounts();
       } else {
-        ideas.forEach(idea => {
+        ideas.forEach((idea) => {
           this.originalRankings.set(
             idea.idea_id,
             idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
           );
         });
         console.log('📋 Original rankings stored on ideas load:', Array.from(this.originalRankings.entries()));
-        this.taFilterChange(null);
+        // Use latest selected TA / Franchise (if any) so data matches header filter.
+        this.activeTaId = this.ideaEvents.getCurrentTaId();
+        this.activeFranchiseId = this.ideaEvents.getCurrentFranchiseId();
+        this.applyActiveFiltersAndInitRankings();
         this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
         this.updatePagedIdeas();
         this.updateStatusCounts();
@@ -175,6 +182,8 @@ export class PrioritizationTwo implements OnInit {
         this.filterBySearchText(event.payload.searchText);
       } else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload);
+      } else if (event.type === 'franchiseFilterChange') {
+        this.franchiseFilterChange(event.payload);
       } else if (event.type === 'rankingTaChanged') {
         // Add or update ranking change in array
         console.log('📥 Received ranking change event:', event.payload);
@@ -282,15 +291,34 @@ export class PrioritizationTwo implements OnInit {
   }
 
   taFilterChange(ta_id: number | null) {
-    if (ta_id == null) {
-      this.filteredIdeas = [...this.ideas];
-    } else {
-      this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+    this.activeTaId = ta_id;
+    this.applyActiveFiltersAndInitRankings();
+  }
+
+  franchiseFilterChange(franchise_id: number | null) {
+    this.activeFranchiseId = franchise_id;
+    this.applyActiveFiltersAndInitRankings();
+  }
+
+  /**
+   * Apply current TA + Franchise filters together and (re)initialise ranking
+   * metadata for the currently filtered ideas.
+   */
+  private applyActiveFiltersAndInitRankings(): void {
+    let list = [...this.ideas];
+
+    if (this.activeTaId != null) {
+      list = list.filter((idea) => idea.ta_id === this.activeTaId);
     }
+    if (this.activeFranchiseId != null) {
+      list = list.filter((idea) => idea.franchise_id === this.activeFranchiseId);
+    }
+
+    this.filteredIdeas = list;
 
     // Original rankings are already stored when ideas are loaded
     // Only update if new ideas are added that weren't in originalRankings
-    this.ideas.forEach(idea => {
+    this.ideas.forEach((idea) => {
       if (!this.originalRankings.has(idea.idea_id)) {
         this.originalRankings.set(
           idea.idea_id,
@@ -301,9 +329,9 @@ export class PrioritizationTwo implements OnInit {
 
     // Populate rankingChanges with all filtered ideas; use existing rank from response so unchanged ranks are sent in payload.
     // Normalize ranking_franchise to string so payload is consistent (API may return number).
-    this.rankingChanges = this.filteredIdeas.map(idea => ({
+    this.rankingChanges = this.filteredIdeas.map((idea) => ({
       idea_id: idea.idea_id,
-      ranking_franchise: idea.ranking_franchise != null ? String(idea.ranking_franchise) : null
+      ranking_franchise: idea.ranking_franchise != null ? String(idea.ranking_franchise) : null,
     }));
 
     console.log('📋 Initial ranking changes populated:', JSON.stringify(this.rankingChanges, null, 2));
@@ -312,7 +340,7 @@ export class PrioritizationTwo implements OnInit {
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
     this.updatePagedIdeas();
-    // Reset filter status when TA filter changes
+    // Reset filter status when TA/Franchise filter changes
     this.currentFilterStatusId = 0;
   }
 

@@ -284,7 +284,13 @@ export class Table {
   // Check if current route is any prioritization page
   isPrioritizationRoute(): boolean {
     const url = this.router.url;
-    return url.includes('/prioritization') || url.includes('/taprioritization');
+    // Support product prioritization (`/productprioritization`) and TA prioritization (`/taprioritization`),
+    // as well as any legacy `/prioritization` paths.
+    return (
+      url.includes('productprioritization') ||
+      url.includes('/prioritization') ||
+      url.includes('/taprioritization')
+    );
   }
 
   // Check if current route is idea-dashboard page

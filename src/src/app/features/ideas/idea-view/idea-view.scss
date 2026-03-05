@@ -20,6 +20,31 @@
    margin: 0;
  }
 
+.identifier-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-bottom: 4px;
+}
+
+/* Ensure UID and RTI UID keys and values use the same font sizing */
+.identifier-row .accordion-label,
+.identifier-row .accordion-value {
+  font-size: 12px;
+}
+
+/* Visual spacing between UID block and RTI UID block when shown inline */
+.identifier-separator {
+  display: inline-block;
+  width: 24px;
+}
+
+.identifier-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
  .card-headings {
    color: var(--primary-400);
    font-size: 12px;
@@ -132,12 +157,14 @@
  .assess-form {
    display: flex;
    flex-direction: column;
-   gap: 15px;
+  /* no extra space between stacked rows in popup forms */
+  gap: 0;
  }
 
  .dropdown-row {
    display: flex;
-   gap: 15px;
+  /* no extra horizontal gap between fields in the same row */
+  gap: 0;
    align-items: flex-start;
  }
 
@@ -188,9 +215,10 @@
  .study-details-top-row {
    display: flex;
    flex-wrap: wrap;
-   gap: 15px;
+  gap: 0;
    align-items: flex-start;
-   margin-bottom: 16px;
+  /* no extra space between top row and POS Reasons row */
+  margin-bottom: 0;
    padding-left: 16px;
    padding-right: 16px;
  }
@@ -204,7 +232,8 @@
 .study-details-pos-reasons-row {
   padding-left: 16px;
   padding-right: 16px;
-  margin-bottom: 16px;
+  /* no extra space before Study Details accordion header */
+  margin-bottom: 0;
 }
 
 .study-details-pos-reasons-row .form-field {
@@ -217,7 +246,8 @@
    display: flex;
    align-items: center;
    justify-content: space-between;
-   padding: 12px 16px;
+   /* slightly tighter vertical padding so header is closer to surrounding rows */
+   padding: 8px 16px;
    background: #f8f8f8;
    font-size: 14px;
    text-align: left;
@@ -381,8 +411,9 @@
  }
 
  .study-details-form-accordion-content {
-   padding: 16px;
-   padding-bottom: 24px;
+  /* reduced vertical padding so fields sit closer to header and buttons */
+  padding: 10px 16px;
+  padding-bottom: 10px;
    background: #fff;
    border-top: 2px solid var(--primary-400, #1e3a5f);
    min-width: 0;
@@ -390,7 +421,8 @@
 
  /* Intro text when Study Details accordion is open */
  .study-details-accordion-intro {
-   margin-bottom: 16px;
+ /* minimal space under the intro text so fields start higher */
+ margin-bottom: 4px;
  }
 
  .study-details-accordion-title-text {
@@ -414,7 +446,8 @@
    min-width: 0;
    width: 100%;
    max-width: 100%;
-   margin-bottom: 16px;
+  /* no extra space between stacked fields inside accordion */
+  margin-bottom: 0;
  }
 
  .study-details-form-accordion-content .form-field:last-child {
@@ -423,7 +456,7 @@
 
  .study-details-form-accordion-content .date-fields-row,
  .study-details-form-accordion-content .study-details-number-fields {
-   margin-bottom: 16px;
+  margin-bottom: 0;
  }
 
  .date-fields-row {
@@ -497,7 +530,7 @@
    align-items: center;
    justify-content: space-between;
    padding: 12px 16px;
-   background: #e0e0e0;
+   background: #f0f0f0;
    border: none;
    cursor: pointer;
    font-size: 14px;
@@ -506,7 +539,7 @@
    text-align: left;
 
    &:hover {
-     background: #d5d5d5;
+     background: #e8e8e8;
    }
  }
 
@@ -558,7 +591,7 @@
    display: grid;
    grid-template-columns: repeat(3, 1fr);
    gap: 0 15px;
-   row-gap: 12px;
+  row-gap: 6px;
  }
 
  .study-details-grid-item {

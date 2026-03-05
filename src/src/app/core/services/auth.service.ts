@@ -11,8 +11,8 @@ import { isLocalHost } from '../utils/environment.util';
 /** Stub user for local dev when running on localhost (no Okta). */
 const LOCAL_DEV_USER: User = {
   user_id: 1,
-  name: 'karthik',
-  email: 'karthik@example.com',
+  name: 'sahil',
+  email: 'sahil@example.com',
   active: true,
   roles: [],
   functions: [],

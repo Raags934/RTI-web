@@ -1,3 +1,9 @@
+/* Sidebar host: prevent internal scrollbars from appearing */
+:host {
+  display: block;
+  overflow: hidden;
+}
+
 /* Brand section (logo + chevron) */
 .brand {
     display: flex;
@@ -6,19 +12,28 @@
     padding: 10px 16px 8px;
   }
 
-  /* Collapsed: compact brand, center toggle */
+  /* Collapsed: compact brand, stack logo and toggle to match rail design */
   :host.sidebar-collapsed .brand {
     justify-content: center;
     padding: 10px 4px 8px;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  :host.sidebar-collapsed .brand img {
-    display: none;
-  }
- 
   .brand img {
     height: 50px;
     width: auto;
+    border-radius: 0;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+  /* In collapsed rail, render logo as compact circular mark */
+  :host.sidebar-collapsed .brand img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
   }
  
   .brand .chevron {

@@ -1,108 +1,101 @@
 <div class="form-field">
 
-    <!-- Static label above -->
-    <label *ngIf="labelRequired" class="form-label" [innerHTML]="label">
-    </label>
- 
-    <!-- TEXT INPUT -->
-    <mat-form-field *ngIf="type === 'text' && control" appearance="outline" class="form-field-control">
-      <input
-        matInput
- 
-        [required]="required"
-        [formControl]="formControl"
-        [placeholder]="placeholder"
-        [disabled]="isDisabled"
- 
-      />
-      <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
-        This field is required
-      </mat-error>
-    </mat-form-field>
- 
-    <!-- DATE INPUT -->
-    <mat-form-field *ngIf="type === 'date' && control" appearance="outline" class="form-field-control">
-      <input
-        matInput
-        [matDatepicker]="picker"
-        [required]="required"
-        [formControl]="formControl"
-        [placeholder]="placeholder"
-        [disabled]="isDisabled"
-        [min]="minDate"
-        [max]="maxDate"
-      />
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-      <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
-        This field is required
-      </mat-error>
-    </mat-form-field>
- 
-    <!-- TEXTAREA -->
-    <mat-form-field *ngIf="type === 'textarea' && control" appearance="outline" class="form-field-control">
-      <textarea
-        matInput
-        rows="2"
-        [required]="required"
-        [formControl]="formControl"
-        [placeholder]="placeholder"
-       
-      ></textarea>
-      <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
- 
-        This field is required
-      </mat-error>
-    </mat-form-field>
- 
-    <!-- SELECT -->
-    <mat-form-field *ngIf="type === 'select' && control" appearance="fill" class="form-field-control">
+  <!-- Static label above -->
+  <label *ngIf="labelRequired" class="form-label">
+    {{ label }}
+    <span *ngIf="required" class="required">*</span>
+  </label>
 
-      <mat-select
-        [formControl]="formControl"
-        (selectionChange)="onSelectionChange($event.value)"
-        [
-      >
+  <!-- TEXT INPUT -->
+  <mat-form-field *ngIf="type === 'text' && control" appearance="outline" class="form-field-control">
+    <input
+      matInput
 
-        <!-- Dropdown Header -->
-        <mat-option *ngIf="dropdownHeader" class="dropdown-header" (click)="clearSelection()">
-          <span class="header-text">{{ dropdownHeader.replace(' ×', '') }}</span>
-          <span class="cancel-icon" (click)="clearSelection(); $event.stopPropagation()">×</span>
-        </mat-option>
+      [required]="required"
+      [formControl]="formControl"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled"
 
-        <!-- Search box -->
-        <mat-option *ngIf="showSearchDropdown">
-          <div class="panel-search-option">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input
-              matInput
-              class="panel-search-input"
-              [formControl]="search"
-              [placeholder]="searchPlaceholder"
-              (click)="$event.stopPropagation()"
-            />
-          </div>
-        </mat-option>
+    />
+    <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
+      This field is required
+    </mat-error>
+  </mat-form-field>
 
-        <!-- Options -->
-        <mat-option *ngFor="let option of filteredOptions" [value]="option.id">
-          {{ option.name }}
-        </mat-option>
+  <!-- DATE INPUT -->
+  <mat-form-field *ngIf="type === 'date' && control" appearance="outline" class="form-field-control">
+    <input
+      matInput
+      [matDatepicker]="picker"
+      [required]="required"
+      [formControl]="formControl"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled"
+    />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
+      This field is required
+    </mat-error>
+  </mat-form-field>
 
-      </mat-select>
+  <!-- TEXTAREA -->
+  <mat-form-field *ngIf="type === 'textarea' && control" appearance="outline" class="form-field-control">
+    <textarea
+      matInput
+      rows="2"
+      [required]="required"
+      [formControl]="formControl"
+      [placeholder]="placeholder"
+     
+    ></textarea>
+    <mat-error *ngIf="formControl && formControl.invalid && formControl.touched">
 
-      <!-- Suffix icon -->
-      <mat-icon *ngIf="showIconDropdown" matSuffix class="suffix-icon">
-        expand_more
-      </mat-icon>
+      This field is required
+    </mat-error>
+  </mat-form-field>
 
-      <!-- Error -->
-      <mat-error *ngIf="required && formControl?.invalid && (submitted || formControl?.touched)">
-        Please select a value
-      </mat-error>
+  <!-- SELECT -->
+  <mat-form-field *ngIf="type === 'select' && control" appearance="fill" class="form-field-control">
 
-    </mat-form-field>
- 
- 
-  </div>
- 
+    <mat-select
+      [formControl]="formControl"
+      (selectionChange)="onSelectionChange($event.value)"
+      [
+    >
+
+      <!-- Search box -->
+      <mat-option *ngIf="showSearchDropdown">
+        <div class="panel-search-option">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            matInput
+            class="panel-search-input"
+            [formControl]="search"
+            [placeholder]="searchPlaceholder"
+            (click)="$event.stopPropagation()"
+          />
+        </div>
+      </mat-option>
+
+      <!-- Options -->
+      <mat-option *ngFor="let option of filteredOptions" [value]="option.id">
+        {{ option.name }}
+      </mat-option>
+
+    </mat-select>
+
+    <!-- Suffix icon -->
+    <mat-icon *ngIf="showIconDropdown" matSuffix class="suffix-icon">
+      expand_more
+    </mat-icon>
+
+    <!-- Error -->
+    <mat-error *ngIf="required && formControl?.invalid && (submitted || formControl?.touched)">
+      Please select a value
+    </mat-error>
+
+  </mat-form-field>
+
+
+</div>
