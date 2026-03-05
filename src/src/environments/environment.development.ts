@@ -20,7 +20,7 @@ export const environment: AppEnvironment = {
     clientId: '452',
     clientSecret: '5236',
     issuer: 'https://abc.oktapreview.com',
-    audience: '0oa2ngykartyujhmM0h8',
+    audience: 'abc',
     authorizationEndpoint: 'https://abc.oktapreview.com/oauth2/v1/authorize',
     tokenEndpoint: 'https://abc.oktapreview.com/oauth2/v1/token',
     userinfoEndpoint: 'https://abc.oktapreview.com/oauth2/v1/userinfo',
