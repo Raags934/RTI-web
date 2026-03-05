@@ -1,23 +1,76 @@
 <app-header-filter class="header-filter"></app-header-filter>
-<app-table-header [showFreezeButton]="true" [showSearch]="false" [showNewIdea]="false"></app-table-header>
-<app-table-filter [tabs]="statusTabs"></app-table-filter>
+<app-table-header [showFreezeButton]="currentFilterStatusId !== 0" [showSearch]="false" [showNewIdea]="false"></app-table-header>
+<app-table-filter [tabs]="statusTabs" [activeStatusId]="currentFilterStatusId"></app-table-filter>
 <app-table
   [columns]="ideaDisplayColumns"
   [dataSource]="pagedIdeas"
   [currentFilterStatusId]="currentFilterStatusId"
-  [showFreezeButton]="true"
-  [showCheckboxColumn]="currentFilterStatusId === 13"
+[showFreezeButton]="currentFilterStatusId !== 0"
+[showCheckboxColumn]="currentFilterStatusId !== 0 && (currentFilterStatusId === 13 || currentFilterStatusId === 14 || currentFilterStatusId === 15 || currentFilterStatusId === 4)"
   [selectedIdeaIds]="selectedIdeaIds"
   (selectedIdeaIdsChange)="selectedIdeaIds = $event"
   [dropdownStyle]="'nested'"
   [from]="'funding'"
+  [useViewIdeaOverlay]="true"
 ></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
 <app-popup
-  [open]="showUpdateFundingPopup"
-  [title]="updateFundingPopupTitle"
-  [helper]="updateFundingPopupHelper"
-  [cancelText]="updateFundingPopupCancelText"
-  [confirmText]="updateFundingPopupConfirmText"
-  [confirmPopupAction]="updateFundingPopupConfirmAction"
-></app-popup>
+  [open]="updateFundingPopup.open"
+  [title]="updateFundingPopup.title"
+  [helper]="updateFundingPopup.helper"
+  [cancelText]="updateFundingPopup.cancelText"
+  [confirmText]="updateFundingPopup.confirmText"
+  [size]="updateFundingPopup.size"
+  [compactContent]="true"
+  [confirmPopupAction]="updateFundingPopup.confirmPopupAction"
+>
+  @if (updateFundingPopup.confirmPopupAction === 'saveUpdateFundingStatus') {
+    <div class="funding-popup-fields dropdown-row">
+      <div class="form-field">
+        <app-form-input
+          label="<strong>Funding Status</strong> <span class='red-asterisk'>*</span>"
+          type="select"
+          dropdownSize="small"
+          [required]="true"
+          [control]="fundingForm.get('funding_status')"
+          [options]="fundingStatusOptions"
+          dropdownHeader="Funding Status ×"
+        ></app-form-input>
+      </div>
+      <div class="form-field">
+        <app-form-input
+          label="<strong>Funding Source</strong> <span class='red-asterisk'>*</span>"
+          type="select"
+          dropdownSize="small"
+          [required]="true"
+          [isDisabled]="!isFundingSourceEnabled"
+          [control]="fundingForm.get('funding_source_value_id')"
+          [options]="fundingSourceSelectOptions"
+          dropdownHeader="Funding Source ×"
+        ></app-form-input>
+      </div>
+    </div>
+    @if (fundingForm.get('funding_status')?.value === 'Abandoned') {
+      <div class="form-field">
+        <app-form-input
+          label="Comment"
+          type="textarea"
+          placeholder="Please provide a reason for abandoning"
+          [control]="fundingForm.get('funding_comment')"
+        ></app-form-input>
+      </div>
+    }
+  }
+</app-popup>
+
+<app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>
+
+<app-view-idea-overlay
+  [open]="showViewIdeaOverlay"
+  [ideaUid]="overlayIdeaUid"
+  [ideas]="filteredIdeas"
+  [referrer]="'/funding'"
+  [statusLabel]="overlayStatusLabel"
+  (closeOverlay)="showViewIdeaOverlay = false; overlayIdeaUid = null; overlayStatusLabel = null"
+  (editDetails)="onEditFromOverlay($event)"
+></app-view-idea-overlay>

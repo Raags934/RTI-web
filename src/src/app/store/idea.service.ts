@@ -299,6 +299,40 @@ export class IdeaService {
   }
 
   // ----------------------------------------------------
+  // PUT: Bulk update multiple ideas to Unfunded (path: 0; body: value_id, idea_ids, updated_by, comment?)
+  // ----------------------------------------------------
+  putNonFundingBulk(payload: {
+    value_id: number;
+    idea_ids: number[];
+    updated_by: number;
+    comment?: string;
+  }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    //    const headers = new HttpHeaders({
+    //   'Content-Type': 'application/json',
+    //   'x-api-key': this.x_api_key,
+    // });
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/0/non-funding`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
+  // PUT: Bulk update multiple ideas to Abandoned (path: 0; body: value_id, idea_ids, updated_by, comment?)
+  // ----------------------------------------------------
+  putAbandonBulk(payload: {
+    value_id: number;
+    idea_ids: number[];
+    updated_by: number;
+    comment?: string;
+  }): Observable<unknown> {
+    const headers = this.buildHeaders();
+    //    const headers = new HttpHeaders({
+    //   'Content-Type': 'application/json',
+    //   'x-api-key': this.x_api_key,
+    // });
+    return this.http.put<unknown>(`${this.baseUrl}/ideas/0/abandon`, payload, { headers });
+  }
+
+  // ----------------------------------------------------
   // PUT: Update idea to Unfunded (path: idea_id; body: value_id, updated_by)
   // ----------------------------------------------------
   putNonFunding(ideaId: number, payload: { value_id: number; updated_by: number }): Observable<unknown> {

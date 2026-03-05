@@ -1394,7 +1394,7 @@ export class IdeaView implements OnInit, OnDestroy {
       return;
     }
 
-    if (status === 'Funded' || status === 'Unfunded') {
+if (status === 'Funded' || status === 'Unfunded') {
       const obs =
         status === 'Funded'
           ? this.ideaService.putFunding(this.viewIdea.idea_id, { value_id: valueId ?? 0, updated_by: updatedBy })
@@ -1403,7 +1403,12 @@ export class IdeaView implements OnInit, OnDestroy {
         next: (res) => {
           this.updateFundingStatusPopup.open = false;
           this.store.dispatch(LoadIdeas());
-          this.router.navigate(['/funding']);
+          // Navigate to the specific funding status tab
+          const statusId = status === 'Funded' ? 14 : 15;
+          if (this.overlayMode) {
+            this.cancelOverlay.emit();
+          }
+          this.router.navigate(['/funding'], { queryParams: { status: statusId } });
           const msg = (res as { message?: string })?.message ?? 'Funding status updated successfully.';
           this.ideaEvents.toastEvent(msg);
         },
@@ -1417,7 +1422,11 @@ export class IdeaView implements OnInit, OnDestroy {
         next: (res) => {
           this.updateFundingStatusPopup.open = false;
           this.store.dispatch(LoadIdeas());
-          this.router.navigate(['/funding']);
+          // Navigate to the Abandoned tab (status_id = 4)
+          if (this.overlayMode) {
+            this.cancelOverlay.emit();
+          }
+          this.router.navigate(['/funding'], { queryParams: { status: 4 } });
           const msg = (res as { message?: string })?.message ?? 'Funding status updated successfully.';
           this.ideaEvents.toastEvent(msg);
         },
@@ -1454,6 +1463,14 @@ export class IdeaView implements OnInit, OnDestroy {
   /** True when idea is Funding Pending (status_id 13). Used to show Update funding status button only for Funding Pending. */
   get isFundingPending(): boolean {
     return this.viewIdea?.status_id === 13;
+  }
+
+  /** True when idea is in a funding-related status (Funding Pending, Funded, Unfunded, Abandoned).
+   * Used to show Update Funding Status button for all these statuses.
+   * status_id: 13 = Funding Pending, 14 = Funded, 15 = Unfunded, 4 = Abandoned */
+  get showUpdateFundingButton(): boolean {
+    const statusId = this.viewIdea?.status_id;
+    return statusId === 13 || statusId === 14 || statusId === 15 || statusId === 4;
   }
 
   /** True when Funding Source dropdown should be disabled (when Funding Status is Unfunded or Abandoned). */

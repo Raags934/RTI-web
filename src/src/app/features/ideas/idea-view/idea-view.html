@@ -335,7 +335,7 @@
     Cancel
   </app-buttons>
   <app-buttons
-    *ngIf="from === 'funding' && isFundingPending"
+    *ngIf="from === 'funding' && showUpdateFundingButton"
     (click)="onUpdateFundingStatus()"
     variant="type1"
     color="var(--primary-400)"
@@ -407,6 +407,7 @@
           [required]="true"
           [control]="fundingForm.get('funding_status')"
           [options]="fundingStatusOptions"
+          dropdownHeader="Funding Status ×"
         ></app-form-input>
       </div>
       <div class="form-field">
@@ -418,6 +419,7 @@
           [isDisabled]="isFundingSourceDisabled"
           [control]="fundingForm.get('funding_source_value_id')"
           [options]="fundingSourceSelectOptions"
+          dropdownHeader="Funding Source ×"
         ></app-form-input>
       </div>
     </div>

@@ -463,3 +463,65 @@ mat-error {
     color: var(--neutral-400);
   }
 }
+
+/* Checkbox styling - override pink color to match primary brand color */
+/* This applies to all checkboxes in the application including funding component */
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-checkmark-color: #fff !important;
+  --mdc-checkbox-selected-focus-icon-color: var(--primary-400) !important;
+  --mdc-checkbox-selected-hover-icon-color: var(--primary-400) !important;
+  --mdc-checkbox-selected-icon-color: var(--primary-400) !important;
+  --mdc-checkbox-selected-pressed-icon-color: var(--primary-400) !important;
+  --mdc-checkbox-unselected-icon-color: var(--neutral-300) !important;
+  --mdc-checkbox-unselected-focus-icon-color: var(--neutral-300) !important;
+  --mdc-checkbox-unselected-hover-icon-color: var(--neutral-400) !important;
+  --mdc-checkbox-unselected-pressed-icon-color: var(--neutral-400) !important;
+}
+
+/* Checkbox ripple effect color */
+.mat-mdc-checkbox .mdc-checkbox__ripple {
+  background-color: var(--primary-400) !important;
+}
+
+/* Target the mdc-checkbox__background element directly - unselected state */
+.mat-mdc-checkbox .mdc-checkbox__background {
+  border-color: var(--neutral-300) !important;
+  background-color: #fff !important;
+}
+
+/* Selected state - background */
+.mat-mdc-checkbox.mat-mdc-checkbox-selected .mdc-checkbox__background {
+  background-color: var(--primary-400) !important;
+  border-color: var(--primary-400) !important;
+}
+
+/* Force background for selected checkbox (extra specificity) */
+.mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background,
+.mat-mdc-checkbox.mat-mdc-checkbox-selected .mdc-checkbox__background {
+  background-color: var(--primary-400) !important;
+  border-color: var(--primary-400) !important;
+}
+
+/* Indeterminate state */
+.mat-mdc-checkbox.mat-mdc-checkbox-indeterminate .mdc-checkbox__background {
+  background-color: var(--primary-400) !important;
+  border-color: var(--primary-400) !important;
+}
+
+/* Also target the older mat-checkbox for backward compatibility */
+::ng-deep .mat-checkbox {
+  --checked-fg-color: var(--primary-400) !important;
+  --checked-checkmark-color: #fff !important;
+  --checked-background-color: var(--primary-400) !important;
+  --checked-border-color: var(--primary-400) !important;
+}
+
+::ng-deep .mat-checkbox .mat-checkbox-frame {
+  background-color: #fff !important;
+  border-color: var(--neutral-300) !important;
+}
+
+::ng-deep .mat-checkbox.mat-checkbox-checked .mat-checkbox-background {
+  background-color: var(--primary-400) !important;
+}
+

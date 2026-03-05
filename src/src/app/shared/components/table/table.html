@@ -63,7 +63,7 @@
         @if (isOptionsMenuOpen(element.idea_uid)) {
         <div class="options-menu" [class.open-upward]="isNearBottom(element)" (click)="$event.stopPropagation()">
           <div class="menu-header">More Options</div>
-          
+         
           <!-- Idea Dashboard Menu Items -->
           @if (isIdeaDashboardRoute()) {
             <div class="menu-item" (click)="editIdea(element)">
@@ -105,7 +105,7 @@
               <span>Reset Idea</span>
             </div>
           }
-          
+         
           <!-- Prioritization Routes Menu Items -->
           @else if (isPrioritizationRoute()) {
             <div class="menu-item" (click)="viewIdea(element)">
@@ -143,13 +143,14 @@
         </div>
         }
       </div>
-      } @else if (col.key === 'ranking_brand') {
+} @else if (col.key === 'ranking_brand') {
       <app-ranking-dropdown [value]="getRankingValue(element)" [maxRank]="dataSource.length || 10"
-        [disabled]="isTaPrioritizationRoute()"
+        [disabled]="isTaPrioritizationRoute() || shouldDisableRanking()"
         (valueChange)="onRankingChange(element, $event)"></app-ranking-dropdown>
       }
       @else if (col.key === 'ranking_franchise') {
       <app-ranking-dropdown [value]="getTARankingValue(element)" [maxRank]="dataSource.length || 10"
+        [disabled]="shouldDisableRanking()"
         (valueChange)="onTaRankingChange(element, $event)"></app-ranking-dropdown>
       }
       @else {

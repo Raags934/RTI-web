@@ -24,3 +24,27 @@
     padding-bottom: 8px;
     border-bottom: 2px solid red;
   }
+
+  /* Dropdown row for side-by-side fields in popup */
+  .dropdown-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .dropdown-row .form-field {
+    flex: 1;
+  }
+
+  /* Funding popup: smaller fields so they fit in the popup */
+  .funding-popup-fields.dropdown-row {
+    gap: 10px;
+  }
+
+  /* Style form fields in funding popup to be smaller */
+  .funding-popup-fields .form-field {
+    min-width: 0;
+  }
+
+  .funding-popup-fields .form-field app-form-input {
+    width: 100%;
+  }

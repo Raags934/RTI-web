@@ -497,6 +497,17 @@ export class Table {
     return this.router.url.includes('/funding');
   }
 
+  // Check if ranking columns should be disabled based on funding status
+  // Returns true when on funding route AND status is Funding Pending (13), Funded (14), Unfunded (15), or Abandoned (4)
+  shouldDisableRanking(): boolean {
+    if (!this.isFunderRoute()) {
+      return false;
+    }
+    // Disable ranking when status is: Funding Pending (13), Funded (14), Unfunded (15), or Abandoned (4)
+    const disabledStatuses = [13, 14, 15, 4];
+    return disabledStatuses.includes(this.currentFilterStatusId);
+  }
+ 
   ngOnDestroy() {
     if (this.sub) {
       this.sub.unsubscribe();
