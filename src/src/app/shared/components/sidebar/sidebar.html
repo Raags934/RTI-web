@@ -1,7 +1,15 @@
 <!-- Brand header: << when expanded (collapse), >> when collapsed (expand) -->
 <div class="brand">
-    <img *ngIf="!menuClosed" src="assets/logos/alcon.png" alt="Alcon Logo" (click)="gotoHome()" />
-    <button type="button" class="chevron" (click)="onMenuclick()" [attr.aria-label]="menuClosed ? 'Expand sidebar' : 'Collapse sidebar'">
+    <!-- Show Alcon wordmark when sidebar is expanded (<<), CircleLockup logo when collapsed (>>) -->
+    <img
+      [src]="menuClosed ? 'assets/logos/CircleLockup_RGB.png' : 'assets/logos/alcon.png'"
+      alt="Alcon Logo"
+      (click)="gotoHome()" />
+    <button
+      type="button"
+      class="chevron"
+      (click)="onMenuclick()"
+      [attr.aria-label]="menuClosed ? 'Expand sidebar' : 'Collapse sidebar'">
       {{ menuClosed ? '»' : '«' }}
     </button>
   </div>

@@ -61,6 +61,11 @@ export class HeaderFilter implements OnInit {
 
   private sub= Subscription;
 
+  /** Cached current user for filter auto-initialisation logic. */
+  private currentUser: User | null = null;
+  /** Guard to ensure we only auto-initialise filters once per component lifecycle. */
+  private initializedFromUser: boolean = false;
+
   constructor(
     private store: Store<AppState>,
     private eventService: IdeaEventsService,
@@ -76,6 +81,7 @@ export class HeaderFilter implements OnInit {
   }
   ngOnInit(): void {
     this.user$.subscribe((user) => {
+      this.currentUser = user ?? null;
       if (!user) return;
 
       this.roleOptions = mapRolesToDropdown(user);
@@ -84,6 +90,10 @@ export class HeaderFilter implements OnInit {
 
       // Once roles are loaded, sync selected role with current route.
       this.syncRoleWithCurrentRoute(this.router.url);
+
+      // After user is loaded and role is synced, attempt to auto-populate
+      // TA, Franchise, and Function filters from the user's assignments.
+      this.tryInitializeFiltersFromUser();
     });
 
     this.franchises$.subscribe((list) => {
@@ -91,6 +101,10 @@ export class HeaderFilter implements OnInit {
 
       this.franchiseOptions = mapFranchisesToDropdown(list);
       this.taOptions = mapTAsToDropdown(list);
+
+      // Once franchise / TA dropdown options are ready, attempt to
+      // auto-populate filters from user assignments (if not already done).
+      this.tryInitializeFiltersFromUser();
     });
 
     // this.sub = this.eventService.events$.subscribe((event) => {
@@ -245,5 +259,58 @@ export class HeaderFilter implements OnInit {
   private isAdminLike(name: string): boolean {
     const n = this.normalizeRoleName(name);
     return n === 'admin';
+  }
+
+  /**
+   * One-time auto-initialisation of TA, Franchise, and Function filters
+   * based on the current user's assignments.
+   *
+   * Behaviour:
+   * - If the user has therapeutic_areas, pick the first one:
+   *   - Set TA filter to that TA.
+   *   - Set Franchise filter to the TA's franchise_id (TA and franchise are linked).
+   * - If the user has functions, pick a sensible default:
+   *   - Prefer Business Function "Franchise" when available.
+   *   - Otherwise prefer any Business Function.
+   *   - Otherwise fall back to the first function.
+   *
+   * This runs only once per component lifecycle and only when the filters
+   * are still empty, so it will not override manual user selections.
+   */
+  private tryInitializeFiltersFromUser(): void {
+    if (this.initializedFromUser) return;
+    if (!this.currentUser) return;
+    if (!this.taOptions.length || !this.franchiseOptions.length) return;
+
+    const taControl = this.filterForm.get('ta');
+    const franchiseControl = this.filterForm.get('franchise');
+
+    if (!taControl || !franchiseControl) return;
+
+    // Only auto-initialise when TA and Franchise are still empty/null.
+    const hasAnyValue =
+      taControl.value !== null ||
+      franchiseControl.value !== null;
+    if (hasAnyValue) return;
+
+    const userTa = (this.currentUser.therapeutic_areas ?? [])[0];
+    if (userTa) {
+      // Ensure that the TA exists in dropdown options before setting.
+      const taExists = this.taOptions.some((ta) => ta.id === userTa.ta_id);
+      if (taExists) {
+        taControl.setValue(userTa.ta_id as any);
+      }
+
+      // Franchise is determined by the TA's franchise_id.
+      const franchiseId = userTa.franchise_id;
+      const franchiseExists = this.franchiseOptions.some(
+        (f) => f.id === franchiseId
+      );
+      if (franchiseExists) {
+        franchiseControl.setValue(franchiseId as any);
+      }
+    }
+
+    this.initializedFromUser = true;
   }
 }

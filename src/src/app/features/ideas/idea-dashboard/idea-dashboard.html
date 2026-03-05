@@ -1,7 +1,12 @@
 <app-header-filter class="header-filter" [useAllByDefault]="true"></app-header-filter>
 <app-table-header></app-table-header>
 <app-table-filter [tabs]="statusTabs"></app-table-filter>
-<app-table [columns]="ideaDisplayColumns" [dataSource]="pagedIdeas" [useViewIdeaOverlay]="true"></app-table>
+<app-table
+  [columns]="ideaDisplayColumns"
+  [dataSource]="pagedIdeas"
+  [currentFilterStatusId]="currentFilterStatusId"
+  [useViewIdeaOverlay]="true"
+></app-table>
 <app-pagination [totalPages]="totalPages" [currentPage]="currentPage"></app-pagination>
 
 <app-idea-history [open]="showIdeaHistory" [ideaId]="selectedIdeaId" [ideaUid]="selectedIdeaUid"></app-idea-history>

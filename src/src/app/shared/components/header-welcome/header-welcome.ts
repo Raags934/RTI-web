@@ -61,10 +61,17 @@ export class HeaderWelcome implements OnInit {
     const fullPath = this.currentRoute.split('?')[0].replace(/^\/+/, '');
     this.prevNextBtnsVisible = false;
 
-    // Show "Welcome back, {{ userName }}" ONLY on the main home/dashboard route.
-    // All feature/detail pages (add idea, my ideas, admin, etc.) should NOT show this line.
-    const isHomeRoute = path === '' || path === 'home';
-    this.showWelcomeLine = isHomeRoute;
+    // Show "Welcome back, {{ userName }}" on the main home/dashboard route
+    // and all primary role landing pages.
+    // Detail pages (add idea, my ideas, admin detail screens, etc.) should NOT show this line.
+    const isHomeOrLandingRoute =
+      path === '' ||
+      path === 'home' ||
+      path === 'harmonizer' ||
+      path === 'productprioritization' ||
+      path === 'taprioritization' ||
+      path === 'funding';
+    this.showWelcomeLine = isHomeOrLandingRoute;
 
     if (fullPath.includes('ideas') && fullPath.includes('edit-draft')) {
       this.pageHeader = headerConfigs.editDraftHeader;

@@ -44,6 +44,7 @@ export class IdeaDashboard implements OnInit {
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
+  currentFilterStatusId: number = 0;
 
   searchableKeys = ideaDisplayColumns.map((col) => col.key).filter((key) => key !== 'options');
 
@@ -88,6 +89,29 @@ export class IdeaDashboard implements OnInit {
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
+
+      // If filters were auto-populated via HeaderFilter before this
+      // component subscribed to events$, read the latest selected
+      // values from IdeaEventsService so the data matches the UI.
+      if (this.activeFilters.ta_id === null) {
+        const taId = this.ideaEvents.getCurrentTaId();
+        if (taId !== null) {
+          this.activeFilters.ta_id = taId;
+        }
+      }
+      if (this.activeFilters.franchise_id === null) {
+        const franchiseId = this.ideaEvents.getCurrentFranchiseId();
+        if (franchiseId !== null) {
+          this.activeFilters.franchise_id = franchiseId;
+        }
+      }
+      if (this.activeFilters.role_id === null) {
+        const roleId = this.ideaEvents.getCurrentRoleId();
+        if (roleId !== null) {
+          this.activeFilters.role_id = roleId;
+        }
+      }
+
       this.applyAllFilters();
       this.updateStatusCounts();
     });
@@ -270,6 +294,7 @@ export class IdeaDashboard implements OnInit {
 
   filterByStatus(status_id: number) {
     console.log('status :' + status_id);
+    this.currentFilterStatusId = status_id;
     if (status_id === 0) {
       this.filteredIdeas = [...this.ideas];
     } else {

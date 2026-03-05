@@ -80,21 +80,6 @@
           [control]="filterForm.get('role')"
         ></app-form-input>
       </div>
-      <div *ngIf="!isAdmin" class="form-field">
-        <label>Function :</label>
-        <app-form-input
-          label="Product"
-          type="select"
-          [options]="functionsOptions"
-          searchPlaceholder="Search function"
-          [required]="true"
-          [labelRequired]="false"
-          [showSearchDropdown]="false"
-          [showIconDropdown]="false"
-          [autoSelectFirst]="!useAllByDefault"
-          [control]="filterForm.get('function')"
-        ></app-form-input>
-      </div>
     </div>
   </div>
  

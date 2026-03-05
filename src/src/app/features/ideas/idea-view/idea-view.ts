@@ -1052,6 +1052,7 @@ export class IdeaView implements OnInit, OnDestroy {
   }
 
   private studyDetailsLabelMap: Record<string, string> = {
+    is_recommended: 'Is the study recommended to be conducted? *',
     study_type: 'Study Type',
     study_id: 'Study ID',
     research_question: 'Research Question',
@@ -1066,11 +1067,11 @@ export class IdeaView implements OnInit, OnDestroy {
     estimated_sample_size: 'Estimated Sample Size',
     total_estimated_budget: 'Total Estimated Budget',
     budget_currency: 'Budget Currency',
-    estimated_spend_plus_1: 'Estimated Spend +1',
-    estimated_spend_plus_2: 'Estimated Spend +2',
-    estimated_spend_plus_3: 'Estimated Spend +3',
+    estimated_spend_plus_1: 'Estimated (Current Year +1) Spend',
+    estimated_spend_plus_2: 'Estimated (Current Year +2) Spend',
+    estimated_spend_plus_3: 'Estimated (Current Year +3) Spend',
     pos: 'POS',
-    pos_reasons: 'Pos Reasons',
+    pos_reasons: 'POS Reasons',
     regions_accepting_submissions: 'Regions Accepting Submissions',
     status_id: 'Status ID',
     created_at: 'Created At',
@@ -1081,11 +1082,13 @@ export class IdeaView implements OnInit, OnDestroy {
   };
 
   /**
-   * Canonical display order for Study Details accordion (Budget Currency first).
-   * Pilot Details accordion uses the same order so positions match (Pilot Budget Currency first, etc.).
+   * Canonical display order for Study Details accordion, matching the Enter Study Details form.
+   * Pilot Study Details accordion uses the same order so positions match (Pilot Budget Currency first, etc.).
    */
   private studyDetailsDisplayOrder: string[] = [
-    'budget_currency',
+    'is_recommended',
+    'pos',
+    'pos_reasons',
     'research_question',
     'potential_claims',
     'primary_endpoints',
@@ -1097,11 +1100,10 @@ export class IdeaView implements OnInit, OnDestroy {
     'estimated_end_date',
     'estimated_sample_size',
     'total_estimated_budget',
+    'budget_currency',
     'estimated_spend_plus_1',
     'estimated_spend_plus_2',
     'estimated_spend_plus_3',
-    'pos',
-    'pos_reasons',
     'regions_accepting_submissions',
     'created_at',
     'created_by',
@@ -1162,9 +1164,9 @@ export class IdeaView implements OnInit, OnDestroy {
     pilot_estimated_sample_size: 'Pilot Estimated Sample Size',
     pilot_total_estimated_budget: 'Pilot Total Estimated Budget',
     pilot_budget_currency: 'Pilot Budget Currency',
-    pilot_estimated_spend_plus_1: 'Pilot Estimated Spend +1',
-    pilot_estimated_spend_plus_2: 'Pilot Estimated Spend +2',
-    pilot_estimated_spend_plus_3: 'Pilot Estimated Spend +3',
+    pilot_estimated_spend_plus_1: 'Pilot Estimated (Current Year +1) Spend',
+    pilot_estimated_spend_plus_2: 'Pilot Estimated (Current Year +2) Spend',
+    pilot_estimated_spend_plus_3: 'Pilot Estimated (Current Year +3) Spend',
     pilot_regions_accepting_submissions: 'Pilot Regions Accepting Submissions',
   };
 
@@ -1243,6 +1245,49 @@ export class IdeaView implements OnInit, OnDestroy {
   /** Keys hidden from Study Details accordion (not shown to user). */
   private studyDetailsHiddenKeys = new Set(['study_id', 'status_id', 'flag_soft_lock', 'study_type']);
 
+  private formatStudyDetailsValue(key: string, value: unknown): string {
+    if (key === 'is_recommended') {
+      const normalized =
+        typeof value === 'string' ? value.toLowerCase().trim() : value;
+      if (
+        normalized === true ||
+        normalized === 'true' ||
+        normalized === 1 ||
+        normalized === '1'
+      ) {
+        return 'Yes';
+      }
+      if (
+        normalized === false ||
+        normalized === 'false' ||
+        normalized === 0 ||
+        normalized === '0'
+      ) {
+        return 'No';
+      }
+      return '.....';
+    }
+
+    if (key === 'created_at' || key === 'updated_at') {
+      if (value == null || value === '') return '.....';
+      const d = new Date(String(value));
+      if (isNaN(d.getTime())) {
+        const s = String(value).trim();
+        return s === '' ? '.....' : s;
+      }
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${mm}-${dd}-${yyyy}`;
+    }
+
+    if (value == null) {
+      return '.....';
+    }
+    const str = String(value).trim();
+    return str === '' ? '.....' : str;
+  }
+
   getStudyDetailsDisplayRows(): { label: string; value: string }[] {
     const record = this.getFirstStudyDetailsRecord();
     if (!record) return [];
@@ -1254,7 +1299,7 @@ export class IdeaView implements OnInit, OnDestroy {
         seen.add(key);
         rows.push({
           label: this.studyDetailsLabelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          value: record[key] != null ? String(record[key]) : '.....',
+          value: this.formatStudyDetailsValue(key, record[key]),
         });
       }
     }
@@ -1262,7 +1307,7 @@ export class IdeaView implements OnInit, OnDestroy {
       if (key.startsWith('pilot_') || seen.has(key) || this.studyDetailsHiddenKeys.has(key)) continue;
       rows.push({
         label: this.studyDetailsLabelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-        value: record[key] != null ? String(record[key]) : '.....',
+        value: this.formatStudyDetailsValue(key, record[key]),
       });
     }
     return rows;
@@ -1292,7 +1337,7 @@ export class IdeaView implements OnInit, OnDestroy {
         // Show pilot field if it exists in record (even if null, show '.....')
         rows.push({
           label: this.pilotDetailsLabelMap[pilotKey] || pilotKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          value: record[pilotKey] != null ? String(record[pilotKey]) : '.....',
+          value: this.formatStudyDetailsValue(pilotKey, record[pilotKey]),
         });
       } else {
         // For fields without pilot versions (pos, pos_reasons, created_at, created_by, updated_at, updated_by)
@@ -1300,7 +1345,7 @@ export class IdeaView implements OnInit, OnDestroy {
         if (['pos', 'pos_reasons', 'created_at', 'created_by', 'updated_at', 'updated_by'].includes(studyKey)) {
           rows.push({
             label: this.studyDetailsLabelMap[studyKey] || studyKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-            value: record[studyKey] != null ? String(record[studyKey]) : '.....',
+            value: this.formatStudyDetailsValue(studyKey, record[studyKey]),
           });
         }
       }

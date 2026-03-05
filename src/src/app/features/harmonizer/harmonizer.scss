@@ -25,3 +25,10 @@
         padding-bottom: 8px;
         border-bottom: 2px solid red;
       }
+       /* Disabled button styling for enterStudyDetails in harmonizer */
+      button:disabled {
+        background-color: grey !important;
+        color: #ccc !important;
+        cursor: not-allowed !important;
+        opacity: 0.6 !important;
+      }

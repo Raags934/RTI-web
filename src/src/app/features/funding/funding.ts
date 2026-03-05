@@ -96,7 +96,11 @@ export class Funding implements OnInit {
 
   private sub!: Subscription;
 
-constructor(
+  /** Current active TA and Franchise filters for this page. */
+  private activeTaId: number | null = null;
+  private activeFranchiseId: number | null = null;
+
+  constructor(
     private store: Store<AppState>,
     private ideaEvents: IdeaEventsService,
     private ideaService: IdeaService,
@@ -145,12 +149,19 @@ constructor(
 
     this.ideas$.subscribe((ideas) => {
       this.ideas = ideas;
-      // Apply current filter when ideas are updated, don't reset to all
+
+      // If TA/Franchise are already selected in header filter (auto-populated),
+      // apply them so funding list matches the visible filters.
       if (this.currentFilterStatusId === 0) {
         this.filteredIdeas = [...this.ideas];
       } else {
         this.filteredIdeas = this.ideas.filter((i) => i.status_id === this.currentFilterStatusId);
       }
+
+      this.activeTaId = this.ideaEvents.getCurrentTaId();
+      this.activeFranchiseId = this.ideaEvents.getCurrentFranchiseId();
+      this.applyActiveFilters();
+
       this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
       this.updatePagedIdeas();
       this.updateStatusCounts();
@@ -183,7 +194,9 @@ constructor(
         this.onFundingClick();
       } else if (event.type === 'exportData') {
         this.exportData();
-} else if (event.type === 'taFilterChange') {
+      } else if (event.type === 'franchiseFilterChange') {
+        this.franchiseFilterChange(event.payload);
+      }else if (event.type === 'taFilterChange') {
         this.taFilterChange(event.payload || 3);
       } else if (event.type === 'viewIdeaOverlay') {
         this.overlayIdeaUid = event.payload.idea_uid;
@@ -205,9 +218,28 @@ constructor(
     if (this.sub) this.sub.unsubscribe();
   }
 
-  taFilterChange(ta_id: number) {
-    this.filteredIdeas = this.ideas.filter(idea => idea.ta_id === ta_id);
+  taFilterChange(ta_id: number | null) {
+    this.activeTaId = ta_id;
+    this.applyActiveFilters();
+  }
 
+  franchiseFilterChange(franchise_id: number | null) {
+    this.activeFranchiseId = franchise_id;
+    this.applyActiveFilters();
+  }
+
+  /** Apply current TA + Franchise filters together. */
+  private applyActiveFilters(): void {
+    let list = [...this.ideas];
+
+    if (this.activeTaId != null) {
+      list = list.filter((idea) => idea.ta_id === this.activeTaId);
+    }
+    if (this.activeFranchiseId != null) {
+      list = list.filter((idea) => idea.franchise_id === this.activeFranchiseId);
+    }
+
+    this.filteredIdeas = list;
     this.totalPages = Math.ceil(this.filteredIdeas.length / this.pageSize);
     this.currentPage = 1;
     this.updatePagedIdeas();
